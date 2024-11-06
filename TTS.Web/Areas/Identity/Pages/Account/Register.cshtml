@@ -19,29 +19,29 @@
 
             <div class="form-floating mb-3">
                 <select asp-for="Input.Role" class="form-select" id="roleSelect" onchange="toggleExpertiseDropdown()">
-                    <option value="">Select Role</option>
+                    <option value="" disabled selected>Select Role</option>
                     @foreach (var role in roles)
                     {
                         <option value="@role">@role.ToString()</option>
                     }
                 </select>
                 <label asp-for="Input.Role">Role</label>
+                <span asp-validation-for="Input.Role" class="text-danger"></span>
             </div>
 
            
                 <div class="form-floating mb-3" id="expertiseSelectContainer" style="display: none;">
-                    <select asp-for="Input.Expertise" class="form-select">
-                        <option value="">Select Expertise</option>
+                    <select asp-for="Input.Expertise" class="form-select" id="expertiseSelect">
+                        <option value="" disabled selected>Select Expertise</option>
                         @foreach (var expertise in expertises)
                         {
                             <option value="@expertise">@expertise.ToString()</option>
                         }
                     </select>
                     <label asp-for="Input.Expertise">Expertise</label>
+                <span asp-validation-for="Input.Expertise" class="text-danger"></span>
                 </div>
             
-
-
             <div class="form-floating mb-3">
                 <input asp-for="Input.FirstName" class="form-control" autocomplete="first-name" aria-required="true" placeholder="Jhon" />
                 <label asp-for="Input.FirstName">First Name</label>
@@ -115,11 +115,14 @@
         function toggleExpertiseDropdown() {
             var roleSelect = document.getElementById("roleSelect");
             var expertiseSelectContainer = document.getElementById("expertiseSelectContainer");
+            var expertiseSelect = document.getElementById("expertiseSelect");
 
             if (roleSelect.value === "Consultant") {
                 expertiseSelectContainer.style.display = "block";
+                expertiseSelect.setAttribute("required", "required");
             } else {
                 expertiseSelectContainer.style.display = "none";
+                expertiseSelect.removeAttribute("required");
             }
         }
     </script>
