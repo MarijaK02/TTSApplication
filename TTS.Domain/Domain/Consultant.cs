@@ -17,5 +17,7 @@ namespace TTS.Domain.Domain
 
         [Required]
         public required Expertise Expertise { get; set; }
+
+        public virtual List<ConsultantWorksOnProject>? Projects { get; set; }
     }
 }

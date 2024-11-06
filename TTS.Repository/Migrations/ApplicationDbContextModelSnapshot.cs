@@ -166,6 +166,7 @@ namespace TTS.Repository.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("UserId")
+                        .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
@@ -212,6 +213,7 @@ namespace TTS.Repository.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("UserId")
+                        .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
@@ -219,6 +221,74 @@ namespace TTS.Repository.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("Consultants");
+                });
+
+            modelBuilder.Entity("TTS.Domain.Domain.ConsultantWorksOnProject", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("ConsultantId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("EndTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("ProjectId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("StartTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("TotalHoursSpentWorking")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ConsultantId");
+
+                    b.HasIndex("ProjectId");
+
+                    b.ToTable("ConsultantWorksOnProject");
+                });
+
+            modelBuilder.Entity("TTS.Domain.Domain.Project", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("ClientId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("EndDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("Expertise")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("StartDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("TotalHours")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ClientId");
+
+                    b.ToTable("Project");
                 });
 
             modelBuilder.Entity("TTS.Domain.Identity.TTSApplicationUser", b =>
@@ -350,7 +420,9 @@ namespace TTS.Repository.Migrations
                 {
                     b.HasOne("TTS.Domain.Identity.TTSApplicationUser", "User")
                         .WithMany()
-                        .HasForeignKey("UserId");
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("User");
                 });
@@ -359,9 +431,49 @@ namespace TTS.Repository.Migrations
                 {
                     b.HasOne("TTS.Domain.Identity.TTSApplicationUser", "User")
                         .WithMany()
-                        .HasForeignKey("UserId");
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("TTS.Domain.Domain.ConsultantWorksOnProject", b =>
+                {
+                    b.HasOne("TTS.Domain.Domain.Consultant", "Consultant")
+                        .WithMany("Projects")
+                        .HasForeignKey("ConsultantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("TTS.Domain.Domain.Project", "Project")
+                        .WithMany("Consultants")
+                        .HasForeignKey("ProjectId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Consultant");
+
+                    b.Navigation("Project");
+                });
+
+            modelBuilder.Entity("TTS.Domain.Domain.Project", b =>
+                {
+                    b.HasOne("TTS.Domain.Domain.Client", "Client")
+                        .WithMany()
+                        .HasForeignKey("ClientId");
+
+                    b.Navigation("Client");
+                });
+
+            modelBuilder.Entity("TTS.Domain.Domain.Consultant", b =>
+                {
+                    b.Navigation("Projects");
+                });
+
+            modelBuilder.Entity("TTS.Domain.Domain.Project", b =>
+                {
+                    b.Navigation("Consultants");
                 });
 #pragma warning restore 612, 618
         }
