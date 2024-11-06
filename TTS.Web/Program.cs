@@ -2,6 +2,10 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using TTS.Domain.Identity;
 using TTS.Repository;
+using TTS.Repository.Implementation;
+using TTS.Repository.Interface;
+using TTS.Service.Implementation;
+using TTS.Service.Interface;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,6 +14,10 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(connectionString));
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
+
+builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
+
+builder.Services.AddTransient<ICompanyService, CompanyService>();
 
 builder.Services.AddDefaultIdentity<TTSApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
     .AddRoles<IdentityRole>()

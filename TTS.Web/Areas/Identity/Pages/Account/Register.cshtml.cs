@@ -105,10 +105,15 @@ namespace TTS.Web.Areas.Identity.Pages.Account
             public string ConfirmPassword { get; set; }
 
             [Required(ErrorMessage = "Please select a role.")]
+            [EnumDataType(typeof(TTSApplicationUserRole))]
             public TTSApplicationUserRole Role { get; set; }
             public string FirstName { get; set; }
             public string LastName { get; set; }
+
+            [Phone]    
             public string PhoneNumber { get; set; }
+
+            [EnumDataType(typeof(Expertise))]
             public Expertise Expertise { get; set; }
         }
 

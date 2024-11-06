@@ -7,11 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Interface\" />
-    <Folder Include="Implementation\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\TTS.Domain\TTS.Domain.csproj" />
     <ProjectReference Include="..\TTS.Repository\TTS.Repository.csproj" />
   </ItemGroup>

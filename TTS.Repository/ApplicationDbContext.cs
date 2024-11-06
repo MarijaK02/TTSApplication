@@ -9,6 +9,7 @@ namespace TTS.Repository
     {
         public virtual DbSet<Client> Clients { get; set; }
         public virtual DbSet<Consultant> Consultants { get; set; }
+        public virtual DbSet<Company> Companies { get; set; }
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options)
         {

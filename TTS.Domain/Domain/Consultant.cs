@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -11,7 +12,10 @@ namespace TTS.Domain.Domain
 {
     public class Consultant : BaseEntity
     {
+        [Required]
         public required TTSApplicationUser User { get; set; }
+
+        [Required]
         public required Expertise Expertise { get; set; }
     }
 }

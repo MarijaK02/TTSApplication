@@ -5,22 +5,18 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using TTS.Domain.Enum;
-using TTS.Domain.Shared;
 
-namespace TTS.Domain.Domain
+namespace TTS.Domain.DTO
 {
-    public class Company : BaseEntity
+    public class CreateCompanyDto
     {
         public string? Address { get; set; }
-
-        [Required]
         public required string Name { get; set; }
-
-        [Required]
+        [EnumDataType(typeof(Industry))]
         public required Industry Industry { get; set; }
-
+        [Phone]
         public string? ContactPhone { get; set; }
-
+        [EmailAddress]
         public string? Email { get; set; }
     }
 }
