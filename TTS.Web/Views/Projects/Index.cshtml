@@ -1,0 +1,132 @@
+﻿@model IEnumerable<TTS.Domain.Domain.Project>
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<div class="d-flex flex-row justify-content-between mb-5 mt-4">
+    <h1 class="text-capitalize">My Projects</h1>
+
+    <p>
+        <a asp-action="Create" class="btn btn-primary">Create New</a>
+    </p>
+</div>
+
+
+<div class="row d-flex flex-row justify-content-between px-2">
+    @foreach (var item in Model)
+    {
+        <div class="card border-3 border-warning-subtle" style="width: 30rem;">
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-4">
+                        <img class="img-thumbnail rounded border border-3" src="https://cdn.pixabay.com/photo/2024/05/26/10/15/bird-8788491_640.jpg" />
+                    </div>
+                    <div class="col">
+                        <h5 class="card-title">@Html.DisplayFor(modelItem => item.Title)</h5>
+                        <h6 class="card-subtitle mb-2 text-body-secondary">@Html.DisplayFor(modelItem => item.Expertise)</h6>
+                        @switch (item.Status)
+                        {
+                            case TTS.Domain.Enum.ProjectStatus.New:
+                                <h6 class="card-subtitle mb-2 text-success text-info">@Html.DisplayFor(modelItem => item.Status)</h6>
+                                break;
+                            case TTS.Domain.Enum.ProjectStatus.Accepted:
+                                <h6 class="card-subtitle mb-2 text-success text-primary">@Html.DisplayFor(modelItem => item.Status)</h6>
+                                break;
+                            case TTS.Domain.Enum.ProjectStatus.InProgress:
+                                <h6 class="card-subtitle mb-2 text-success text-warning">@Html.DisplayFor(modelItem => item.Status)</h6>
+                                break;
+                            case TTS.Domain.Enum.ProjectStatus.Invalid:
+                                <h6 class="card-subtitle mb-2 text-success text-danger">@Html.DisplayFor(modelItem => item.Status)</h6>
+                                break;
+                            case TTS.Domain.Enum.ProjectStatus.Completed:
+                                <h6 class="card-subtitle mb-2 text-success text-success">@Html.DisplayFor(modelItem => item.Status)</h6>
+                                break;
+                        }
+                    </div>
+                </div>
+
+                <p class="card-text">@Html.DisplayFor(modelItem => item.Description)</p>
+                <div class="d-flex flex-row justify-content-between align-itmes-center">
+                    <p class="card-link align-self-center">Total Hours: @Html.DisplayFor(modelItem => item.TotalHours)</p>
+                    <a asp-controller="Projects" asp-action="Details" class="card-link btn btn-secondary text-warning d-flex">See more <i class="bi bi-arrow-right align-self-center ms-2"></i> </a>
+                </div>
+            </div>
+        </div>
+    }
+    <div class="col-3 card border-3 border-warning-subtle" style="width: 30rem;">
+        <div class="card-body">
+            <div class="row mb-3">
+                <div class="col-4">
+                    <img class="img-thumbnail rounded border border-3" src="https://cdn.pixabay.com/photo/2024/05/26/10/15/bird-8788491_640.jpg" />
+                </div>
+                <div class="col">
+                    <h5 class="card-title truncate-two-rows">Technology Transfer System Application For Integrated Systems Course</h5>
+                    <h6 class="card-subtitle mb-2 text-body-secondary truncate-one-row">Software Development</h6>
+                    <h6 class="card-subtitle mb-2 text-primary">Accepted</h6>
+                </div>
+            </div>
+           
+            <p class="card-text truncate-three-rows mb-4">Some quick example text to build on the card title and make up the bulk of the card's content. 
+                Some quick example text to build on the card title and make up the bulk of the card's content.</p>
+            <div class="d-flex flex-row justify-content-between align-itmes-center">
+                <div class="d-flex flex-row">
+                    <p class="card-link align-self-center me-2">Total Hours: </p><p>50</p>
+                </div>
+                <a asp-controller="Projects" asp-action="Details" class="card-link btn btn-secondary text-warning d-flex">See more <i class="bi bi-arrow-right align-self-center ms-2"></i> </a>
+            </div>            
+        </div>
+    </div>
+
+    <div class="col-3 card border-3 border-warning-subtle" style="width: 30rem;">
+        <div class="card-body">
+            <div class="row mb-3">
+                <div class="col-4">
+                    <img class="img-thumbnail rounded border border-3" src="https://cdn.pixabay.com/photo/2024/05/26/10/15/bird-8788491_640.jpg" />
+                </div>
+                <div class="col">
+                    <h5 class="card-title truncate-two-rows">Technology Transfer System Application For Integrated Systems Course</h5>
+                    <h6 class="card-subtitle mb-2 text-body-secondary truncate-one-row">Software Development</h6>
+                    <h6 class="card-subtitle mb-2 text-primary">Accepted</h6>
+                </div>
+            </div>
+
+            <p class="card-text truncate-three-rows mb-4">
+                Some quick example text to build on the card title and make up the bulk of the card's content.
+                Some quick example text to build on the card title and make up the bulk of the card's content.
+            </p>
+            <div class="d-flex flex-row justify-content-between align-itmes-center">
+                <div class="d-flex flex-row">
+                    <p class="card-link align-self-center me-2">Total Hours: </p><p>50</p>
+                </div>
+                <a asp-controller="Projects" asp-action="Details" class="card-link btn btn-secondary text-warning d-flex">See more <i class="bi bi-arrow-right align-self-center ms-2"></i> </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-3 card border-3 border-warning-subtle" style="width: 30rem;">
+        <div class="card-body">
+            <div class="row mb-3">
+                <div class="col-4">
+                    <img class="img-thumbnail rounded border border-3" src="https://cdn.pixabay.com/photo/2024/05/26/10/15/bird-8788491_640.jpg" />
+                </div>
+                <div class="col">
+                    <h5 class="card-title truncate-two-rows">Technology Transfer System Application For Integrated Systems Course</h5>
+                    <h6 class="card-subtitle mb-2 text-body-secondary truncate-one-row">Software Development</h6>
+                    <h6 class="card-subtitle mb-2 text-primary">Accepted</h6>
+                </div>
+            </div>
+
+            <p class="card-text truncate-three-rows mb-4">
+                Some quick example text to build on the card title and make up the bulk of the card's content.
+                Some quick example text to build on the card title and make up the bulk of the card's content.
+            </p>
+            <div class="d-flex flex-row justify-content-between align-itmes-center">
+                <div class="d-flex flex-row">
+                    <p class="card-link align-self-center me-2">Total Hours: </p><p>50</p>
+                </div>
+                <a asp-controller="Projects" asp-action="Details" class="card-link btn btn-secondary text-warning d-flex">See more <i class="bi bi-arrow-right align-self-center ms-2"></i> </a>
+            </div>
+        </div>
+    </div>
+</div>

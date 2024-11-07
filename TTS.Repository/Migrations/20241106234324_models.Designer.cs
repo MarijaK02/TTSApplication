@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TTS.Repository;
 
@@ -11,9 +12,11 @@ using TTS.Repository;
 namespace TTS.Repository.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241106234324_models")]
+    partial class models
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -159,43 +162,6 @@ namespace TTS.Repository.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("TTS.Domain.Domain.Activity", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("CreatedById")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Description")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime?>("EndDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid>("ProjectId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("StartDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CreatedById");
-
-                    b.HasIndex("ProjectId");
-
-                    b.ToTable("Activities");
-                });
-
             modelBuilder.Entity("TTS.Domain.Domain.Client", b =>
                 {
                     b.Property<Guid>("Id")
@@ -211,30 +177,6 @@ namespace TTS.Repository.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("Clients");
-                });
-
-            modelBuilder.Entity("TTS.Domain.Domain.Comment", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("CommentBody")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("CreatedById")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<DateTime>("CreatedOn")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CreatedById");
-
-                    b.ToTable("Comments");
                 });
 
             modelBuilder.Entity("TTS.Domain.Domain.Company", b =>
@@ -311,7 +253,7 @@ namespace TTS.Repository.Migrations
 
                     b.HasIndex("ProjectId");
 
-                    b.ToTable("ConsultantWorksOnProjects");
+                    b.ToTable("ConsultantWorksOnProject");
                 });
 
             modelBuilder.Entity("TTS.Domain.Domain.Project", b =>
@@ -349,7 +291,7 @@ namespace TTS.Repository.Migrations
 
                     b.HasIndex("ClientId");
 
-                    b.ToTable("Projects");
+                    b.ToTable("Project");
                 });
 
             modelBuilder.Entity("TTS.Domain.Identity.TTSApplicationUser", b =>
@@ -477,25 +419,6 @@ namespace TTS.Repository.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("TTS.Domain.Domain.Activity", b =>
-                {
-                    b.HasOne("TTS.Domain.Domain.Consultant", "CreatedBy")
-                        .WithMany()
-                        .HasForeignKey("CreatedById")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("TTS.Domain.Domain.Project", "Project")
-                        .WithMany()
-                        .HasForeignKey("ProjectId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("CreatedBy");
-
-                    b.Navigation("Project");
-                });
-
             modelBuilder.Entity("TTS.Domain.Domain.Client", b =>
                 {
                     b.HasOne("TTS.Domain.Identity.TTSApplicationUser", "User")
@@ -505,17 +428,6 @@ namespace TTS.Repository.Migrations
                         .IsRequired();
 
                     b.Navigation("User");
-                });
-
-            modelBuilder.Entity("TTS.Domain.Domain.Comment", b =>
-                {
-                    b.HasOne("TTS.Domain.Identity.TTSApplicationUser", "CreatedBy")
-                        .WithMany()
-                        .HasForeignKey("CreatedById")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("CreatedBy");
                 });
 
             modelBuilder.Entity("TTS.Domain.Domain.Consultant", b =>

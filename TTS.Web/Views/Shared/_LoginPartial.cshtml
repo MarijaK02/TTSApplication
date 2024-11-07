@@ -9,8 +9,11 @@
             <a class="nav-link text-light p-2 btn btn-outline-info" asp-area="Identity" asp-page="/Account/Manage/Index" title="Manage">Hello @User.Identity?.Name!</a>
     </li>
     <li class="nav-item">
-        <form  class="form-inline" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })">
-                <button type="submit" class="nav-link text-light btn btn-outline-info  p-2">Logout</button>
+        <form class="form-inline" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })">
+                <button type="submit" class="nav-link text-light btn btn-outline-info p-2">
+                    <i class="bi bi-box-arrow-left"></i>
+                    Logout
+                </button>
         </form>
     </li>
 }
