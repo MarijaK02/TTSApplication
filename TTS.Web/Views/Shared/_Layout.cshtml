@@ -17,9 +17,13 @@
             <nav class="navbar navbar-dark bg-dark fixed-top shadow-lg p-3">
                 <div class="container-fluid shadow-lg">
 
-                    <button class="btn btn-outline-warning w-auto" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasDarkNavbar" aria-controls="offcanvasDarkNavbar" aria-label="Toggle navigation">
-                        <i class="bi bi-boxes"></i>
-                    </button>
+                    @if (SignInManager.IsSignedIn(User))
+                    {
+                        <button class="btn btn-outline-warning w-auto" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasDarkNavbar" aria-controls="offcanvasDarkNavbar" aria-label="Toggle navigation">
+                            <i class="bi bi-boxes"></i>
+                        </button>
+                    }
+
                     <a class="text-light text-capitalize" asp-controller="Home" asp-action="Index">Technology Transfer System</a>
 
                     
@@ -31,14 +35,27 @@
                         <div class="d-flex flex-column justify-content-between offcanvas-body bg-dark">
                             <ul class="navbar-nav justify-content-start flex-grow-1 pe-3">
                                 <li class="nav-item">
-                                    <a class="nav-link active text-warning" asp-controller="Home" asp-action="Index">My Profile</a>
+                                    <a class="nav-link active text-warning" asp-controller="Home" asp-action="Index">
+                                        <i class="bi bi-person-lines-fill"></i>
+                                        My Profile
+                                    </a>
                                 </li>
-                                <li class="nav-item">
-                                    <a class="nav-link" asp-controller="Projects" asp-action="Index">My Projects</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link" href="#">My Projects</a>
-                                </li>
+                                @if (User.IsInRole("Consultant"))
+                                {
+                                    <li class="nav-item">
+                                        <a class="nav-link" asp-controller="Projects" asp-action="Index">
+                                            <i class="bi bi-folder"></i>
+                                            All Projects
+                                            </a>
+                                    </li>
+                                } 
+                               
+                                    <li class="nav-item">
+                                    <a class="nav-link" asp-controller="Projects" asp-action="CustomIndex">
+                                        <i class="bi bi-grid"></i>
+                                            My Projects</a>
+                                    </li>
+                                                              
                                 <li class="nav-item">
                                     <a class="nav-link" href="#">Other consultants</a>
                                 </li>

@@ -11,21 +11,14 @@ namespace TTS.Domain.Domain
 {
     public class Activity : BaseEntity
     {
-        [Required]
         public required string Title { get; set; }
         public string? Description { get; set; }
 
-        [Required]
         public required ActivityStatus Status { get; set; }
 
-        [Required]
         public required DateTime StartDate { get; set; }
         public DateTime? EndDate { get; set; }
 
-        [Required]
-        public required Consultant CreatedBy { get; set; }
-
-        [Required]
-        public required Project Project { get; set; }
+        public ConsultantWorksOnProject? ResponsibleConsultant { get; set; }
     }
 }

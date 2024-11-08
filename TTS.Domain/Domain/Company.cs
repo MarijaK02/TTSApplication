@@ -13,10 +13,8 @@ namespace TTS.Domain.Domain
     {
         public string? Address { get; set; }
 
-        [Required]
         public required string Name { get; set; }
 
-        [Required]
         public required Industry Industry { get; set; }
 
         public string? ContactPhone { get; set; }

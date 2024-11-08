@@ -10,14 +10,15 @@ namespace TTS.Domain.Domain
 {
     public class ConsultantWorksOnProject : BaseEntity
     {
-        [Required]
-        public required Consultant Consultant { get; set; }
-        [Required]
-        public required Project Project { get; set; }
-        [Required]
+        public Consultant Consultant { get; set; }
+
+        public Project Project { get; set; }
+
+        public List<Activity>? Activites { get; set; }
+
         public required DateTime StartTime { get; set; }
         public DateTime? EndTime { get; set; }
-        [Required]
+
         public required int TotalHoursSpentWorking { get; set; }
     }
 }

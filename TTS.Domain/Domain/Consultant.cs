@@ -12,12 +12,9 @@ namespace TTS.Domain.Domain
 {
     public class Consultant : BaseEntity
     {
-        [Required]
         public required TTSApplicationUser User { get; set; }
 
-        [Required]
         public required Expertise Expertise { get; set; }
-
         public virtual List<ConsultantWorksOnProject>? Projects { get; set; }
     }
 }

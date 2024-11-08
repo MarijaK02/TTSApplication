@@ -11,13 +11,10 @@ namespace TTS.Domain.Domain
 {
     public class Comment : BaseEntity
     {
-        [Required]
         public required TTSApplicationUser CreatedBy { get; set; }
 
-        [Required]
         public required DateTime CreatedOn { get; set; }
 
-        [Required]
         public required string CommentBody { get; set; }
     }
 }

@@ -11,7 +11,6 @@ namespace TTS.Domain.Domain
 {
     public class Client : BaseEntity
     {
-        [Required]
         public required TTSApplicationUser User { get; set; }
     }
 }

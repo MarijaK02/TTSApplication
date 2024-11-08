@@ -12,8 +12,8 @@ using TTS.Repository;
 namespace TTS.Repository.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20241106235132_models2")]
-    partial class models2
+    [Migration("20241107161307_init")]
+    partial class init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -168,16 +168,13 @@ namespace TTS.Repository.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("CreatedById")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime?>("EndDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<Guid>("ProjectId")
+                    b.Property<Guid?>("ResponsibleConsultantId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("StartDate")
@@ -192,9 +189,7 @@ namespace TTS.Repository.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CreatedById");
-
-                    b.HasIndex("ProjectId");
+                    b.HasIndex("ResponsibleConsultantId");
 
                     b.ToTable("Activities");
                 });
@@ -206,7 +201,6 @@ namespace TTS.Repository.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("UserId")
-                        .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
@@ -227,7 +221,6 @@ namespace TTS.Repository.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("CreatedById")
-                        .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<DateTime>("CreatedOn")
@@ -277,7 +270,6 @@ namespace TTS.Repository.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("UserId")
-                        .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
@@ -323,7 +315,7 @@ namespace TTS.Repository.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid?>("ClientId")
+                    b.Property<Guid>("CreatedById")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Description")
@@ -350,7 +342,7 @@ namespace TTS.Repository.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ClientId");
+                    b.HasIndex("CreatedById");
 
                     b.ToTable("Projects");
                 });
@@ -482,30 +474,18 @@ namespace TTS.Repository.Migrations
 
             modelBuilder.Entity("TTS.Domain.Domain.Activity", b =>
                 {
-                    b.HasOne("TTS.Domain.Domain.Consultant", "CreatedBy")
-                        .WithMany()
-                        .HasForeignKey("CreatedById")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                    b.HasOne("TTS.Domain.Domain.ConsultantWorksOnProject", "ResponsibleConsultant")
+                        .WithMany("Activites")
+                        .HasForeignKey("ResponsibleConsultantId");
 
-                    b.HasOne("TTS.Domain.Domain.Project", "Project")
-                        .WithMany()
-                        .HasForeignKey("ProjectId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("CreatedBy");
-
-                    b.Navigation("Project");
+                    b.Navigation("ResponsibleConsultant");
                 });
 
             modelBuilder.Entity("TTS.Domain.Domain.Client", b =>
                 {
                     b.HasOne("TTS.Domain.Identity.TTSApplicationUser", "User")
                         .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("UserId");
 
                     b.Navigation("User");
                 });
@@ -514,9 +494,7 @@ namespace TTS.Repository.Migrations
                 {
                     b.HasOne("TTS.Domain.Identity.TTSApplicationUser", "CreatedBy")
                         .WithMany()
-                        .HasForeignKey("CreatedById")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("CreatedById");
 
                     b.Navigation("CreatedBy");
                 });
@@ -525,9 +503,7 @@ namespace TTS.Repository.Migrations
                 {
                     b.HasOne("TTS.Domain.Identity.TTSApplicationUser", "User")
                         .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("UserId");
 
                     b.Navigation("User");
                 });
@@ -553,16 +529,23 @@ namespace TTS.Repository.Migrations
 
             modelBuilder.Entity("TTS.Domain.Domain.Project", b =>
                 {
-                    b.HasOne("TTS.Domain.Domain.Client", "Client")
+                    b.HasOne("TTS.Domain.Domain.Client", "CreatedBy")
                         .WithMany()
-                        .HasForeignKey("ClientId");
+                        .HasForeignKey("CreatedById")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
-                    b.Navigation("Client");
+                    b.Navigation("CreatedBy");
                 });
 
             modelBuilder.Entity("TTS.Domain.Domain.Consultant", b =>
                 {
                     b.Navigation("Projects");
+                });
+
+            modelBuilder.Entity("TTS.Domain.Domain.ConsultantWorksOnProject", b =>
+                {
+                    b.Navigation("Activites");
                 });
 
             modelBuilder.Entity("TTS.Domain.Domain.Project", b =>
