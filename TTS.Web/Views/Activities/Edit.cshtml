@@ -1,0 +1,58 @@
+﻿@using TTS.Domain.Enum
+@model TTS.Domain.DTO.CreateAndEditActivityDto
+
+@{
+    ViewData["Title"] = "Edit";
+    var status = Enum.GetValues(typeof(ActivityStatus)).Cast<ActivityStatus>();
+}
+
+<div class="container">
+    <h1>Edit</h1>
+
+    <h4>Activity</h4>
+    <hr />
+    <div class="row">
+        <div class="col-md-4">
+            <form asp-action="Edit">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <div class="form-group">
+                    <label asp-for="Title" class="control-label"></label>
+                    <input asp-for="Title" class="form-control" />
+                    <span asp-validation-for="Title" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="Description" class="control-label"></label>
+                    <input asp-for="Description" class="form-control" />
+                    <span asp-validation-for="Description" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="ActivityStatus" class="control-label"></label>
+                    <select asp-for="ActivityStatus" class="form-control">
+                        @foreach (var s in status)
+                        {
+                            <option value="@s">@s.ToString()</option>
+                        }
+                    </select>
+                    <span asp-validation-for="ActivityStatus" class="text-danger"></span>
+                </div>
+                <input type="hidden" asp-for="ActivityId" />
+                <input type="hidden" asp-for="ProjectId" />
+                <div class="form-group">
+                    <input type="submit" value="Save" class="btn btn-primary" />
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div>
+        <a asp-action="Index" asp-route-projectId="@Model.ProjectId">Back to List</a>
+    </div>
+
+    @section Scripts {
+        @{
+            await Html.RenderPartialAsync("_ValidationScriptsPartial");
+        }
+    }
+</div>
+
+

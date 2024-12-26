@@ -1,0 +1,150 @@
+﻿@using TTS.Domain.DTO
+@model IndexActivitesDto
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<nav class="navbar navbar-expand-lg bg-body-secondary border-bottom border-warning shadow-lg mb-5">
+    <div class="container-fluid">
+        <div class="navbar-brand truncate-one-row" style="width: 23%; display: block">@Model.ProjectTitle</div>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+            <div class="navbar-nav">
+                <a 
+                    asp-controller="Projects" 
+                    asp-action="Details" 
+                    asp-route-id="@Model.ProjectId"
+                    class="nav-link">
+                        Details
+                </a>
+                <a 
+                    asp-controller="Activities" 
+                    asp-action="Index" 
+                    asp-route-projectId="@Model?.ProjectId" 
+                    asp-route-projectTitle="@Model?.ProjectTitle"
+                    class="nav-link active bg-warning fw-medium">
+                        Activites
+                </a>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<div class="container mt-3">
+    <table class="table table-hover">
+        <thead>
+            <tr>
+                <th>
+                    Title
+                <th>
+                    Status
+                </th>
+                <th>
+                    Start Date
+                </th>
+                <th>
+                    Responsible
+                </th>
+                <th>
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model!.Activities!)
+            {
+                <tr onclick="location.href='@Url.Action("Details", new { id = item.Id, projectId = Model.ProjectId })'">
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Title)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Status)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.StartDate)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.ResponsibleConsultant!.Consultant.User.FirstName)
+                        @Html.DisplayFor(modelItem => item.ResponsibleConsultant!.Consultant.User.LastName)
+                    </td>
+                    <td>
+                        <a class="btn btn-outline-dark bg-dark-subtle me-3" asp-action="Edit" asp-route-projectId="@Model.ProjectId" asp-route-id="@item.Id">Edit</a>
+                        <a class="btn btn-danger" asp-action="Delete" asp-route-projectId="@Model.ProjectId" asp-route-id="@item.Id">Delete</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <div class="container mb-3" id="createForm" style="display: none;">
+            <div class="row border border-1 border-dark p-3 rounded-2">
+                <form asp-action="Create" method="post">
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+             
+         
+                        <div class="form-group">
+                            <label for="NewActivityTitle" class="control-label">Title</label>
+                            <input type="text" name="NewActivityTitle" id="NewActivityTitle" class="form-control" />
+                            
+                            <span asp-validation-for="NewActivityTitle" class="text-danger"></span>
+                        </div>
+
+
+                <div class="form-group mt-2">
+                            <label for="NewActivityDescription" class="control-label">Description</label>
+                            <textarea name="NewActivityDescription" id="NewActivityDescription" class="form-control" style="height: 100px"></textarea>
+                            <span asp-validation-for="NewActivityDescription" class="text-danger"></span>
+                        </div>
+                   
+                    <div class="form-group mt-2">
+                        <input type="submit" value="Save" class="btn btn-outline-success" />
+                    </div>
+                <input name="ProjectId" value="@Model.ProjectId" type="hidden" />
+                <input name="ProjectTitle" value="@Model.ProjectTitle" type="hidden" />
+
+                </form>
+        </div>
+    </div>
+    <a id="showCreateForm" class="btn btn-outline-primary border border-2 border-primary"><i class="bi bi-plus-lg" id="plusIcon"></i></a>
+    @section Scripts {
+        @{
+            await Html.RenderPartialAsync("_ValidationScriptsPartial");
+        }
+
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                const showButton = document.getElementById('showCreateForm');
+                const createForm = document.getElementById('createForm');
+                const icon = document.getElementById('plusIcon')
+
+                showButton.addEventListener('click', function () {
+                    const isHidden = createForm.style.display === 'none';
+                    createForm.style.display = isHidden ? 'block' : 'none';
+                    if (isHidden) {
+                        createForm.style.display = 'block';
+                        icon.classList.remove("bi-plus-lg");
+                        icon.classList.add("bi-dash-lg");
+                        showButton.classList.remove("btn-outline-primary");
+                        showButton.classList.remove("border-primary")
+                        showButton.classList.add("btn-outline-danger");
+                        showButton.classList.add("border-danger");
+                    }else{
+                        createForm.style.display = 'none';
+                        icon.classList.remove("bi-dash-lg");
+                        icon.classList.add("bi-plus-lg");
+                        showButton.classList.remove("btn-outline-danger");
+                        showButton.classList.remove("border-danger");
+                        showButton.classList.add("btn-outline-primary");
+                        showButton.classList.add("border-primary");
+               
+                    }
+                    
+                });
+            });
+        </script>
+    }
+</div>
+

@@ -12,6 +12,7 @@ namespace TTS.Domain.DTO
         public Guid? Id { get; set; }
         public required string Title { get; set; }
         public required Expertise Expertise { get; set; }
+        public ProjectStatus? ProjectStatus { get; set; }
         public string? Description { get; set; }
     }
 }

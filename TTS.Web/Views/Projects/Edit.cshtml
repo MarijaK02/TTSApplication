@@ -4,47 +4,65 @@
 @{
     ViewData["Title"] = "Edit";
     var expertises = Enum.GetValues(typeof(Expertise)).Cast<Expertise>();
+    var status = Enum.GetValues(typeof(ProjectStatus)).Cast<ProjectStatus>();
 }
 
-<h1>Edit</h1>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Edit" asp-route-id="@Model.Id">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-group">
-                <label asp-for="Title" class="control-label"></label>
-                <input asp-for="Title" class="form-control" />
-                <span asp-validation-for="Title" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Expertise" class="control-label"></label>
-                <select asp-for="Expertise" class="form-control">
-                    <option value="" disabled selected>Select expertise</option>
-                    @foreach(var expertise in expertises)
-                    {
-                        <option value="@expertise">@expertise.ToString()</option>
-                    }
+<div class="container">
+    <h1>Edit</h1>
+    <hr />
+    <div class="row">
+        <div class="col-md-4">
+            <form asp-action="Edit" asp-route-id="@Model.Id">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <div class="form-group">
+                    <label asp-for="Title" class="control-label"></label>
+                    <input asp-for="Title" class="form-control" />
+                    <span asp-validation-for="Title" class="text-danger"></span>
+                </div>
+                @if (User.IsInRole("Consultant"))
+                {
+                    <div class="form-group">
+                        <label asp-for="ProjectStatus" class="control-label"></label>
+                        <select asp-for="ProjectStatus" class="form-control">
+                            @foreach (var s in status)
+                            {
+                                <option value="@s">@s.ToString()</option>
+                            }
+                        </select>
+                        <span asp-validation-for="ProjectStatus" class="text-danger"></span>
+                    </div>
+                }
+                <div class="form-group">
+                    <label asp-for="Expertise" class="control-label"></label>
+                    <select asp-for="Expertise" class="form-control">
+                        @foreach (var expertise in expertises)
+                        {
+                            <option value="@expertise">@expertise.ToString()</option>
+                        }
 
-                </select>
-                <span asp-validation-for="Expertise" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Description" class="control-label"></label>
-                <input asp-for="Description" class="form-control" />
-                <span asp-validation-for="Description" class="text-danger"></span>
-            </div>
-            <div class="form-group my-3">
-                <input type="submit" value="Edit" class="btn btn-primary" />
-            </div>
-        </form>
+                    </select>
+                    <span asp-validation-for="Expertise" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="Description" class="control-label"></label>
+                    <input asp-for="Description" class="form-control" />
+                    <span asp-validation-for="Description" class="text-danger"></span>
+                </div>
+                <div class="form-group my-3">
+                    <input type="submit" value="Edit" class="btn btn-primary" />
+                </div>
+            </form>
+        </div>
     </div>
-</div>
 
-<div>
-    <a asp-action="CustomIndex">Back to List</a>
-</div>
+    <div>
+        <a asp-action="CustomIndex">Back to List</a>
+    </div>
 
-@section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
-}
+    @section Scripts {
+        @{
+            await Html.RenderPartialAsync("_ValidationScriptsPartial");
+        }
+    }
+
+</div>

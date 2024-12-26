@@ -19,6 +19,7 @@ namespace TTS.Domain.Domain
         public required DateTime StartDate { get; set; }
         public DateTime? EndDate { get; set; }
 
-        public ConsultantWorksOnProject? ResponsibleConsultant { get; set; }
+        public required ConsultantWorksOnProject ResponsibleConsultant { get; set; }
+        public virtual ICollection<Comment>? Comments { get; set; }
     }
 }

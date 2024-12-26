@@ -15,6 +15,6 @@ namespace TTS.Domain.Domain
         public required TTSApplicationUser User { get; set; }
 
         public required Expertise Expertise { get; set; }
-        public virtual List<ConsultantWorksOnProject>? Projects { get; set; }
+        public virtual ICollection<ConsultantWorksOnProject>? Projects { get; set; }
     }
 }

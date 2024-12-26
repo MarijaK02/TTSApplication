@@ -12,8 +12,8 @@ using TTS.Repository;
 namespace TTS.Repository.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20241107161307_init")]
-    partial class init
+    [Migration("20241111121907_Init")]
+    partial class Init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -216,6 +216,9 @@ namespace TTS.Repository.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<Guid>("ActivityId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<string>("CommentBody")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -227,6 +230,8 @@ namespace TTS.Repository.Migrations
                         .HasColumnType("datetime2");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("ActivityId");
 
                     b.HasIndex("CreatedById");
 
@@ -492,9 +497,17 @@ namespace TTS.Repository.Migrations
 
             modelBuilder.Entity("TTS.Domain.Domain.Comment", b =>
                 {
+                    b.HasOne("TTS.Domain.Domain.Activity", "Activity")
+                        .WithMany("Comments")
+                        .HasForeignKey("ActivityId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("TTS.Domain.Identity.TTSApplicationUser", "CreatedBy")
                         .WithMany()
                         .HasForeignKey("CreatedById");
+
+                    b.Navigation("Activity");
 
                     b.Navigation("CreatedBy");
                 });
@@ -530,12 +543,22 @@ namespace TTS.Repository.Migrations
             modelBuilder.Entity("TTS.Domain.Domain.Project", b =>
                 {
                     b.HasOne("TTS.Domain.Domain.Client", "CreatedBy")
-                        .WithMany()
+                        .WithMany("Projects")
                         .HasForeignKey("CreatedById")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("CreatedBy");
+                });
+
+            modelBuilder.Entity("TTS.Domain.Domain.Activity", b =>
+                {
+                    b.Navigation("Comments");
+                });
+
+            modelBuilder.Entity("TTS.Domain.Domain.Client", b =>
+                {
+                    b.Navigation("Projects");
                 });
 
             modelBuilder.Entity("TTS.Domain.Domain.Consultant", b =>

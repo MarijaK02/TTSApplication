@@ -11,6 +11,6 @@ namespace TTS.Domain.Enum
         New,
         Active,
         Completed,
-        Deleted
+        Invalid
     }
 }

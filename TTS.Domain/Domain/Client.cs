@@ -12,5 +12,6 @@ namespace TTS.Domain.Domain
     public class Client : BaseEntity
     {
         public required TTSApplicationUser User { get; set; }
+        public virtual ICollection<Project>? Projects { get; set; }
     }
 }

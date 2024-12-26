@@ -10,11 +10,11 @@ namespace TTS.Domain.Domain
 {
     public class ConsultantWorksOnProject : BaseEntity
     {
-        public Consultant Consultant { get; set; }
+        public required Consultant Consultant { get; set; }
 
-        public Project Project { get; set; }
+        public required Project Project { get; set; }
 
-        public List<Activity>? Activites { get; set; }
+        public ICollection<Activity>? Activites { get; set; }
 
         public required DateTime StartTime { get; set; }
         public DateTime? EndTime { get; set; }

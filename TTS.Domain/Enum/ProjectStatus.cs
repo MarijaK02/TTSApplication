@@ -10,14 +10,10 @@ namespace TTS.Domain.Enum
     {
         //klient podnesuva baranje za proekt
         New,
-        //koga ke bide prv pat prifaten od nekoj konsultant
-        Accepted,
-        //Koga ke bide kreirana prvata aktivnost
+        //Koga ke bide kreirana prvata aktivnost (ili koga konsultantot i adminot ke smenat znaci moze i bez aktivnosti)
         InProgress,
-        //Koga ke se zavrsi proektot
+        //Koga ke se zavrsi proektot (adminot i konsultantot go menuvaat statusot)
         Completed,
-        //Dokolku klientot ili adminot go izbrisat proektot
-        Deleted,
         //Dokolku odluci adminot deka e nevaliden
         Invalid
     }

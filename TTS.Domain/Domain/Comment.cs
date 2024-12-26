@@ -16,5 +16,7 @@ namespace TTS.Domain.Domain
         public required DateTime CreatedOn { get; set; }
 
         public required string CommentBody { get; set; }
+        public required Activity Activity { get; set; }
+        public List<Attachment>? Attachments { get; set; }
     }
 }

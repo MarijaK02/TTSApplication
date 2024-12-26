@@ -4,19 +4,12 @@
     ViewData["Title"] = "Index";
 }
 
-<div class="d-flex flex-row justify-content-between mb-5 mt-4">
-    <h1 class="text-capitalize">My Projects</h1>
 
-    @if (User.IsInRole("Client"))
-    {
-        <p>
-            <a asp-action="Create" class="btn btn-primary">Create New</a>
-        </p>
-    }
-
-</div>
 
 <div class="container-fluid mx-5">
+    <div class="d-flex flex-row justify-content-between mb-5 mt-4">
+        <h1 class="text-capitalize"> <i class="bi bi-book"></i> All Projects</h1>
+    </div>
     <div class="row d-flex flex-row px-2">
         @foreach (var item in Model)
         {
@@ -33,9 +26,6 @@
                             {
                                 case TTS.Domain.Enum.ProjectStatus.New:
                                     <h6 class="card-subtitle mb-2 text-success text-info">@Html.DisplayFor(modelItem => item.Project.Status)</h6>
-                                    break;
-                                case TTS.Domain.Enum.ProjectStatus.Accepted:
-                                    <h6 class="card-subtitle mb-2 text-success text-primary">@Html.DisplayFor(modelItem => item.Project.Status)</h6>
                                     break;
                                 case TTS.Domain.Enum.ProjectStatus.InProgress:
                                     <h6 class="card-subtitle mb-2 text-success text-warning">@Html.DisplayFor(modelItem => item.Project.Status)</h6>
@@ -59,23 +49,16 @@
                         </div>
 
                         <div class="d-flex flex-row">
-                            <a asp-controller="Projects" asp-action="Details" asp-route-id="@item.Project.Id" class="card-link btn btn-secondary text-warning d-flex me-2">
-                                See more <i class="bi bi-arrow-right align-self-center ms-2"></i>
-                            </a>
-                            @if (User.IsInRole("Client"))
-                            {
-                                <a asp-controller="Projects" asp-action="Delete" asp-route-id="@item.Project.Id" class="card-link btn btn-danger text-light d-flex">
-                                    <i class="bi bi-trash3 align-self-center me-2"></i> Delete
-                                </a>
-                            }
-                            @if (User.IsInRole("Consultant"))
-                            {
+
                                 <form asp-controller="Projects" asp-action="ApplyForProject" asp-route-id="@item.Project.Id" method="post">
-                                    <button type="submit" disabled="@item.Disabled" class="card-link btn btn-outline-info btn-secondary text-info d-flex">
-                                        <i class="bi bi-bookmark-plus align-self-center me-2"></i> Apply
+                                    <button type="submit" disabled="@item.Disabled" class="card-link btn btn-outline-info btn-secondary text-info d-flex me-2">
+                                    <i class="bi bi-pencil align-self-center me-2"></i> Apply
                                     </button>
                                 </form>
-                            }
+                            <a asp-controller="Projects" asp-action="Details" asp-route-id="@item.Project.Id" class="btn btn-outline-warning  d-flex">
+                                <i class="bi bi-three-dots-vertical"></i>
+                            </a>
+                            
                         </div>
                     </div>
                 </div>

@@ -14,6 +14,7 @@ namespace TTS.Repository
         public virtual DbSet<Activity> Activities { get; set; }
         public virtual DbSet<Comment> Comments { get; set; }
         public virtual DbSet<ConsultantWorksOnProject> ConsultantWorksOnProjects { get; set; }
+        public virtual DbSet<Attachment> Attachments { get; set; }
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options)
         {

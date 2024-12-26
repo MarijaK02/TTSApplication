@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using TTS.Domain.Enum;
+﻿using TTS.Domain.Enum;
 using TTS.Domain.Shared;
 
 namespace TTS.Domain.Domain
@@ -23,6 +17,6 @@ namespace TTS.Domain.Domain
 
         public virtual required Client CreatedBy { get; set; }
 
-        public virtual List<ConsultantWorksOnProject>? Consultants { get; set; }
+        public virtual ICollection<ConsultantWorksOnProject>? Consultants { get; set; }
     }
 }

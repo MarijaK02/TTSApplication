@@ -1,0 +1,140 @@
+﻿@model TTS.Domain.DTO.ActivityDto
+
+@{
+    ViewData["Title"] = "Details";
+}
+<div class="container-fluid mt-3 px-5">
+    <div>
+        <h4>Activity</h4>
+        <a asp-action="Edit" asp-route-id="@Model.Activity!.Id" asp-route-projectId="@Model.ProjectId">Edit</a> |
+        <a asp-action="Details" asp-route-id="@Model.Activity!.Id" asp-route-projectId="@Model.ProjectId">Details</a> |
+        <a asp-action="Delete" asp-route-id="@Model.Activity!.Id" asp-route-projectId="@Model.ProjectId">Delete</a>
+        <hr />
+
+        <dl class="row">
+            <dt class="col-sm-2">
+                @Html.DisplayNameFor(model => model.Activity!.Title)
+            </dt>
+            <dd class="col-sm-10">
+                @Html.DisplayFor(model => model.Activity!.Title)
+            </dd>
+            <dt class="col-sm-2">
+                @Html.DisplayNameFor(model => model.Activity!.Description)
+            </dt>
+            <dd class="col-sm-10">
+                @Html.DisplayFor(model => model.Activity!.Description)
+            </dd>
+            <dt class="col-sm-2">
+                @Html.DisplayNameFor(model => model.Activity!.Status)
+            </dt>
+            <dd class="col-sm-10">
+                @Html.DisplayFor(model => model.Activity!.Status)
+            </dd>
+            <dt class="col-sm-2">
+                @Html.DisplayNameFor(model => model.Activity!.StartDate)
+            </dt>
+            <dd class="col-sm-10">
+                @Html.DisplayFor(model => model.Activity!.StartDate)
+            </dd>
+            <dt class="col-sm-2">
+                @Html.DisplayNameFor(model => model.Activity!.EndDate)
+            </dt>
+            <dd class="col-sm-10">
+                @Html.DisplayFor(model => model.Activity!.EndDate)
+            </dd>
+        </dl>
+    </div>
+    @if (Model.Attachments != null && Model.Attachments.Any())
+    {
+        <div class="row">
+            @foreach (var attachment in Model.Attachments)
+            {
+                <div class="col mb-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">
+                                <i class="bi bi-file-earmark"></i> @attachment.FileName
+                            </h5>
+                            <p class="card-text text-muted">Type: @attachment.FileName.Split(".")[1]</p>
+                            <div class="d-flex justify-content-between">
+                                <a asp-action="Download" asp-controller="Activities" asp-route-fileId="@attachment.Id" class="btn btn-outline-primary btn-sm">
+                                    <i class="bi bi-download"></i> Download
+                                </a>
+                                <a asp-action="RemoveFile"
+                                   asp-controller="Activities"
+                                   asp-route-fileId="@attachment.Id"
+                                   asp-route-projectId="@Model.ProjectId"
+                                   asp-route-id="@Model.Activity.Id"
+                                   class="btn btn-danger btn-sm">
+                                    <i class="bi bi-trash3"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-info" role="alert">
+            No attachments found for this project.
+        </div>
+    }
+    <div>
+        <a asp-action="Index" asp-route-projectId="@Model?.ProjectId">Back to List</a>
+    </div>
+
+    <div>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Created By</th>
+                    <th>Created On</th>
+                    <th>Comment Body</th>
+                </tr>
+            </thead>
+            @if (Model?.Comments != null)
+            {
+                <tbody>
+                    @foreach (var item in Model.Comments)
+                    {
+                        <tr>
+                            <td>@item.CreatedBy.FirstName @item.CreatedBy.LastName</td>
+                            <td>@item.CreatedOn</td>
+                            <td>@item.CommentBody</td>
+                        </tr>
+                    }
+                </tbody>
+            }
+
+        </table>
+
+
+        <form asp-action="AddComment" asp-controller="Activities" method="post" class="mb-5">
+            <input type="hidden" name="projectId" value="@Model?.ProjectId" />
+            <input type="hidden" name="id" value="@Model?.Activity.Id" />
+
+            <div class="form-group">
+                <label for="CommentBody">New Comment</label>
+                <textarea class="form-control" id="CommentBody" name="CommentBody" rows="3" required></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary mt-3">Save Comment</button>
+        </form>
+
+        <form asp-action="SaveFiles" asp-controller="Activities" method="post" enctype="multipart/form-data">
+            <input type="hidden" name="projectId" value="@Model?.ProjectId" />
+            <input type="hidden" name="activityId" value="@Model?.Activity.Id" />
+            <div>
+                <label for="formFileMultiple" class="form-label">Attachments</label>
+                <input class="form-control" type="file" id="formFileMultiple" name="files" multiple>
+            </div>
+            <div>
+                <button type="submit" class="btn btn-danger mt-3">Upload</button>
+            </div>
+        </form>
+    </div>
+
+</div>
+
+

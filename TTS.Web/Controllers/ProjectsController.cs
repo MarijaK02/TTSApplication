@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Reflection.Metadata;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -44,28 +45,53 @@ namespace TTS.Web.Controllers
 
             if (role!.Equals("Client"))
             {
-                var client = _context.Clients.FirstOrDefault(c => c.User.Id == user!.Id);
-                projects = await _context.Projects
-                    .Where(p => p.CreatedBy.Id == client!.Id)
-                    .Select(p => new GetProjectDto
+                var client = _context.Clients
+                    .Include(c => c.Projects)
+                    .FirstOrDefault(c => c.User.Id == user!.Id);
+                if(client!.Projects != null)
                 {
-                    Project = p,
-                    Disabled = false
-                }).ToListAsync();
+                    projects = client.Projects
+                    .Select(p => new GetProjectDto
+                    {
+                        Project = p,
+                        Disabled = false,
+                        NumConsultants = p.Consultants != null && p.Consultants.Any() ? p.Consultants.Count() : 0,
+                        TotalActivites = p.Consultants != null && p.Consultants.Any() ? p.Consultants
+                            .Select(c => c.Activites != null && c.Activites.Any() ? c.Activites.Count() : 0)
+                            .Sum() : 0,
+                        EndDate = p.EndDate
+                    }).ToList();
+                }               
             }
             if (role!.Equals("Consultant"))
             {
-                var consultant = _context.Consultants.FirstOrDefault(c => c.User.Id == user!.Id);
-                projects = await _context.ConsultantWorksOnProjects
-                    .Where(cp => cp.Consultant.Id == consultant!.Id)
+                var consultant = _context.Consultants
+                    .Include(c => c.Projects)
+                    .Include("Projects.Project")
+                    .Include("Projects.Activites")
+                    .FirstOrDefault(c => c.User.Id == user!.Id);
+                if(consultant!.Projects != null)
+                {
+                    projects = consultant.Projects
                     .Select(cp => cp.Project)
                     .Select(p => new GetProjectDto
                     {
                         Project = p,
-                        Disabled = false
-                    }).ToListAsync();
+                        Disabled = false,
+                        NumConsultants = p.Consultants != null && p.Consultants.Any() ? p.Consultants.Count() : 0,
+                        TotalActivites = p.Consultants != null && p.Consultants.Any() ? p.Consultants
+                            .Select(c => c.Activites != null && c.Activites.Any() ? c.Activites.Count() : 0)
+                            .Sum() : 0,
+                        NumOfConsultantActivites = consultant.Projects != null && consultant.Projects.Any() ?
+                           consultant.Projects
+                            .Select(p => p.Activites != null && p.Activites.Any() ? p.Activites.Count() : 0)
+                            .Sum() : 0,
+                        EndDate = p.EndDate,
+                        TotalHours = (int)((TimeSpan)(DateTime.Now - p.StartDate)).TotalHours
+                    }).ToList();
+                }
+                
             }
-
             return View(projects);
         }
 
@@ -74,14 +100,16 @@ namespace TTS.Web.Controllers
         {
             var user = await _userManager.GetUserAsync(User);
 
-                var consultant = _context.Consultants.FirstOrDefault(c => c.User.Id == user!.Id);
-                var consultantProjects = _context.ConsultantWorksOnProjects
-                    .Where(cp => cp.Consultant.Id == consultant!.Id)
+                var consultant = _context.Consultants
+                    .Include(c => c.Projects)
+                    .Include("Projects.Project")
+                    .FirstOrDefault(c => c.User.Id == user!.Id);
+                var consultantProjects = consultant!.Projects!
                     .Select(cp => cp.Project);
-                var projects = await _context.Projects.Select(p => new GetProjectDto
-                {
-                    Project = p,
-                    Disabled = consultantProjects.Contains(p) ? true : false
+            var projects = await _context.Projects.Select(p => new GetProjectDto
+            {
+                Project = p,
+                Disabled = consultantProjects.Contains(p) ? true : false
                 }).ToListAsync();
             
             return View(projects);
@@ -143,14 +171,13 @@ namespace TTS.Web.Controllers
 
                         _context.Add(project);
                         await _context.SaveChangesAsync();
-                        return RedirectToAction(nameof(Index));
+                        return RedirectToAction(nameof(CustomIndex));
                     }
                 }                
             }
             return View(createProjectDto);
         }
 
-        [Authorize(Roles = "Client")]
         // GET: Projects/Edit/5
         public async Task<IActionResult> Edit(Guid? id)
         {
@@ -166,13 +193,13 @@ namespace TTS.Web.Controllers
                 Id = project!.Id,
                 Title = project.Title,
                 Expertise = project.Expertise,
+                ProjectStatus = project.Status,
                 Description = project.Description
             };
 
             return View(dto);
         }
 
-        [Authorize(Roles = "Client")]
         // POST: Projects/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
@@ -193,6 +220,7 @@ namespace TTS.Web.Controllers
                     project!.Title = dto.Title;
                     project.Description = dto.Description;
                     project.Expertise = dto.Expertise;
+                    project.Status = dto.ProjectStatus ?? project.Status;
 
                     _context.Update(project);
                     await _context.SaveChangesAsync();
@@ -231,6 +259,7 @@ namespace TTS.Web.Controllers
             return View(project);
         }
 
+
         // POST: Projects/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
@@ -248,25 +277,30 @@ namespace TTS.Web.Controllers
 
         [HttpPost]
         [Authorize(Roles = "Consultant")]
+        [ValidateAntiForgeryToken]
         //GET: Projects/ApplyForProject/id
-        public async Task<IActionResult> ApplyForProject(Guid id)
+        public async Task<IActionResult> ApplyForProject(Guid? id)
         {           
-            if (ProjectExists(id))
+            if (id != null)
             {
                 var project = await _context.Projects.FirstOrDefaultAsync(p => p.Id == id);
                 var user = await _userManager.GetUserAsync(User);
                 var consultant = await _context.Consultants.FirstOrDefaultAsync(c => c.User.Id == user!.Id);
-                var consultantWorksOnProject = new ConsultantWorksOnProject
+
+                if(consultant != null && project != null)
                 {
-                    Id = Guid.NewGuid(),
-                    Consultant = consultant,
-                    Project = project,
-                    StartTime = DateTime.Now,
-                    TotalHoursSpentWorking = 0
-                };
-                _context.Add(consultantWorksOnProject);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(CustomIndex));
+                    var consultantWorksOnProject = new ConsultantWorksOnProject
+                    {
+                        Id = Guid.NewGuid(),
+                        Consultant = consultant,
+                        Project = project,
+                        StartTime = DateTime.Now,
+                        TotalHoursSpentWorking = 0
+                    };
+                    _context.Add(consultantWorksOnProject);
+                    await _context.SaveChangesAsync();
+                    return RedirectToAction(nameof(CustomIndex));
+                }               
             }
             return NotFound();
         }
