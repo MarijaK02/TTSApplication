@@ -11,6 +11,6 @@ namespace TTS.Domain.Domain
         public Guid Id { get; set; }
         public required string FileName { get; set; } 
         public required string FilePath { get; set; }
-        public required virtual Activity Activity { get; set; }
+        public required virtual Comment Comment { get; set; }
     }
 }

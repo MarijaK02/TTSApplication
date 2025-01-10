@@ -14,5 +14,6 @@ namespace TTS.Domain.DTO
         public required Expertise Expertise { get; set; }
         public ProjectStatus? ProjectStatus { get; set; }
         public string? Description { get; set; }
+        public DateTime? EndDate { get; set; }
     }
 }

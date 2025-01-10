@@ -20,12 +20,12 @@ namespace TTS.Repository.Implementation
             this.context = context;
             entities = context.Set<T>();
         }
-        public IEnumerable<T> GetAll()
+        public IQueryable<T> GetAll()
         {
-            return entities.AsEnumerable();
+            return entities.AsQueryable<T>();
         }
 
-        public T Get(Guid? id)
+        public T Get(Guid id)
         {
             return entities.SingleOrDefault(s => s.Id == id);
         }

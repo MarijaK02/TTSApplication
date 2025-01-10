@@ -114,7 +114,14 @@ namespace TTS.Web.Areas.Identity.Pages.Account
             public string PhoneNumber { get; set; }
 
             [EnumDataType(typeof(Expertise))]
+            [Required(ErrorMessage = "Please select your expertise.")]
             public Expertise Expertise { get; set; }
+
+            [EnumDataType(typeof(Industry))]
+            [Required(ErrorMessage = "Please select your industry.")]
+            public Industry Industry { get; set; }
+
+            public string Address { get; set; }
         }
 
 
@@ -169,7 +176,10 @@ namespace TTS.Web.Areas.Identity.Pages.Account
                         {
                             var client = new Client
                             {
-                                User = user
+                                User = user,
+                                Industry = Input.Industry,
+                                Address = Input.Address
+
                             };
                             _context.Set<Client>().Add(client);
                             _context.SaveChanges();

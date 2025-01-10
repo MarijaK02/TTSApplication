@@ -2,31 +2,31 @@
 @model LoginModel
 
 @{
-    ViewData["Title"] = "Log in";
+    ViewData["Title"] = "Најави се!";
 }
 
 
 <div class="row justify-content-center">
     <div class="col-md-4 pt-5">
-        <section class="mt-5 p-5 p-5 bg-opacity-25 bg-warning rounded rounded-3 border border-2 border-info">
+        <section class="mt-5 p-5 p-5  rounded rounded-3 border border-2 border-info">
             <h3 class="text-dark">@ViewData["Title"]</h3>
             <form id="account" method="post">
                 <hr />
                 <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
                 <div class="form-floating mb-3">
                     <input asp-for="Input.Email" class="form-control" autocomplete="username" aria-required="true" placeholder="name@example.com" />
-                    <label asp-for="Input.Email" class="form-label">Email</label>
+                    <label asp-for="Input.Email" class="form-label">E-mail</label>
                     <span asp-validation-for="Input.Email" class="text-danger"></span>
                 </div>
                 <div class="form-floating mb-3">
                     <input asp-for="Input.Password" class="form-control" autocomplete="current-password" aria-required="true" placeholder="password" />
-                    <label asp-for="Input.Password" class="form-label">Password</label>
+                    <label asp-for="Input.Password" class="form-label">Лозинка</label>
                     <span asp-validation-for="Input.Password" class="text-danger"></span>
                 </div>
                 <div class="checkbox mb-3">
                     <label asp-for="Input.RememberMe" class="form-label">
                         <input class="form-check-input" asp-for="Input.RememberMe" />
-                        @Html.DisplayNameFor(m => m.Input.RememberMe)
+                        Запомни ме?
                     </label>
                 </div>
                 <div>
@@ -34,13 +34,13 @@
                 </div>
                 <div>
                     <p>
-                        <a id="forgot-password" asp-page="./ForgotPassword" class="text-decoration-none link-opacity-75-hover">Forgot your password?</a>
+                        <a id="forgot-password" asp-page="./ForgotPassword" class="text-decoration-none link-opacity-75-hover">Заборавена лозинка?</a>
                     </p>
                     <p>
-                        <a asp-page="./Register" asp-route-returnUrl="@Model.ReturnUrl" class="text-decoration-none link-opacity-75-hover">Register as a new user</a>
+                        <a asp-page="./Register" asp-route-returnUrl="@Model.ReturnUrl" class="text-decoration-none link-opacity-75-hover">Регистрирај се како нов корисник?</a>
                     </p>
                     <p>
-                        <a id="resend-confirmation" asp-page="./ResendEmailConfirmation" class="text-decoration-none link-opacity-75-hover">Resend email confirmation</a>
+                        <a id="resend-confirmation" asp-page="./ResendEmailConfirmation" class="text-decoration-none link-opacity-75-hover">Испрати потврда за e-mail</a>
                     </p>
                 </div>
             </form>

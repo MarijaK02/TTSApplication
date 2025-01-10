@@ -10,6 +10,7 @@ namespace TTS.Domain.DTO
     public class CreateAndEditActivityDto
     {
         public required Guid ProjectId { get; set; }
+        public required string ProjectTitle { get; set; }
         public Guid? ActivityId { get; set; }
         public string? Title { get; set; }
         public string? Description { get; set; }

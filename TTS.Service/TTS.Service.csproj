@@ -7,6 +7,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Proxies" Version="8.0.10" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\TTS.Domain\TTS.Domain.csproj" />
     <ProjectReference Include="..\TTS.Repository\TTS.Repository.csproj" />
   </ItemGroup>

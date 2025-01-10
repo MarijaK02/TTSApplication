@@ -7,11 +7,11 @@ using TTS.Domain.Domain;
 using TTS.Domain.DTO;
 using TTS.Domain.Enum;
 using TTS.Domain.Identity;
+using TTS.Domain.Shared;
 using TTS.Repository;
 
 namespace TTS.Web.Controllers
 {
-    [Authorize(Roles = "Consultant")]
     [Route("Activities")]
     public class ActivitiesController : Controller
     {
@@ -33,9 +33,12 @@ namespace TTS.Web.Controllers
                 ProjectId = projectId,
                 ProjectTitle = projectTitle ?? "",
                 Activities = await _context.Activities
-                .Include(a => a.ResponsibleConsultant)
-                .Include("ResponsibleConsultant.Consultant")
-                .Include("ResponsibleConsultant.Consultant.User")
+                .Include(a => a.ConsultantProject)
+                .Include("ConsultantProject.Consultant")
+                .Include("ConsultantProject.Project")
+                .Include("ConsultantProject.Consultant.User")
+                .Include("Comments.CreatedBy")
+                .Where(a => a.ConsultantProject.Project.Id == projectId)
                 .OrderByDescending(a => a.StartDate)
                 .ToListAsync() ?? new List<Activity>()
                 
@@ -46,7 +49,7 @@ namespace TTS.Web.Controllers
 
         // GET: Activities/Details/5
         [HttpGet("Details/{id}")]
-        public async Task<IActionResult> Details(Guid projectId, Guid? id)
+        public async Task<IActionResult> Details(Guid projectId, Guid? id, string projectTitle)
         {
             if (id == null)
             {
@@ -55,8 +58,11 @@ namespace TTS.Web.Controllers
 
             var activity = await _context.Activities
                 .Include(a => a.Comments)
-                .Include(a => a.Attachments)
+                .Include("ConsultantProject")
+                .Include("ConsultantProject.Consultant")
+                .Include("ConsultantProject.Consultant.User")
                 .Include("Comments.CreatedBy")
+                .Include("Comments.Attachments")
                 .FirstOrDefaultAsync(m => m.Id == id);
 
             if (activity == null)
@@ -64,14 +70,13 @@ namespace TTS.Web.Controllers
                 return NotFound();
             }
 
-            List<Comment>? comments = activity.Comments == null ? null : activity.Comments.ToList();
-            List<Attachment>? attacments = activity.Attachments == null ? null : activity.Attachments.ToList();
+            List<Comment>? comments = activity.Comments == null ? null : activity.Comments.OrderByDescending(c => c.CreatedOn).ToList();
             var dto = new ActivityDto
             {
                 ProjectId = projectId,
+                ProjectTitle = projectTitle,
                 Activity = activity,
-                Comments = comments,
-                Attachments = attacments
+                Comments = comments
             };
             return View(dto);
         }
@@ -112,7 +117,7 @@ namespace TTS.Web.Controllers
                         Description = dto.NewActivityDescription,
                         Status = ActivityStatus.New,
                         StartDate = DateTime.Now,
-                        ResponsibleConsultant = project,
+                        ConsultantProject = project,
                         Comments = null
                     };
                    
@@ -127,7 +132,7 @@ namespace TTS.Web.Controllers
 
         // GET: Activities/Edit/5
         [HttpGet("Edit/{id}")]
-        public async Task<IActionResult> Edit(Guid projectId, Guid? id)
+        public async Task<IActionResult> Edit(Guid projectId, Guid? id, string projectTitle)
         {
             if (id == null)
             {
@@ -142,6 +147,7 @@ namespace TTS.Web.Controllers
             var dto = new CreateAndEditActivityDto
             {
                 ProjectId = projectId,
+                ProjectTitle = projectTitle,
                 ActivityId = activity.Id,
                 Title = activity.Title,
                 Description = activity.Description,
@@ -183,54 +189,35 @@ namespace TTS.Web.Controllers
                         throw;
                     }
                 }
-                return RedirectToAction(nameof(Index), new { projectId = dto.ProjectId });
+                return RedirectToAction(nameof(Index), new { projectId = dto.ProjectId, projectTitle = dto.ProjectTitle });
             }
             return View(dto);
         }
 
-        // GET: Activities/Delete/5
-        [HttpGet("Delete/{id}")]
-        public async Task<IActionResult> Delete(Guid projectId, Guid? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var activity = await _context.Activities
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (activity == null)
-            {
-                return NotFound();
-            }
-
-            var dto = new ActivityDto
-            {
-                ProjectId = projectId,
-                Activity = activity
-            };
-
-            return View(dto);
-        }
-
+        
         // POST: Activities/Delete/5
         [HttpPost("Delete/{id}")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(Guid projectId, Guid id)
+        public async Task<IActionResult> DeleteConfirmed(Guid projectId, Guid id, string projectTitle)
         {
             var activity = await _context.Activities.FindAsync(id);
             if (activity != null)
             {
                 _context.Activities.Remove(activity);
+                await _context.SaveChangesAsync();
             }
 
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index), new { projectId = projectId });
+            return RedirectToAction(nameof(Index), new { projectId = projectId, projectTitle = projectTitle});
         }
 
         [HttpPost("AddComment")]
-        public async Task<IActionResult> AddComment(Guid projectId, Guid id, string commentBody)
+        public async Task<IActionResult> AddComment(Guid projectId, Guid id, string? commentBody, IFormFile[]? files)
         {
+            if(String.IsNullOrEmpty(commentBody) && (files==null || !files.Any()))
+            {
+                return View("Error");
+            }
+
             var activity = await _context.Activities
                 .FirstOrDefaultAsync(m => m.Id == id);
             var user = await _userManager.GetUserAsync(User);
@@ -259,66 +246,48 @@ namespace TTS.Web.Controllers
             }
 
             _context.Comments.Add(comment);
-            await _context.SaveChangesAsync();
 
-            return RedirectToAction(nameof(Details), new { projectId = projectId, id = activity.Id });
-        }
-
-        [HttpPost("SaveFiles")]
-        public async Task<IActionResult> SaveFiles(Guid projectId, Guid activityId, IFormFile[] files)
-        {
-            var activity = await _context.Activities.FirstOrDefaultAsync(a => a.Id == activityId);
-            if(activity == null)
+            if (files != null && files.Any())
             {
-                return NotFound();
-            }
-
-            if (files == null || files.Length == 0)
-            {
-                ModelState.AddModelError("Files", "Please select at least one file to upload.");
-                return BadRequest("No files selected.");
-            }
-
-            var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
-
-            if (!Directory.Exists(uploadsFolder))
-            {
-                Directory.CreateDirectory(uploadsFolder);
-            }
-
-            foreach (var file in files)
-            {
-                //if (file.Length > 5 * 1024 * 1024)
-                //{
-                //    ModelState.AddModelError("Files", $"File {file.FileName} is too large. Max size is 5 MB.");
-                //    return BadRequest("One or more files are too large.");
-                //}
-
-                var fileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
-                var filePath = Path.Combine(uploadsFolder, fileName);
-
-                using (var fileStream = new FileStream(filePath, FileMode.Create))
+                var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
+                if (!Directory.Exists(uploadsFolder))
                 {
-                    await file.CopyToAsync(fileStream);
+                    Directory.CreateDirectory(uploadsFolder);
                 }
 
-                if (activity.Status == ActivityStatus.New)
+                foreach (var file in files)
                 {
-                    activity.Status = ActivityStatus.Active;
+                    //if (file.Length > 5 * 1024 * 1024)
+                    //{
+                    //    ModelState.AddModelError("Files", $"File {file.FileName} is too large. Max size is 5 MB.");
+                    //    return BadRequest("One or more files are too large.");
+                    //}
+
+                    var fileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
+                    var filePath = Path.Combine(uploadsFolder, fileName);
+
+                    using (var fileStream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await file.CopyToAsync(fileStream);
+                    }
+
+                    if (activity.Status == ActivityStatus.New)
+                    {
+                        activity.Status = ActivityStatus.Active;
+                    }
+
+                    var attachment = new Attachment
+                    {
+                        Id = Guid.NewGuid(),
+                        FileName = file.FileName,
+                        FilePath = filePath,
+                        Comment = comment
+                    };
+
+                    _context.Attachments.Add(attachment);
                 }
-
-                var attachment = new Attachment
-                {
-                    Id = Guid.NewGuid(),
-                    FileName = file.FileName,  
-                    FilePath = filePath,       
-                    Activity = activity    
-                };
-
-                _context.Attachments.Add(attachment);
-                _context.Update(activity);
             }
-
+          
             await _context.SaveChangesAsync();
 
             return RedirectToAction(nameof(Details), new { projectId = projectId, id = activity.Id });

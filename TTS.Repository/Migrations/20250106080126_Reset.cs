@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace TTS.Repository.Migrations
 {
     /// <inheritdoc />
-    public partial class Init : Migration
+    public partial class Reset : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -51,22 +51,6 @@ namespace TTS.Repository.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_AspNetUsers", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Companies",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Address = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Industry = table.Column<int>(type: "int", nullable: false),
-                    ContactPhone = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Email = table.Column<string>(type: "nvarchar(max)", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Companies", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -180,6 +164,8 @@ namespace TTS.Repository.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Address = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Industry = table.Column<int>(type: "int", nullable: false),
                     UserId = table.Column<string>(type: "nvarchar(450)", nullable: true)
                 },
                 constraints: table =>
@@ -197,8 +183,8 @@ namespace TTS.Repository.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: true),
-                    Expertise = table.Column<int>(type: "int", nullable: false)
+                    Expertise = table.Column<int>(type: "int", nullable: false),
+                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -221,7 +207,6 @@ namespace TTS.Repository.Migrations
                     Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     StartDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     EndDate = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    TotalHours = table.Column<int>(type: "int", nullable: false),
                     CreatedById = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
@@ -236,7 +221,7 @@ namespace TTS.Repository.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "ConsultantWorksOnProjects",
+                name: "ConsultantProjects",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
@@ -244,19 +229,19 @@ namespace TTS.Repository.Migrations
                     ProjectId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     StartTime = table.Column<DateTime>(type: "datetime2", nullable: false),
                     EndTime = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    TotalHoursSpentWorking = table.Column<int>(type: "int", nullable: false)
+                    ApplicationStatus = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_ConsultantWorksOnProjects", x => x.Id);
+                    table.PrimaryKey("PK_ConsultantProjects", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_ConsultantWorksOnProjects_Consultants_ConsultantId",
+                        name: "FK_ConsultantProjects_Consultants_ConsultantId",
                         column: x => x.ConsultantId,
                         principalTable: "Consultants",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_ConsultantWorksOnProjects_Projects_ProjectId",
+                        name: "FK_ConsultantProjects_Projects_ProjectId",
                         column: x => x.ProjectId,
                         principalTable: "Projects",
                         principalColumn: "Id",
@@ -273,16 +258,17 @@ namespace TTS.Repository.Migrations
                     Status = table.Column<int>(type: "int", nullable: false),
                     StartDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     EndDate = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    ResponsibleConsultantId = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
+                    ConsultantProjectId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Activities", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Activities_ConsultantWorksOnProjects_ResponsibleConsultantId",
-                        column: x => x.ResponsibleConsultantId,
-                        principalTable: "ConsultantWorksOnProjects",
-                        principalColumn: "Id");
+                        name: "FK_Activities_ConsultantProjects_ConsultantProjectId",
+                        column: x => x.ConsultantProjectId,
+                        principalTable: "ConsultantProjects",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -292,7 +278,7 @@ namespace TTS.Repository.Migrations
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     CreatedById = table.Column<string>(type: "nvarchar(450)", nullable: true),
                     CreatedOn = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    CommentBody = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CommentBody = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     ActivityId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
@@ -311,10 +297,30 @@ namespace TTS.Repository.Migrations
                         principalColumn: "Id");
                 });
 
+            migrationBuilder.CreateTable(
+                name: "Attachments",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    FileName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    FilePath = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CommentId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Attachments", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Attachments_Comments_CommentId",
+                        column: x => x.CommentId,
+                        principalTable: "Comments",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
             migrationBuilder.CreateIndex(
-                name: "IX_Activities_ResponsibleConsultantId",
+                name: "IX_Activities_ConsultantProjectId",
                 table: "Activities",
-                column: "ResponsibleConsultantId");
+                column: "ConsultantProjectId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetRoleClaims_RoleId",
@@ -356,6 +362,11 @@ namespace TTS.Repository.Migrations
                 filter: "[NormalizedUserName] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Attachments_CommentId",
+                table: "Attachments",
+                column: "CommentId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Clients_UserId",
                 table: "Clients",
                 column: "UserId");
@@ -371,19 +382,19 @@ namespace TTS.Repository.Migrations
                 column: "CreatedById");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Consultants_UserId",
-                table: "Consultants",
-                column: "UserId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_ConsultantWorksOnProjects_ConsultantId",
-                table: "ConsultantWorksOnProjects",
+                name: "IX_ConsultantProjects_ConsultantId",
+                table: "ConsultantProjects",
                 column: "ConsultantId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ConsultantWorksOnProjects_ProjectId",
-                table: "ConsultantWorksOnProjects",
+                name: "IX_ConsultantProjects_ProjectId",
+                table: "ConsultantProjects",
                 column: "ProjectId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Consultants_UserId",
+                table: "Consultants",
+                column: "UserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Projects_CreatedById",
@@ -410,19 +421,19 @@ namespace TTS.Repository.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
-                name: "Comments");
-
-            migrationBuilder.DropTable(
-                name: "Companies");
+                name: "Attachments");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");
 
             migrationBuilder.DropTable(
+                name: "Comments");
+
+            migrationBuilder.DropTable(
                 name: "Activities");
 
             migrationBuilder.DropTable(
-                name: "ConsultantWorksOnProjects");
+                name: "ConsultantProjects");
 
             migrationBuilder.DropTable(
                 name: "Consultants");

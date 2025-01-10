@@ -1,69 +1,66 @@
-﻿@model IEnumerable<TTS.Domain.DTO.GetProjectDto>
+﻿@model IEnumerable<TTS.Domain.Domain.Project>
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Browse Projects";
 }
 
+<div class="container my-5">
+    @if (!Model.Any())
+    {
+        <div class="row justify-content-center">
+            <div class="col-md-6 text-center p-4 border border-secondary border-dashed rounded-3 bg-light">
+                <i class="fas fa-tasks" style="font-size: 50px; color: #999;"></i>
+                <h2 class="mt-3 text-muted">Нема проекти за вашата експертиза</h2>
+                <p class="text-secondary">
+                    Достапните проекти ќе бидат видливи тука.
+                </p>
+            </div>
+        </div>
+    }
+    else
+    {
+        <h3 class="mb-4">Аплицирај за проект</h3>
+        <p class="text-muted mb-5">Кликнете на проект за повеќе детали и аплицирање.</p>
 
+        <div class="accordion" id="projectAccordion">
+            @foreach (var project in Model)
+            {
+                var statusClass = project.Status switch
+                {
+                    TTS.Domain.Enum.ProjectStatus.New => "text-info",
+                    TTS.Domain.Enum.ProjectStatus.InProgress => "text-warning",
+                    TTS.Domain.Enum.ProjectStatus.Invalid => "text-danger",
+                    TTS.Domain.Enum.ProjectStatus.Completed => "text-success",
+                    _ => "text-muted"
+                };
 
-<div class="container-fluid mx-5">
-    <div class="d-flex flex-row justify-content-between mb-5 mt-4">
-        <h1 class="text-capitalize"> <i class="bi bi-book"></i> All Projects</h1>
-    </div>
-    <div class="row d-flex flex-row px-2">
-        @foreach (var item in Model)
-        {
-            <div class="col-3 card border-3 border-warning-subtle me-5 mb-5" style="width: 30rem;">
-                <div class="card-body">
-                    <div class="row mb-3">
-                        <div class="col-4">
-                            <img class="img-thumbnail rounded border border-3" src="https://cdn.pixabay.com/photo/2024/05/26/10/15/bird-8788491_640.jpg" />
-                        </div>
-                        <div class="col-8">
-                            <h5 class="card-title truncate-two-rows">@Html.DisplayFor(modelItem => item.Project.Title)</h5>
-                            <h6 class="card-subtitle mb-2 text-body-secondary truncate-one-row">@Html.DisplayFor(modelItem => item.Project.Expertise)</h6>
-                            @switch (item.Project.Status)
-                            {
-                                case TTS.Domain.Enum.ProjectStatus.New:
-                                    <h6 class="card-subtitle mb-2 text-success text-info">@Html.DisplayFor(modelItem => item.Project.Status)</h6>
-                                    break;
-                                case TTS.Domain.Enum.ProjectStatus.InProgress:
-                                    <h6 class="card-subtitle mb-2 text-success text-warning">@Html.DisplayFor(modelItem => item.Project.Status)</h6>
-                                    break;
-                                case TTS.Domain.Enum.ProjectStatus.Invalid:
-                                    <h6 class="card-subtitle mb-2 text-success text-danger">@Html.DisplayFor(modelItem => item.Project.Status)</h6>
-                                    break;
-                                case TTS.Domain.Enum.ProjectStatus.Completed:
-                                    <h6 class="card-subtitle mb-2 text-success text-success">@Html.DisplayFor(modelItem => item.Project.Status)</h6>
-                                    break;
-                            }
-                        </div>
-                    </div>
+                <div class="accordion-item mb-3">
+                    <h2 class="accordion-header" id="heading-@project.Id">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-@project.Id" aria-expanded="false" aria-controls="collapse-@project.Id">
+                            <div class="d-flex flex-column w-100">
+                                <span class="h5">@project.Title</span>
+                                <small class="text-secondary">@project.Expertise</small>
+                                <small class="@statusClass">@project.Status</small>
+                            </div>
+                        </button>
+                    </h2>
+                    <div id="collapse-@project.Id" class="accordion-collapse collapse" aria-labelledby="heading-@project.Id" data-bs-parent="#projectAccordion">
+                        <div class="accordion-body">
+                            <p><strong>Опис:</strong> @project.Description</p>
+                            <p><strong>Датум на креирање:</strong> @project.StartDate.ToShortDateString()</p>
+                            <p><strong>Краен рок:</strong> @(project.EndDate?.ToShortDateString() ?? "Не е зададен")</p>
 
-                    <p class="card-text truncate-three-rows mb-4">
-                        @Html.DisplayFor(modelItem => item.Project.Description)
-                    </p>
-                    <div class="d-flex flex-row justify-content-between align-itmes-center">
-                        <div class="d-flex flex-row">
-                            <p class="card-link align-self-center me-2">Total Hours: </p><p>@Html.DisplayFor(modelItem => item.Project.TotalHours)</p>
-                        </div>
-
-                        <div class="d-flex flex-row">
-
-                                <form asp-controller="Projects" asp-action="ApplyForProject" asp-route-id="@item.Project.Id" method="post">
-                                    <button type="submit" disabled="@item.Disabled" class="card-link btn btn-outline-info btn-secondary text-info d-flex me-2">
-                                    <i class="bi bi-pencil align-self-center me-2"></i> Apply
+                            <div class="d-flex justify-content-end">
+                                <form asp-controller="Projects" asp-action="ApplyForProject" asp-route-id="@project.Id" method="post" class="me-2">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="bi bi-pencil me-1"></i> Аплицирај
                                     </button>
                                 </form>
-                            <a asp-controller="Projects" asp-action="Details" asp-route-id="@item.Project.Id" class="btn btn-outline-warning  d-flex">
-                                <i class="bi bi-three-dots-vertical"></i>
-                            </a>
-                            
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
-        }
-    </div>
+            }
+        </div>
+    }
 </div>
-

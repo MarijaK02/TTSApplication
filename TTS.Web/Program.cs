@@ -12,12 +12,12 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(connectionString));
+    options.UseLazyLoadingProxies().UseSqlServer(connectionString));
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
-
-builder.Services.AddTransient<ICompanyService, CompanyService>();
+builder.Services.AddTransient<IProjectsService, ProjectsService>();
+builder.Services.AddTransient<IUserService, UserService>();
 
 builder.Services.AddDefaultIdentity<TTSApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
     .AddRoles<IdentityRole>()
@@ -47,7 +47,7 @@ app.UseAuthorization();
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
+    pattern: "{controller=Projects}/{action=CustomIndex}");
 app.MapRazorPages();
 
 using (var scope = app.Services.CreateScope())

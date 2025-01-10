@@ -3,48 +3,90 @@
 
 @{
     ViewData["Title"] = "Edit";
-    var expertises = Enum.GetValues(typeof(Expertise)).Cast<Expertise>();
-    var status = Enum.GetValues(typeof(ProjectStatus)).Cast<ProjectStatus>();
+    var expertises = Html.GetEnumSelectList<Expertise>();
+    var status = Html.GetEnumSelectList<ProjectStatus>();
 }
 
-<div class="container">
-    <h1>Edit</h1>
+<nav class="navbar navbar-expand-lg bg-body-secondary border-bottom border-warning shadow-lg mb-5">
+    <div class="container-fluid">
+        <div class="navbar-brand truncate-one-row fw-bold fs-5" style="width: 23%; display: block">
+
+            @Model.Title
+        </div>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse fs-5" id="navbarNavAltMarkup">
+            <div class="navbar-nav">
+                <a asp-controller="Projects"
+                   asp-action="Details"
+                   asp-route-id="@Model.Id"
+                   class="nav-link active bg-warning fw-bold">
+                    Details
+                </a>
+                <a asp-controller="Activities"
+                   asp-action="Index"
+                   asp-route-projectId="@Model.Id"
+                   asp-route-projectTitle="@Model.Title"
+                   class="nav-link fw-medium">
+                    Activites
+                </a>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<div class="container mt-3">
+    <div class="d-flex justify-content-between">
+        <div class="d-flex align-content-center">
+            <div class="me-2">
+                <a asp-action="Details" asp-route-id="@Model.Id" asp-controller="Projects" class="btn btn-outline-warning border border-2 border-warning">
+                    <i class="bi bi-arrow-left fw-bolder"></i>
+                </a>
+            </div>
+
+            <h3>Промени го проектот</h3>
+        </div>
+    </div>
+
+
+
     <hr />
     <div class="row">
         <div class="col-md-4">
             <form asp-action="Edit" asp-route-id="@Model.Id">
                 <div asp-validation-summary="ModelOnly" class="text-danger"></div>
                 <div class="form-group">
-                    <label asp-for="Title" class="control-label"></label>
+                    <label asp-for="Title" class="control-label">Наслов</label>
                     <input asp-for="Title" class="form-control" />
                     <span asp-validation-for="Title" class="text-danger"></span>
                 </div>
                 @if (User.IsInRole("Consultant"))
                 {
                     <div class="form-group">
-                        <label asp-for="ProjectStatus" class="control-label"></label>
+                        <label asp-for="ProjectStatus" class="control-label">Статус</label>
                         <select asp-for="ProjectStatus" class="form-control">
                             @foreach (var s in status)
                             {
-                                <option value="@s">@s.ToString()</option>
+                                <option value="@s">@s.Text</option>
                             }
                         </select>
                         <span asp-validation-for="ProjectStatus" class="text-danger"></span>
                     </div>
                 }
                 <div class="form-group">
-                    <label asp-for="Expertise" class="control-label"></label>
+                    <label asp-for="Expertise" class="control-label">Експертиза</label>
                     <select asp-for="Expertise" class="form-control">
                         @foreach (var expertise in expertises)
                         {
-                            <option value="@expertise">@expertise.ToString()</option>
+                            <option value="@expertise">@expertise.Text</option>
                         }
 
                     </select>
                     <span asp-validation-for="Expertise" class="text-danger"></span>
                 </div>
                 <div class="form-group">
-                    <label asp-for="Description" class="control-label"></label>
+                    <label asp-for="Description" class="control-label">Опис</label>
                     <input asp-for="Description" class="form-control" />
                     <span asp-validation-for="Description" class="text-danger"></span>
                 </div>
@@ -53,10 +95,6 @@
                 </div>
             </form>
         </div>
-    </div>
-
-    <div>
-        <a asp-action="CustomIndex">Back to List</a>
     </div>
 
     @section Scripts {

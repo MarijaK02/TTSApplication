@@ -2,75 +2,94 @@
 @using TTS.Domain.Enum
 @model RegisterModel
 @{
-    ViewData["Title"] = "Register";
+    ViewData["Title"] = "Регистрирај се!";
     var roles = Enum.GetValues(typeof(TTSApplicationUserRole)).Cast<TTSApplicationUserRole>();
-    var expertises = Enum.GetValues(typeof(Expertise)).Cast<Expertise>();
+    var expertises = Html.GetEnumSelectList<Expertise>();
+    var industries = Html.GetEnumSelectList<Industry>();
 
 }
 
 
 
 <div class="row justify-content-center">
-    <div class="col-md-4">
-        <form id="registerForm" asp-route-returnUrl="@Model.ReturnUrl" method="post" class="p-5 p-5 bg-opacity-25 bg-warning rounded rounded-3 border border-2 border-info">
+    <div class="col-md-4 mt-5">
+        <form id="registerForm" asp-route-returnUrl="@Model.ReturnUrl" method="post" class="p-5 p-5  rounded rounded-3 border border-2 border-info">
             <h3>@ViewData["Title"]</h3>
-            <h5>Create a new account.</h5>
+            <h5>Креирај нов профил</h5>
             <hr />
             <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
 
             <div class="form-floating mb-3">
-                <select asp-for="Input.Role" class="form-select" id="roleSelect" onchange="toggleExpertiseDropdown()">
-                    <option value="" disabled selected>Select Role</option>
+                <select asp-for="Input.Role" class="form-select" id="roleSelect" onchange="toggleAdditionalDropdown()">
+                    <option value="" disabled selected>Изберете тип на корисник</option>
                     @foreach (var role in roles)
                     {
                         <option value="@role">@role.ToString()</option>
                     }
                 </select>
-                <label asp-for="Input.Role">Role</label>
+                <label asp-for="Input.Role">Тип корисник</label>
                 <span asp-validation-for="Input.Role" class="text-danger"></span>
             </div>
 
            
                 <div class="form-floating mb-3" id="expertiseSelectContainer" style="display: none;">
                     <select asp-for="Input.Expertise" class="form-select" id="expertiseSelect">
-                        <option value="" disabled selected>Select Expertise</option>
+                        <option value="" disabled selected>Изберете експертиза</option>
                         @foreach (var expertise in expertises)
                         {
-                            <option value="@expertise">@expertise.ToString()</option>
+                        <option value="@Enum.Parse(typeof(Expertise),@expertise.Value) ">@expertise.Text</option>
                         }
                     </select>
-                    <label asp-for="Input.Expertise">Expertise</label>
+                    <label asp-for="Input.Expertise">Експертиза</label>
                 <span asp-validation-for="Input.Expertise" class="text-danger"></span>
                 </div>
+
+            <div class="form-floating mb-3" id="industrySelectContainer" style="display: none;">
+                <select asp-for="Input.Industry" class="form-select" id="industrySelect">
+                    <option value="" disabled selected>Изберете индустрија</option>
+                    @foreach (var industry in industries)
+                    {
+                        <option value="@Enum.Parse(typeof(Industry),@industry.Value)">@industry.Text</option>
+                    }
+                </select>
+                <label asp-for="Input.Industry">Индустрија</label>
+                <span asp-validation-for="Input.Industry" class="text-danger"></span>
+            </div>
             
             <div class="form-floating mb-3">
                 <input asp-for="Input.FirstName" class="form-control" autocomplete="first-name" aria-required="true" placeholder="Jhon" />
-                <label asp-for="Input.FirstName">First Name</label>
+                <label asp-for="Input.FirstName">Име</label>
                 <span asp-validation-for="Input.FirstName" class="text-danger"></span>
             </div>
-            <div class="form-floating mb-3">
-                <input asp-for="Input.LastName" class="form-control" autocomplete="last-name" aria-required="true" placeholder="Doe" />
-                <label asp-for="Input.LastName">Last Name</label>
+            <div class="form-floating mb-3" id="lastNameInput">
+                <input asp-for="Input.LastName" class="form-control" autocomplete="last-name" aria-required="false" placeholder="Doe" />
+                <label asp-for="Input.LastName">Презиме</label>
                 <span asp-validation-for="Input.LastName" class="text-danger"></span>
+            </div>
+
+            <div class="form-floating mb-3" id="addressInputContainer">
+                <input asp-for="Input.Address" class="form-control" autocomplete="address" aria-required="true" placeholder="Jhon" />
+                <label asp-for="Input.Address">Адреса</label>
+                <span asp-validation-for="Input.Address" class="text-danger"></span>
             </div>
             <div class="form-floating mb-3">
                 <input asp-for="Input.PhoneNumber" class="form-control" autocomplete="phone-number" aria-required="true" placeholder="070123456" />
-                <label asp-for="Input.PhoneNumber">Phone Number</label>
+                <label asp-for="Input.PhoneNumber">Тел. број</label>
                 <span asp-validation-for="Input.PhoneNumber" class="text-danger"></span>
             </div>
             <div class="form-floating mb-3">
                 <input asp-for="Input.Email" class="form-control" autocomplete="username" aria-required="true" placeholder="name@example.com" />
-                <label asp-for="Input.Email">Email</label>
+                <label asp-for="Input.Email">E-mail</label>
                 <span asp-validation-for="Input.Email" class="text-danger"></span>
             </div>
             <div class="form-floating mb-3">
                 <input asp-for="Input.Password" class="form-control" autocomplete="new-password" aria-required="true" placeholder="password" />
-                <label asp-for="Input.Password">Password</label>
+                <label asp-for="Input.Password">Лозинка</label>
                 <span asp-validation-for="Input.Password" class="text-danger"></span>
             </div>
             <div class="form-floating mb-3">
                 <input asp-for="Input.ConfirmPassword" class="form-control" autocomplete="new-password" aria-required="true" placeholder="password" />
-                <label asp-for="Input.ConfirmPassword">Confirm Password</label>
+                <label asp-for="Input.ConfirmPassword">Потврдете лозинка</label>
                 <span asp-validation-for="Input.ConfirmPassword" class="text-danger"></span>
             </div>
             <button id="registerSubmit" type="submit" class="w-100 btn btn-lg btn-info shadow">Register</button>
@@ -81,10 +100,14 @@
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
     <script>
-        function toggleExpertiseDropdown() {
+        function toggleAdditionalDropdown() {
             var roleSelect = document.getElementById("roleSelect");
             var expertiseSelectContainer = document.getElementById("expertiseSelectContainer");
             var expertiseSelect = document.getElementById("expertiseSelect");
+            var industrySelectContainer = document.getElementById("industrySelectContainer");
+            var industrySelect = document.getElementById("industrySelect");
+            var addressInput = document.getElementById("addressInputContainer");
+            var lastNameInput = document.getElementById("lastNameInput");
 
             if (roleSelect.value === "Consultant") {
                 expertiseSelectContainer.style.display = "block";
@@ -93,6 +116,24 @@
                 expertiseSelectContainer.style.display = "none";
                 expertiseSelect.removeAttribute("required");
             }
-        }
+
+            if (roleSelect.value === "Client") {
+                industrySelectContainer.style.display = "block";
+                industrySelect.setAttribute("required", "required");
+
+                addressInput.style.display = "block";
+                addressInput.setAttribute("required", "required");
+
+                lastNameInput.style.display = "none";
+            } else {
+                industrySelectContainer.style.display = "none";
+                industrySelect.removeAttribute("required");
+
+                addressInput.style.display = "none";
+                addressInput.removeAttribute("required");
+
+                lastNameInput.style.display = "block";
+            }
+        }     
     </script>
 }

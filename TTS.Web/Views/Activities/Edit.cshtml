@@ -6,27 +6,31 @@
     var status = Enum.GetValues(typeof(ActivityStatus)).Cast<ActivityStatus>();
 }
 
-<div class="container">
-    <h1>Edit</h1>
+<div class="container mt-4">
+    <div class="d-flex">
+        <div class="me-2" >
+            <a asp-action="Index" asp-route-projectId="@Model.ProjectId" asp-route-projectTitle="@Model.ProjectTitle" class="btn btn-outline-warning"><i class="bi bi-arrow-left"></i></a>
+        </div>
+        <h4>Промени ја активноста</h4>
+    </div>
 
-    <h4>Activity</h4>
     <hr />
     <div class="row">
         <div class="col-md-4">
             <form asp-action="Edit">
                 <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-                <div class="form-group">
-                    <label asp-for="Title" class="control-label"></label>
+                <div class="form-group mb-2">
+                    <label asp-for="Title" class="control-label">Наслов</label>
                     <input asp-for="Title" class="form-control" />
                     <span asp-validation-for="Title" class="text-danger"></span>
                 </div>
-                <div class="form-group">
-                    <label asp-for="Description" class="control-label"></label>
+                <div class="form-group mb-2">
+                    <label asp-for="Description" class="control-label">Опис</label>
                     <input asp-for="Description" class="form-control" />
                     <span asp-validation-for="Description" class="text-danger"></span>
                 </div>
-                <div class="form-group">
-                    <label asp-for="ActivityStatus" class="control-label"></label>
+                <div class="form-group mb-2">
+                    <label asp-for="ActivityStatus" class="control-label">Статус</label>
                     <select asp-for="ActivityStatus" class="form-control">
                         @foreach (var s in status)
                         {
@@ -38,15 +42,13 @@
                 <input type="hidden" asp-for="ActivityId" />
                 <input type="hidden" asp-for="ProjectId" />
                 <div class="form-group">
-                    <input type="submit" value="Save" class="btn btn-primary" />
+                    <input type="submit" value="Зачувај" class="btn btn-primary" />
                 </div>
             </form>
         </div>
     </div>
 
-    <div>
-        <a asp-action="Index" asp-route-projectId="@Model.ProjectId">Back to List</a>
-    </div>
+
 
     @section Scripts {
         @{

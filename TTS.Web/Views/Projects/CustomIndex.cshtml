@@ -4,82 +4,97 @@
     ViewData["Title"] = "Index";
 }
 
-<div class="d-flex flex-row justify-content-between mb-2 mt-4 container-fluid px-5">
-    <h3 class="text-capitalize"><i class="bi bi-book"></i> My Projects</h3>
+<div class="container my-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="text-capitalize">Мои проекти</h4>
 
-    @if (User.IsInRole("Client"))
+        @if (User.IsInRole("Client"))
+        {
+            <a asp-action="Create" class="btn btn-primary d-flex align-items-center">
+                <i class="bi bi-plus-circle-dotted me-2"></i> Креирај нов
+            </a>
+        }
+    </div>
+
+    @if (!Model.Any())
     {
-        <p>
-            <a asp-action="Create" class="btn btn-primary"> <i class="bi bi-plus-circle-dotted"></i> Create New</a>
-        </p>
+        <hr />
+        <div class="row justify-content-center">
+            <div class="col-md-6 text-center p-4 border border-secondary border-dashed rounded-3 bg-light">
+                <i class="fas fa-tasks" style="font-size: 50px; color: #999;"></i>
+                <h2 class="mt-3 text-muted">Нема проекти</h2>
+                @if (User.IsInRole("Client"))
+                {
+                    <p class="text-secondary">
+                        Започни со креирање на проекти или контактирај го админот на е-маил <strong>admin@admin.com</strong>!
+                    </p>
+                }
+                else
+                {
+                    <p class="text-secondary">
+                        Аплицирај за работа на проекти во делот <strong>Сите проекти</strong> и започни со работа!
+                    </p>
+                }
+            </div>
+        </div>
     }
-
-</div>
-
-<div class="container-fluid px-5">
+    else
+    {
         <div class="table-responsive">
-            <table class="table table-bordered">
-                <thead>
+            <table class="table table-striped table-hover align-middle">
+                <thead class="table-light">
                     <tr>
-                        <th></th>
-                        <th class="text-secondary">View Details</th>
-                        <th class="text-secondary"><i class="bi bi-bookmark"></i> Project</th>
-                        <th class="text-secondary">Status</th>
-                        <th class="text-secondary">Total activites</th>
-                        <th class="text-secondary">Due date</th>
-                        <th class="text-secondary">Responsibles</th>
-                        @if(User.IsInRole("Consultant")){
-                            <th class="text-secondary">Total hours</th>
-                            <th class="text-secondary">My Activites</th>
+                        <th>#</th>
+                        <th><i class="bi bi-bookmark"></i> Проект</th>
+                        <th>Статус</th>
+                        <th>Вкупно активности</th>
+                        <th>До</th>
+                        <th>Одговорни</th>
+                        @if (User.IsInRole("Consultant"))
+                        {
+                            <th>Вкупно часови</th>
+                            <th>Мои активности</th>
                         }
-
-                        <th class="text-secondary">Delete Project</th>
+                        <th></th>
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach(var project in Model)
+                    @foreach (var project in Model)
                     {
-                        <tr class="">
-                            <td>@(Model.IndexOf(project)+1)</td>
-                            <td>
-                                <a asp-controller="Projects" asp-action="Details" asp-route-id="@project.Project.Id" class="btn btn-outline-secondary text-info fw-medium">
-                                    <i class="bi bi-search text-dark pe-2"></i> Details
-                                </a>
-                            </td>
-                            <td class="fw-medium bg-secondary-subtle">@project.Project.Title</td>
-
-                        @switch (project.Project.Status)
+                        var statusClass = project.Project.Status switch
                         {
-                            case TTS.Domain.Enum.ProjectStatus.New:
-                                <td class="text-center text-info">@project.Project.Status.ToString()</td>
-                                break;                            
-                            case TTS.Domain.Enum.ProjectStatus.InProgress:
-                                <td class="text-center text-warning">@project.Project.Status.ToString()</td>
-                                break;
-                            case TTS.Domain.Enum.ProjectStatus.Invalid:
-                                <td class="text-center text-danger">@project.Project.Status.ToString()</td>
-                                break;
-                            case TTS.Domain.Enum.ProjectStatus.Completed:
-                                <td class="text-center text-success">@project.Project.Status.ToString()</td>
-                                break;
-                        }
-                            <td class="text-end">@project.TotalActivites</td>
-                            <td class="text-end">@(project.EndDate.GetValueOrDefault().ToShortDateString() ?? "-")</td>
-                            <td class="text-end">@project.NumConsultants</td>
+                            TTS.Domain.Enum.ProjectStatus.New => "text-info",
+                            TTS.Domain.Enum.ProjectStatus.InProgress => "text-warning",
+                            TTS.Domain.Enum.ProjectStatus.Invalid => "text-danger",
+                            _ => "text-success"
+                        };
+
+                        <tr onclick="location.href='@Url.Action("Details", new { id = project.Project.Id })'">
+                            <td>@(Model.IndexOf(project) + 1)</td>
+                            <td class="fw-medium">@project.Project.Title</td>
+                            <td class="@statusClass">@Html.DisplayFor(model => project.Project.Status)</td>
+                            <td>@project.TotalActivites</td>
+                            <td>@(project.EndDate?.ToShortDateString() ?? "-")</td>
+                            <td>@project.NumConsultants</td>
+
                             @if (User.IsInRole("Consultant"))
                             {
-                                <td class="text-end">@project.TotalHours</td>
-                                <td class="text-end">@project.NumOfConsultantActivites</td>
+                                <td>@project.TotalHours</td>
+                                <td>@project.NumOfConsultantActivites</td>
                             }
                             <td class="text-end">
-                                <a asp-controller="Projects" asp-action="Delete" asp-route-id="@project.Project.Id" class="btn btn-outline-secondary text-danger fw-medium">
-                                    <i class="bi bi-trash3 align-self-center me-2"></i> Delete
-                                </a>
+                                @if (User.IsInRole("Client"))
+                                {
+                                    <a asp-controller="Projects" asp-action="Delete" asp-route-id="@project.Project.Id"
+                                       class="btn btn-outline-danger btn-sm">
+                                        <i class="bi bi-trash3"></i> Избриши
+                                    </a>
+                                }
                             </td>
                         </tr>
                     }
                 </tbody>
             </table>
         </div>
+    }
 </div>
-

@@ -12,8 +12,8 @@ using TTS.Repository;
 namespace TTS.Repository.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20241111121907_Init")]
-    partial class Init
+    [Migration("20250106090422_ApplicationDates")]
+    partial class ApplicationDates
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -168,14 +168,14 @@ namespace TTS.Repository.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<Guid>("ConsultantProjectId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime?>("EndDate")
                         .HasColumnType("datetime2");
-
-                    b.Property<Guid?>("ResponsibleConsultantId")
-                        .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("StartDate")
                         .HasColumnType("datetime2");
@@ -189,9 +189,33 @@ namespace TTS.Repository.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ResponsibleConsultantId");
+                    b.HasIndex("ConsultantProjectId");
 
                     b.ToTable("Activities");
+                });
+
+            modelBuilder.Entity("TTS.Domain.Domain.Attachment", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("CommentId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("FileName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("FilePath")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CommentId");
+
+                    b.ToTable("Attachments");
                 });
 
             modelBuilder.Entity("TTS.Domain.Domain.Client", b =>
@@ -199,6 +223,12 @@ namespace TTS.Repository.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Address")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Industry")
+                        .HasColumnType("int");
 
                     b.Property<string>("UserId")
                         .HasColumnType("nvarchar(450)");
@@ -220,7 +250,6 @@ namespace TTS.Repository.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("CommentBody")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("CreatedById")
@@ -236,33 +265,6 @@ namespace TTS.Repository.Migrations
                     b.HasIndex("CreatedById");
 
                     b.ToTable("Comments");
-                });
-
-            modelBuilder.Entity("TTS.Domain.Domain.Company", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Address")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ContactPhone")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Email")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("Industry")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Companies");
                 });
 
             modelBuilder.Entity("TTS.Domain.Domain.Consultant", b =>
@@ -284,26 +286,26 @@ namespace TTS.Repository.Migrations
                     b.ToTable("Consultants");
                 });
 
-            modelBuilder.Entity("TTS.Domain.Domain.ConsultantWorksOnProject", b =>
+            modelBuilder.Entity("TTS.Domain.Domain.ConsultantProject", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<int>("ApplicationStatus")
+                        .HasColumnType("int");
+
                     b.Property<Guid>("ConsultantId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime?>("EndTime")
+                    b.Property<DateTime>("DateApplied")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("DateModified")
                         .HasColumnType("datetime2");
 
                     b.Property<Guid>("ProjectId")
                         .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("StartTime")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("TotalHoursSpentWorking")
-                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
@@ -311,7 +313,7 @@ namespace TTS.Repository.Migrations
 
                     b.HasIndex("ProjectId");
 
-                    b.ToTable("ConsultantWorksOnProjects");
+                    b.ToTable("ConsultantProjects");
                 });
 
             modelBuilder.Entity("TTS.Domain.Domain.Project", b =>
@@ -341,9 +343,6 @@ namespace TTS.Repository.Migrations
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("TotalHours")
-                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
@@ -479,11 +478,24 @@ namespace TTS.Repository.Migrations
 
             modelBuilder.Entity("TTS.Domain.Domain.Activity", b =>
                 {
-                    b.HasOne("TTS.Domain.Domain.ConsultantWorksOnProject", "ResponsibleConsultant")
+                    b.HasOne("TTS.Domain.Domain.ConsultantProject", "ConsultantProject")
                         .WithMany("Activites")
-                        .HasForeignKey("ResponsibleConsultantId");
+                        .HasForeignKey("ConsultantProjectId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
-                    b.Navigation("ResponsibleConsultant");
+                    b.Navigation("ConsultantProject");
+                });
+
+            modelBuilder.Entity("TTS.Domain.Domain.Attachment", b =>
+                {
+                    b.HasOne("TTS.Domain.Domain.Comment", "Comment")
+                        .WithMany("Attachments")
+                        .HasForeignKey("CommentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Comment");
                 });
 
             modelBuilder.Entity("TTS.Domain.Domain.Client", b =>
@@ -521,7 +533,7 @@ namespace TTS.Repository.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("TTS.Domain.Domain.ConsultantWorksOnProject", b =>
+            modelBuilder.Entity("TTS.Domain.Domain.ConsultantProject", b =>
                 {
                     b.HasOne("TTS.Domain.Domain.Consultant", "Consultant")
                         .WithMany("Projects")
@@ -530,7 +542,7 @@ namespace TTS.Repository.Migrations
                         .IsRequired();
 
                     b.HasOne("TTS.Domain.Domain.Project", "Project")
-                        .WithMany("Consultants")
+                        .WithMany("ConsultantProjects")
                         .HasForeignKey("ProjectId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -561,19 +573,24 @@ namespace TTS.Repository.Migrations
                     b.Navigation("Projects");
                 });
 
+            modelBuilder.Entity("TTS.Domain.Domain.Comment", b =>
+                {
+                    b.Navigation("Attachments");
+                });
+
             modelBuilder.Entity("TTS.Domain.Domain.Consultant", b =>
                 {
                     b.Navigation("Projects");
                 });
 
-            modelBuilder.Entity("TTS.Domain.Domain.ConsultantWorksOnProject", b =>
+            modelBuilder.Entity("TTS.Domain.Domain.ConsultantProject", b =>
                 {
                     b.Navigation("Activites");
                 });
 
             modelBuilder.Entity("TTS.Domain.Domain.Project", b =>
                 {
-                    b.Navigation("Consultants");
+                    b.Navigation("ConsultantProjects");
                 });
 #pragma warning restore 612, 618
         }

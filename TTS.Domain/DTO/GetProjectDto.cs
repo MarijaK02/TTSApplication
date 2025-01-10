@@ -11,7 +11,6 @@ namespace TTS.Domain.DTO
     public class GetProjectDto
     {
         public required Project Project { get; set; }
-        public required bool Disabled { get; set; }
         public int TotalActivites { get; set; }
         public int NumConsultants { get; set; }
         public int? NumOfConsultantActivites { get; set; }
