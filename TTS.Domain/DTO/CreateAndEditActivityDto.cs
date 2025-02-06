@@ -11,9 +11,10 @@ namespace TTS.Domain.DTO
     {
         public required Guid ProjectId { get; set; }
         public required string ProjectTitle { get; set; }
-        public Guid? ActivityId { get; set; }
-        public string? Title { get; set; }
-        public string? Description { get; set; }
-        public ActivityStatus? ActivityStatus { get; set; }
+        public Guid ActivityId { get; set; }
+        public required string Title { get; set; }
+        public required string Description { get; set; }
+        public ActivityStatus ActivityStatus { get; set; }
+        public DateTime? EndDate { get; set; }
     }
 }

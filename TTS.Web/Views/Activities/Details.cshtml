@@ -39,13 +39,9 @@
         <h4>@Html.DisplayFor(model => model.Activity!.Title)</h4>
         <div class="d-flex justify-content-between mb-3">
             <div>
-                @if (User.IsInRole("Consultant") && Model!.Activity!.ConsultantProject != null && Model!.Activity!.ConsultantProject!.Consultant.User.UserName == User!.Identity!.Name)
+                @if (User.IsInRole("Consultant"))
                 {
                     <a class="btn btn-outline-primary me-2" asp-action="Edit" asp-route-id="@Model.Activity!.Id" asp-route-projectId="@Model.ProjectId" asp-route-projectTitle="@Model.ProjectTitle">Промени</a>
-
-                    <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#myModal" onclick="event.stopPropagation();">
-                        Избриши
-                    </button>
                 }
 
                 <div class="modal fade" tabindex="-1" id="myModal">
@@ -65,7 +61,8 @@
                                         asp-action="Details" asp-route-projectId="@Model.ProjectId" asp-route-id="@Model.Activity.Id">
                                     Откажи
                                 </button>
-                                <form asp-action="Delete" method="post" asp-route-id="@Model.Activity.Id">
+
+                                <form asp-action="DeleteConfirmed" method="post" asp-route-id="@Model.Activity.Id">
                                     <input type="hidden" name="projectId" value="@Model.ProjectId" />
                                     <input type="hidden" name="projectTitle" value="@Model.ProjectTitle" />
                                     <button type="submit" class="btn btn-danger">Потврди</button>
@@ -98,6 +95,14 @@
             <dd class="col-sm-10">@Html.DisplayFor(model => model.Activity!.EndDate)</dd>
         </dl>
     </div>
+    @if (Model.TotalActiveHours > Model.TotalExpectedHours)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-circle-fill me-3"></i>
+            Активноста ги надминува очекуваните работни саати за @((Model.TotalActiveHours - Model.TotalExpectedHours) / 24) денови и   @((Model.TotalActiveHours - Model.TotalExpectedHours) % 24) часови!
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
 
     <hr />
 
@@ -135,9 +140,13 @@
                     </div>
                     @if (item.CreatedBy.UserName == User!.Identity!.Name)
                     {
-                        <div>
-                            <button class="btn btn-outline-success btn-sm"><i class="bi bi-pencil"></i></button>
-                            <button class="btn btn-outline-danger btn-sm"><i class="bi bi-trash3"></i></button>
+                        <div class="d-flex">
+                            <form method="post" asp-action="DeleteComment" asp-route-commentId="@item.Id">
+                                <button class="btn btn-outline-danger btn-sm" type="submit"><i class="bi bi-trash3"></i></button>
+                                <input hidden value="@Model.Activity.Id" name="activityId"/>
+                                <input hidden value="@Model.ProjectId" name="projectId"/>
+                                <input hidden value="@Model.ProjectTitle" name="projectTitle"/>
+                            </form>
                         </div>
                     }
                 </div>
@@ -162,16 +171,13 @@
                                                 </a>
                                                 @if (item.CreatedBy.UserName == User.Identity.Name)
                                                 {
-                                                    <a asp-action="RemoveFile"
-                                                       asp-controller="Activities"
-                                                       asp-route-fileId="@attachment.Id"
-                                                       asp-route-projectId="@Model.ProjectId"
-                                                       asp-route-id="@Model.Activity.Id"
-                                                       class="btn btn-danger btn-sm">
-                                                        <i class="bi bi-trash3"></i>
-                                                    </a>
+                                                    <form method="post" asp-action="RemoveFile" asp-route-fileId="@attachment.Id">
+                                                        <input hidden name="projectId" value="@Model.ProjectId"/>
+                                                        <input hidden name="id" value="@Model.Activity.Id"/>
+                                                        <input hidden name="projectTitle" value="@Model.ProjectTitle"/>
+                                                        <button class="btn btn-danger btn-sm"></button>
+                                                    </form>
                                                 }
-
                                             </div>
                                         </div>
                                     </div>
@@ -235,7 +241,7 @@
 
             if (commentsContainer.getElementsByClassName("comment").length >= totalComments) {
                 this.disabled = true;
-                this.innerText = "All Comments Loaded";
+                this.innerText = "Сите коментари се прикажани";
             }
         }
     });

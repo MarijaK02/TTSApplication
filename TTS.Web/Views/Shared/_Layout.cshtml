@@ -9,74 +9,78 @@
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/TTS.Web.styles.css" asp-append-version="true" />
 
-    <link 
-        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" 
-        rel="stylesheet" 
-        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" 
-        crossorigin="anonymous">
-    <link 
-        rel="stylesheet" 
-        href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+          rel="stylesheet"
+          integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
+          crossorigin="anonymous">
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
     <title>@ViewData["Title"] - TTS.Web</title>
 </head>
-<body class="bg-gradient d-flex flex-column" style="width: 100vw">
+<body class="bg-light d-flex flex-column" style="width: 100vw">
     <div class="sticky-top" style="width: 100%">
-            <nav class="navbar navbar-dark bg-dark shadow-lg p-3">
-                <div class="container-fluid shadow-lg">
-
-                    <div class="d-flex w-25 justify-content-start align-items-center">
-                        @if (SignInManager.IsSignedIn(User))
-                        {
-                            <button class="btn btn-outline-warning w-auto h-50 me-2" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasDarkNavbar" aria-controls="offcanvasDarkNavbar" aria-label="Toggle navigation">
-                                <i class="bi bi-boxes"></i>
-                            </button>
-                        }
-                          
-                        <p class="text-light text-capitalize fw-normal fs-2 navbar-brand mb-0 pb-0">Систем трансфер за технологии</p>
-                    </div>
-                    
-                    <div class="offcanvas offcanvas-start text-bg-dark" tabindex="-1" id="offcanvasDarkNavbar" aria-labelledby="offcanvasDarkNavbarLabel">
-                        <div class="offcanvas-header bg-info">
-                            <h5 class="offcanvas-title text-opacity-75 text-black text-capitalize" id="offcanvasDarkNavbarLabel">Систем трансфер за технологии</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-                        </div>
-                        <div class="d-flex flex-column justify-content-between offcanvas-body bg-dark">
-                            <ul class="navbar-nav nav-pills ">
-                                @if (User.IsInRole("Consultant"))
-                                {
-                                    <li class="nav-item">
-                                        <a class="nav-link" asp-controller="Projects" asp-action="Index">
-                                            <i class="bi bi-folder"></i>
-                                            Сите проекти
-                                            </a>
-                                    </li>
-                                } 
-                               
-                                    <li class="nav-item">
-                                    <a class="nav-link" asp-controller="Projects" asp-action="CustomIndex">
-                                        <i class="bi bi-grid"></i>
-                                            Мои проекти
-                                    </a>
-                                    </li>                                                                                            
-                            </ul>
-                            <footer class="footer border-top pt-3 pb-5">
-                                @if (SignInManager.IsSignedIn(User))
-                                {
-                                    <form class="form-inline" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })">
-                                        <button type="submit" class="nav-link text-light p-2">
-                                            <i class="bi bi-box-arrow-left"></i>
-                                            Одјави се
-                                        </button>
-                                    </form>
-                                }
-                            </footer>
-                        </div>
-                    </div>
-                    <partial name="_LoginPartial" />
+        <!-- Navbar -->
+        <nav class="navbar navbar-dark bg-dark shadow-sm p-3">
+            <div class="container-fluid">
+                <div class="d-flex align-items-center">
+                    @if (SignInManager.IsSignedIn(User))
+                    {
+                        <button class="btn btn-outline-light me-3" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasNavbar" aria-controls="offcanvasNavbar">
+                            <i class="bi bi-list"></i>
+                        </button>
+                    }
+                    <span class="navbar-brand mb-0 h1">Систем трансфер за технологии</span>
                 </div>
-            </nav>
+                <partial name="_LoginPartial" />
+            </div>
+        </nav>
+
+        <!-- Sidebar -->
+        <div class="offcanvas offcanvas-start bg-dark text-white" tabindex="-1" id="offcanvasNavbar" aria-labelledby="offcanvasNavbarLabel">
+            <div class="offcanvas-header">
+                <h5 class="offcanvas-title" id="offcanvasNavbarLabel">Мени</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+            </div>
+            <div class="offcanvas-body">
+                <ul class="navbar-nav flex-column gap-2">
+                    @if (User.IsInRole("Consultant"))
+                    {
+                        <li class="nav-item">
+                            <a class="nav-link d-flex align-items-center gap-2" asp-controller="Projects" asp-action="Index">
+                                <i class="bi bi-folder"></i>
+                                Сите проекти
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link d-flex align-items-center gap-2" asp-controller="Projects" asp-action="MyApplications">
+                                <i class="bi bi-archive"></i>
+                                Мои апликации
+                            </a>
+                        </li>
+                    }
+                    <li class="nav-item">
+                        <a class="nav-link d-flex align-items-center gap-2" asp-controller="Projects" asp-action="MyProjects">
+                            <i class="bi bi-grid"></i>
+                            Мои проекти
+                        </a>
+                    </li>
+                </ul>
+                <hr class="text-white" />
+                <div class="mt-auto">
+                    @if (SignInManager.IsSignedIn(User))
+                    {
+                        <form class="form-inline" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })">
+                            <button type="submit" class="nav-link text-white d-flex align-items-center gap-2">
+                                <i class="bi bi-box-arrow-left"></i>
+                                Одјави се
+                            </button>
+                        </form>
+                    }
+                </div>
+            </div>
         </div>
+    </div>
 
     <div style="height: 80vh; max-width: 100%; flex: 1" class="pb-5">
         <main role="main">
@@ -90,7 +94,6 @@
         </div>
     </footer>
 
-
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js"
             integrity="sha384-0pUGZvbkm6XF6gxjEnlmuGrJXVbNuzT9qBBavbLwCsOGabYfZo0T0to5eqruptLy"
             crossorigin="anonymous">
@@ -99,6 +102,4 @@
 
     @RenderSection("Scripts", required: false)
 </body>
-
-
 </html>

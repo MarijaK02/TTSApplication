@@ -43,7 +43,7 @@
     <div class="d-flex justify-content-between">
         <div class="d-flex">
             <div class="me-2">
-                <a asp-action="CustomIndex" class="btn btn-outline-warning border border-2 border-warning"><i class="bi bi-arrow-left fw-bolder"></i></a>
+                <a asp-action="MyProjects" class="btn btn-outline-warning border border-2 border-warning"><i class="bi bi-arrow-left fw-bolder"></i></a>
             </div>
             <h3>@Model!.Project.Title</h3>
         </div>
@@ -109,22 +109,29 @@
             <dd class="col-sm-10">
                 @(Model.Project.EndDate == null ? "-" : Model.Project.EndDate.GetValueOrDefault().ToLongDateString())
             </dd>
-            @if (User.IsInRole("Client"))
-            {
-                <dt>
+            <dt class="col-sm-2">
                     Одговорни
-                </dt>
-                @if (Model.Responsibles!.Any())
+            </dt>
+            @if (Model.Responsibles!.Any())
+            {
+                @foreach (var responsible in Model.Responsibles!)
                 {
-                    @foreach (var responsible in Model.Responsibles!)
-                    {
-                        <dd>
-                            @responsible.User.FirstName @responsible.User.LastName (@responsible.User.UserName)
-                        </dd>
-                    }
+                <dd class="col-sm-10">
+                        @responsible.User.FirstName @responsible.User.LastName (@responsible.User.UserName)
+                </dd>
                 }
             }
+            @if (Model.TotalHours > Model.TotalExpectedHours)
+            {
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="bi bi-exclamation-circle-fill me-3"></i>
+                    Проектот ги надминува очекуваните работни саати за @((Model.TotalHours - Model.TotalExpectedHours) / 24) денови и @((Model.TotalHours - Model.TotalExpectedHours) % 24) часови!
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            }
         </dl>
+
+
     </div>
 
     @if (User.IsInRole("Client"))
@@ -139,18 +146,25 @@
                     {
                         <div class="list-group-item d-flex justify-content-between align-items-center">
                             <div>
-                                <h5>@application.Consultant.User.FirstName @application.Consultant.User.LastName</h5>
+                                <h5>@application.Consultant!.User.FirstName @application.Consultant.User.LastName</h5>
                                 <p>Username: @application.Consultant.User.UserName</p>
                                 <p>Expertise: @application.Consultant.Expertise</p>
                             </div>
 
-                            <div>
-                                <a asp-action="AcceptApplication" asp-route-applicationId="@application.Id" class="btn btn-success me-2">
-                                    Approve
-                                </a>
-                                <a asp-action="RejectApplication" asp-route-applicationId="@application.Id" class="btn btn-danger">
-                                    Reject
-                                </a>
+                            <div class="d-flex">
+                                <form method="post" asp-action="AcceptApplication" asp-route-applicationId="@application.Id" class="me-2">
+                                    <input hidden name="projectId" value="@Model.Project.Id"/>
+                                    <button class="btn btn-success me-2" type="submit">
+                                        Одобри
+                                    </button>
+                                </form>
+
+                                <form method="post" asp-action="RejectApplication" asp-route-applicationId="@application.Id">
+                                    <input hidden name="projectId" value="@Model.Project.Id" />
+                                    <button class="btn btn-danger me-2" type="submit">
+                                        Одбиј
+                                    </button>
+                                </form>
                             </div>
                         </div>
                     }

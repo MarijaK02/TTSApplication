@@ -11,12 +11,14 @@ namespace TTS.Domain.Domain
 {
     public class Comment : BaseEntity
     {
-        public required TTSApplicationUser CreatedBy { get; set; }
+        public string CreatedById { get; set; }
+        public TTSApplicationUser? CreatedBy { get; set; }
+        public Guid ActivityId { get; set; }
+        public Activity? Activity { get; set; }
 
-        public required DateTime CreatedOn { get; set; }
+        public DateTime CreatedOn { get; set; }
+        public string CommentBody { get; set; }
 
-        public string? CommentBody { get; set; }
-        public required virtual Activity Activity { get; set; }
-        public List<Attachment>? Attachments { get; set; }
+        public virtual List<Attachment>? Attachments { get; set; }
     }
 }

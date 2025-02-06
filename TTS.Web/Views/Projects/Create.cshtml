@@ -10,7 +10,7 @@
 
     <div class="d-flex">
         <div class="me-2">
-            <a asp-action="CustomIndex" class="btn btn-outline-warning border border-2 border-warning"><i class="bi bi-arrow-left fw-bolder"></i></a>
+            <a asp-action="MyProjects" class="btn btn-outline-warning border border-2 border-warning"><i class="bi bi-arrow-left fw-bolder"></i></a>
         </div>
         <h3>Креирај нов проект</h3>
     </div>
@@ -38,7 +38,7 @@
                 </div>
                 <div class="form-group mb-2">
                     <label asp-for="Description" class="control-label">Опис</label>
-                    <input asp-for="Description" class="form-control" />
+                    <textarea asp-for="Description" class="form-control" rows="10"></textarea>
                     <span asp-validation-for="Description" class="text-danger"></span>
                 </div>
                 <div class="form-group mb-2">

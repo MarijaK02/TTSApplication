@@ -3,14 +3,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using TTS.Domain.Shared;
 
 namespace TTS.Domain.Domain
 {
-    public class Attachment
+    public class Attachment : BaseEntity
     {
-        public Guid Id { get; set; }
-        public required string FileName { get; set; } 
-        public required string FilePath { get; set; }
-        public required virtual Comment Comment { get; set; }
+        public string FileName { get; set; }
+        public string FilePath { get; set; }
+        public Guid CommentId { get; set; }
+        public Comment Comment { get; set; }
     }
 }

@@ -1,0 +1,101 @@
+﻿@using TTS.Domain.Enum
+@model TTS.Domain.DTO.ConsultantApplicationsDto
+
+@{
+    ViewData["Title"] = "Мои апликации";
+}
+
+<div class="container mt-4">
+    <div class=" mb-5">
+        <h4 class="text-capitalize">Мои апликации</h4>
+    </div>
+
+    <form method="get" asp-action="MyApplications" class="mt-2 mb-2">
+        <label for="statusSelect" class="form-label fw-bold mb-2">Избери категорија:</label>
+        <select id="statusSelect" name="status" class="form-select w-25 mb-2" onchange="this.form.submit()">
+            <option value="@ApplicationStatus.Applied" selected="@(Model.Status == ApplicationStatus.Applied ? "selected" : null)">Тековни апликации</option>
+            <option value="@ApplicationStatus.Accepted" selected="@(Model.Status == ApplicationStatus.Accepted ? "selected" : null)">Прифатени апликации</option>
+            <option value="@ApplicationStatus.Rejected" selected="@(Model.Status == ApplicationStatus.Rejected ? "selected" : null)">Одбиени апликации</option>
+        </select>
+    </form>
+
+    <div class="row">
+        <div id="currentApplications" class="col-md-12">
+            <div class="card shadow-sm">
+                @switch (Model.Status)
+                {
+                    case ApplicationStatus.Applied:
+                        <div class="card-header bg-warning text-white">
+                            <h4 class="mb-0">Тековни апликации</h4>
+                        </div>
+                        break;
+                    case ApplicationStatus.Accepted:
+                        <div class="card-header bg-success text-white">
+                            <h4 class="mb-0">Прифатени апликации</h4>
+                        </div>
+                        break;
+                    case ApplicationStatus.Rejected:
+                        <div class="card-header bg-danger text-white">
+                            <h4 class="mb-0">Одбиени апликации</h4>
+                        </div>
+                        break;
+                }
+                <div class="card-body">
+                    @if (Model.Applications!.Any())
+                    {
+                        <ul class="list-group">
+                            @foreach (var application in Model.Applications!)
+                            {
+                                var statusClass = application.Project.Status switch
+                                {
+                                    TTS.Domain.Enum.ProjectStatus.New => "text-info",
+                                    TTS.Domain.Enum.ProjectStatus.InProgress => "text-warning",
+                                    TTS.Domain.Enum.ProjectStatus.Invalid => "text-danger",
+                                    _ => "text-success"
+                                };
+
+                                <li class="list-group-item">
+                                        <div>
+                                            <h5>@application.Project.Title</h5>
+                                            <p><strong>Експертиза:</strong> @application.Project.Expertise</p>
+                                            <p class="truncate-two-rows">@application.Project.Description</p>
+                                            <p><strong>Креиран на:</strong> @application.Project.StartDate.ToShortDateString()</p>
+                                            <div class="d-flex"><strong class="me-2">Статус на проектот:</strong><p class="@statusClass"> @application.Project.Status</p></div>
+                                        </div>
+
+                                        @if(Model.Status == ApplicationStatus.Applied){
+                                            <form asp-action="RemoveApplication" method="post" asp-route-applicationId="@application.Id">
+                                                <button class="btn btn-danger">Откажете ја апликацијата</button>
+                                            </form>
+                                        }
+
+                                    @if(Model.Status == ApplicationStatus.Rejected)
+                                    {
+                                        <form asp-action="ApplyForProject" method="post" asp-route-applicationId="@application.Id">
+                                            <button class="btn btn-primary">Аплицирајте повторно</button>
+                                        </form>
+                                    }
+                                </li>
+                            }
+                        </ul>
+                    }
+                    else
+                    {
+                        @switch (Model.Status)
+                        {
+                            case ApplicationStatus.Applied:
+                                <p class="text-muted">Нема тековни апликации.</p>
+                                break;
+                            case ApplicationStatus.Accepted:
+                                <p class="text-muted">Нема прифатени апликации.</p>
+                                break;
+                            case ApplicationStatus.Rejected:
+                                <p class="text-muted">Нема одбиени апликации.</p>
+                                break;
+                        }
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

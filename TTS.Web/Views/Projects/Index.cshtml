@@ -1,4 +1,4 @@
-﻿@model IEnumerable<TTS.Domain.Domain.Project>
+﻿@model List<TTS.Domain.Domain.Project>
 
 @{
     ViewData["Title"] = "Browse Projects";
@@ -10,9 +10,9 @@
         <div class="row justify-content-center">
             <div class="col-md-6 text-center p-4 border border-secondary border-dashed rounded-3 bg-light">
                 <i class="fas fa-tasks" style="font-size: 50px; color: #999;"></i>
-                <h2 class="mt-3 text-muted">Нема проекти за вашата експертиза</h2>
+                <h2 class="mt-3 text-muted">Нема нови проекти за вашата експертиза.</h2>
                 <p class="text-secondary">
-                    Достапните проекти ќе бидат видливи тука.
+                    Достапните проекти ќе бидат видливи тука. Во меѓувреме проверете ги тековните проекти за кои аплициравте во делот <strong>Мои Апликации</strong> или продолжете со работа на Вашите проекти.
                 </p>
             </div>
         </div>
@@ -51,7 +51,7 @@
                             <p><strong>Краен рок:</strong> @(project.EndDate?.ToShortDateString() ?? "Не е зададен")</p>
 
                             <div class="d-flex justify-content-end">
-                                <form asp-controller="Projects" asp-action="ApplyForProject" asp-route-id="@project.Id" method="post" class="me-2">
+                                <form asp-controller="Projects" asp-action="ApplyForProject" asp-route-projectId="@project.Id" method="post" class="me-2">
                                     <button type="submit" class="btn btn-primary">
                                         <i class="bi bi-pencil me-1"></i> Аплицирај
                                     </button>

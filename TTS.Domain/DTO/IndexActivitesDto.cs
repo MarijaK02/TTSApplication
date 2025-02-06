@@ -6,8 +6,8 @@ namespace TTS.Domain.DTO
     {
         public Guid ProjectId { get; set; }
         public string? ProjectTitle { get; set; }
-        public List<Activity>? Activities { get; set; }
-        public string? NewActivityTitle { get; set; }
-        public string? NewActivityDescription { get; set; }
+        public List<Activity>? Activites { get; set; }
+        public List<Consultant> Consultants { get; set; }
+        public Guid? SelectedConsultantId { get; set; }
     }
 }

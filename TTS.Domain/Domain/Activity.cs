@@ -11,15 +11,15 @@ namespace TTS.Domain.Domain
 {
     public class Activity : BaseEntity
     {
-        public required string Title { get; set; }
+        public Guid ConsultantProjectId { get; set; }
+        public ConsultantProject? ConsultantProject { get; set; }
+
+        public string Title { get; set; }
         public string? Description { get; set; }
-
-        public required ActivityStatus Status { get; set; }
-
-        public required DateTime StartDate { get; set; }
+        public ActivityStatus Status { get; set; }
+        public DateTime StartDate { get; set; }
         public DateTime? EndDate { get; set; }
 
-        public required virtual ConsultantProject ConsultantProject { get; set; }
-        public ICollection<Comment>? Comments { get; set; }
+        public virtual ICollection<Comment>? Comments { get; set; }
     }
 }

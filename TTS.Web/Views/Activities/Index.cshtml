@@ -36,10 +36,27 @@
 </nav>
 
 <div class="container mt-3">
-    <div>
-        <a asp-action="CustomIndex" asp-controller="Projects" class="btn btn-outline-warning border border-2 border-warning"><i class="bi bi-arrow-left fw-bolder"></i></a>
+    <div class="d-flex align-items-baseline w-100 justify-content-between">
+        <div class="me-3">
+            <a asp-action="MyProjects" asp-controller="Projects" class="btn btn-outline-warning border border-2 border-warning"><i class="bi bi-arrow-left fw-bolder"></i></a>
+        </div>
+        <form class="col-sm-3" method="get" asp-action="Index">
+            <input type="hidden" name="projectId" value="@Model.ProjectId" />
+            <input type="hidden" name="projectTitle" value="@Model.ProjectTitle" />
+
+            <div class="mb-3">
+                <select class="form-select" id="consultant" name="selectedConsultantId" onchange="this.form.submit()">
+                    <option selected>Сите консултанти</option>
+                    @foreach (var c in Model.Consultants)
+                    {
+                        <option value="@c.Id" selected="@(Model.SelectedConsultantId == c.Id ? "selected" : null)">@c.User.FirstName @c.User.LastName</option>
+                    }
+                </select>
+            </div>
+        </form>
     </div>
-    @if (!Model!.Activities!.Any())
+  
+    @if (!Model!.Activites!.Any())
     {
         <div class="row justify-content-center mb-4">
             <div class="col-md-6 text-center p-4 border border-secondary border-dashed rounded-3 bg-light">
@@ -54,34 +71,36 @@
 
             </div>
         </div>
-    }
-    @if(!Model!.Activities!.Any() && User.IsInRole("Consultant") || Model!.Activities!.Any())
+    }else
     {
         <table class="table table-hover">
             <thead>
                 <tr>
-                    <th></th>
-                    <th class="text-secondary">
+                    <th class="fw-bold">#</th>
+                    <th class="fw-bold">
                         Наслов
                     </th>
-                    <th class="text-secondary">
+                    <th class="fw-bold">
                         Статус
                     </th>
-                    <th class="text-secondary">
+                    <th class="fw-bold">
                         Датум на креирање
                     </th>
-                    <th class="text-secondary">
-                        Одговорен
+                    <th class="fw-bold">
+                        Одговорен консултант
                     </th>
-                    <th>
-                    </th>
+                    @if (User.IsInRole("Consultant"))
+                    {
+                        <th>
+                        </th>
+                    }
                 </tr>
             </thead>
             <tbody>
-                @foreach (var item in Model!.Activities!)
+                @foreach (var item in Model!.Activites!)
                 {
                     <tr onclick="location.href='@Url.Action("Details", new { id = item.Id, projectId = Model.ProjectId, projectTitle = Model.ProjectTitle })'">
-                        <td>@(Model.Activities.IndexOf(item) + 1)</td>
+                        <td>@(Model.Activites.IndexOf(item) + 1)</td>
                         <td>
                             @Html.DisplayFor(modelItem => item.Title)
                         </td>
@@ -95,8 +114,8 @@
                             @Html.DisplayFor(modelItem => item.StartDate)
                         </td>
                         <td>
-                            @Html.DisplayFor(modelItem => item.ConsultantProject!.Consultant.User.FirstName)
-                            @Html.DisplayFor(modelItem => item.ConsultantProject!.Consultant.User.LastName)
+                            @Html.DisplayFor(modelItem => item.ConsultantProject!.Consultant!.User.FirstName)
+                            @Html.DisplayFor(modelItem => item.ConsultantProject!.Consultant!.User.LastName)
                         </td>
                         @if (User.IsInRole("Consultant"))
                         {
@@ -122,7 +141,7 @@
                                                         asp-action="Index" asp-route-projectId="@Model.ProjectId" asp-route-projectTitle="@Model.ProjectTitle">
                                                     Откажи
                                                 </button>
-                                                <form asp-action="Delete" method="post" asp-route-id="@item.Id">
+                                                <form asp-action="DeleteConfirmed" method="post" asp-route-id="@item.Id">
                                                     <input type="hidden" name="projectId" value="@Model.ProjectId" />
                                                     <input type="hidden" name="projectTitle" value="@Model.ProjectTitle" />
                                                     <button type="submit" class="btn btn-danger">Потврди</button>
@@ -133,51 +152,42 @@
                                 </div>
                             </td>
                         }
-
                     </tr>
                 }
             </tbody>
         </table>
-
-        <div class="container mb-3" id="createForm" style="display: none;">
-            <div class="row border border-1 border-dark p-3 rounded-2">
-                <form asp-action="Create" method="post">
-                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-
-
-
-                    <div class="form-group">
-                        <label for="NewActivityTitle" class="control-label">Title</label>
-                        <input type="text" name="NewActivityTitle" id="NewActivityTitle" class="form-control" />
-
-                        <span asp-validation-for="NewActivityTitle" class="text-danger"></span>
-                    </div>
-
-
-                    <div class="form-group mt-2">
-                        <label for="NewActivityDescription" class="control-label">Description</label>
-                        <textarea name="NewActivityDescription" id="NewActivityDescription" class="form-control" style="height: 100px"></textarea>
-                        <span asp-validation-for="NewActivityDescription" class="text-danger"></span>
-                    </div>
-
-                    <div class="form-group mt-2">
-                        <input type="submit" value="Save" class="btn btn-outline-success" />
-                    </div>
-                    <input name="ProjectId" value="@Model.ProjectId" type="hidden" />
-                    <input name="ProjectTitle" value="@Model.ProjectTitle" type="hidden" />
-
-                </form>
-            </div>
-        </div>
-        @if (User.IsInRole("Consultant"))
-        {
-            <a id="showCreateForm" class="btn btn-outline-primary"><i class="bi bi-plus-lg" id="plusIcon"></i></a>
-        }
     }
 
+    <div class="container mb-3" id="createForm" style="display: none;">
+        <div class="row border border-1 border-dark p-3 rounded-2">
+            <form asp-action="Create" method="post">
+                <input type="hidden" name="projectId" value="@Model.ProjectId" />
+                <input type="hidden" name="projectTitle" value="@Model.ProjectTitle" />
 
+                <div class="mb-3">
+                    <label for="newActivityTitle" class="form-label">Наслов на активност</label>
+                    <input type="text" class="form-control" id="newActivityTitle" name="newActivityTitle" required>
+                </div>
+
+                <div class="mb-3">
+                    <label for="newActivityDescription" class="form-label">Опис на активност</label>
+                    <textarea class="form-control" id="newActivityDescription" name="newActivityDescription" rows="3" required></textarea>
+                </div>
+
+                <div class="mb-3 col-sm-2">
+                    <label for="endDate" class="form-label">Краен рок</label>
+                    <input type="datetime-local" class="form-control" id="endDate" name="endDate" required>
+                </div>
+
+                <button type="submit" class="btn btn-primary">Креирај</button>
+            </form>
+        </div>
+    </div>
+    @if (User.IsInRole("Consultant"))
+    {
+        <a id="showCreateForm" class="btn btn-outline-primary"><i class="bi bi-plus-lg" id="plusIcon"></i></a>
+    }
    
-    
     @section Scripts {
         @{
             await Html.RenderPartialAsync("_ValidationScriptsPartial");

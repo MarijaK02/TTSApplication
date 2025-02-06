@@ -16,6 +16,7 @@ namespace TTS.Domain.DTO
         public int? NumOfConsultantActivites { get; set; }
         public DateTime? EndDate { get; set; }
         public int TotalHours { get; set; }
+        public int TotalExpectedHours { get; set; }
 
     }
 }

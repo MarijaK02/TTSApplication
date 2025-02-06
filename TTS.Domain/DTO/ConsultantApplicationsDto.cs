@@ -4,15 +4,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using TTS.Domain.Domain;
+using TTS.Domain.Enum;
 
 namespace TTS.Domain.DTO
 {
-    public class ProjectDetailsDto
+    public class ConsultantApplicationsDto
     {
-        public required Project Project { get; set; }
+        public ApplicationStatus Status { get; set; }
         public List<ConsultantProject>? Applications { get; set; }
-        public List<Consultant>? Responsibles{ get; set; }
-        public int TotalHours { get; set; }
-        public int TotalExpectedHours { get; set; }
+
     }
 }

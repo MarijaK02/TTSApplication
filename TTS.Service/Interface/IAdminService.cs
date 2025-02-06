@@ -7,12 +7,9 @@ using TTS.Domain.Domain;
 
 namespace TTS.Service.Interface
 {
-    public interface IUserService
+    public interface IAdminService
     {
         public List<Client> GetAllClients();
         public List<Consultant> GetAllConsultants();
-        public Client GetClient(string userId);
-        public Consultant GetConsultant(string userId);
-        public List<Consultant> GetConsultantsForProject(Guid projectId);
     }
 }
