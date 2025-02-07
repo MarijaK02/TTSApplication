@@ -1,0 +1,81 @@
+﻿@using AdminApplication.Models.DTO
+@using AdminApplication.Models.Enums
+@model CreateProjectFormDto
+
+<form method="post" asp-action="Create">
+    <div class="card">
+        <div class="card-header bg-opacity-50 bg-primary d-flex justify-content-between">
+            <h5 class="mb-0">Креирај нов проект</h5>
+            <button type="submit" class="btn btn-dark">Зачувај</button>
+        </div>
+        <div class="card-body">
+
+            <div class="row mb-2">
+                <label class="col-1 fw-bold">Наслов:</label>
+                <div class="col-5">
+                    <input type="text" class="form-control" asp-for="Project.Title" required />
+                </div>
+            </div>
+
+            <div class="row mb-2">
+                <label class="col-1 fw-bold">Експертиза:</label>
+                <div class="col-5">
+                    <select class="form-control" asp-for="Project.Expertise" asp-items="@(new SelectList(Enum.GetValues(typeof(Expertise))))">
+                        <option value="" disabled selected>-- Изберете експертиза --</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="row mb-2">
+                <label class="col-1 fw-bold">Статус:</label>
+                <div class="col-5">
+                    <select class="form-control" asp-for="Project.Status" asp-items="@(new SelectList(Enum.GetValues(typeof(ProjectStatus))))">
+                        <option value="" disabled selected>-- Изберете статус --</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="row mb-2">
+                <label class="col-1 fw-bold">Дата на почеток:</label>
+                <div class="col-5">
+                    <input type="date" class="form-control" asp-for="Project.StartDate" required />
+                </div>
+            </div>
+
+            <div class="row mb-2">
+                <label class="col-1 fw-bold">Краен рок:</label>
+                <div class="col-5">
+                    <input type="date" class="form-control" asp-for="Project.EndDate" />
+                </div>
+            </div>
+
+            <div class="row mb-2">
+                <label class="col-1 fw-bold">Опис:</label>
+                <div class="col">
+                    <textarea class="form-control" asp-for="Project.Description" rows="5"></textarea>
+                </div>
+            </div>
+
+            <div class="row mb-2">
+                <label class="col-1 fw-bold">Клиент:</label>
+                <div class="col-5">
+                    <select id="ClientId" class="form-control" asp-for="Project.CreatedById">
+                        <option value="" disabled selected>-- Select Client --</option>
+                        @foreach (var client in Model.Clients)
+                        {
+                            <option value="@client.Id">@client.User.FirstName</option>
+                        }
+                    </select>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</form>
+
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

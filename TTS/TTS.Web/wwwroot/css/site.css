@@ -61,7 +61,13 @@ tr:hover td{
     transition: background-color 0.2s ease;
 }
 
-    .nav-link:hover {
-        background-color: rgba(255, 255, 255, 0.1);
-        border-radius: 4px;
-    }
+.nav-link:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+}
+
+.disabled-row {
+    pointer-events: none;
+    opacity: 0.6; 
+    cursor: not-allowed;
+}

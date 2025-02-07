@@ -1,0 +1,56 @@
+﻿@using AdminApplication.Models.DTO
+@using AdminApplication.Models.Enums
+@model ConsultantsListDto
+
+<div class="my-4">
+    <div class="d-flex justify-content-between">
+        <h4 class="mb-4">Регистрирани консултанти</h4>
+    </div>
+
+    <form method="get" asp-action="Index">
+        <div class="d-flex justify-content-between mb-3">
+            <div class="d-flex w-50">
+                <input type="text" name="searchTerm" class="form-control me-2 w-75" placeholder="@(Model.SearchTerm ?? "Пребарај по име или емаил")" value="@Context.Request.Query["search"]" />
+                <button type="submit" name="action" class="btn btn-dark w-25">
+                    <i class="bi bi-search"></i> Пребарај
+                </button>
+            </div>
+
+            <div class="w-25">
+                <select class="form-control" name="selectedExpertise" onchange="this.form.submit()">
+                    <option vlaue="" selected disabled>---Селектирај експертиза---</option>
+                    <option value="">Сите</option>
+                    @foreach (var expertise in Enum.GetValues(typeof(Expertise)))
+                    {
+                        <option value="@expertise" selected="@(Model.SelectedExpertise == (Expertise)expertise ? "selected" : null)">
+                            @expertise.ToString()
+                        </option>
+                    }
+                </select>
+            </div>
+        </div>
+    </form>
+
+    <table class="table table-striped table-hover">
+        <thead class="table-primary">
+            <tr>
+                <th class="fw-bold">Име</th>
+                <th class="fw-bold">Е-маил</th>
+                <th class="fw-bold">Експертиза</th>
+                <th class="fw-bold">Број на проекти</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var consultant in Model.Consultants)
+            {
+                <tr onclick="location.href='@Url.Action("Details", new { consultantId = consultant.Id })'">
+                    <td>@consultant.User.FirstName @consultant.User.LastName</td>
+                    <td>@consultant.User.Email</td>
+                    <td>@consultant.Expertise</td>
+                    <td>@(consultant.Projects?.Count ?? 0)</td>                   
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+

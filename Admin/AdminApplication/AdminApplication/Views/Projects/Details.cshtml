@@ -1,0 +1,204 @@
+﻿@using AdminApplication.Models.DTO.API
+@using AdminApplication.Models.Enums
+@model DetailsProjectDto
+
+<nav class="navbar navbar-expand-lg mb-3">
+    <div class="">
+        <ul class="nav nav-tabs">
+            <li class="nav-item">
+                <a class="nav-link active">Детали</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" asp-controller="Activities" asp-action="Index" asp-route-projectId="@Model.Project.Id">Активности</a>
+            </li>
+        </ul>
+    </div>
+</nav>
+
+
+@* Deatils *@
+<div class="card shadow-sm w-75">
+    <form asp-action="EditProject" method="post">
+        <div class="card-header bg-opacity-50 bg-primary d-flex justify-content-between">
+            <h5 class="mb-0">Детали за проектот</h5>
+            <button type="submit" class="btn btn-dark">Зачувај</button>
+        </div>
+        <div class="card-body">
+
+            <input type="hidden" asp-for="Project.Id" />
+
+            <div class="row mb-2">
+                <label class="col-7 fw-bold">Наслов:</label>
+                <div class="col">
+                    <input type="text" class="form-control" asp-for="Project.Title" required />
+                </div>
+            </div>
+
+            <div class="row mb-2">
+                <label class="col-7 fw-bold">Експертиза:</label>
+                <div class="col">
+                    <select class="form-control" asp-for="Project.Expertise" asp-items="@(new SelectList(Enum.GetValues(typeof(Expertise))))">
+                        <option value="" disabled>-- Изберете експертиза --</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="row mb-2">
+                <label class="col-7 fw-bold">Статус:</label>
+                <div class="col">
+                    <select class="form-control" asp-for="Project.Status" asp-items="@(new SelectList(Enum.GetValues(typeof(ProjectStatus))))">
+                        <option value="" disabled>-- Изберете статус --</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="row mb-2">
+                <label class="col-7 fw-bold">Дата на почеток:</label>
+                <div class="col">
+                    <input type="date" class="form-control" asp-for="Project.StartDate" required />
+                </div>
+            </div>
+
+            <div class="row mb-2">
+                <label class="col-7 fw-bold">Краен рок:</label>
+                <div class="col">
+                    <input type="date" class="form-control" asp-for="Project.EndDate" />
+                </div>
+            </div>
+
+            <div class="row mb-2">
+                <label class="col-7 fw-bold">Број на консултанти кои работат на проектот:</label>
+                <div class="col">
+                    <input type="number" class="form-control" value="@Model.Project.ConsultantProjects?.Where(cp => cp.ApplicationStatus == ApplicationStatus.Accepted).Count()" disabled />
+                </div>
+            </div>
+
+            <div class="row mb-2">
+                <label class="col-7 fw-bold">Број на консултанти кои аплицирале за работа на проектот:</label>
+                <div class="col">
+                    <input type="number" class="form-control" value="@Model.Project.ConsultantProjects?.Where(cp => cp.ApplicationStatus == ApplicationStatus.Applied).Count()" disabled />
+                </div>
+            </div>
+
+            <div class="row mb-2">
+                <label class="col-7 fw-bold">Опис:</label>
+                <div class="col">
+                    <textarea class="form-control" asp-for="Project.Description" rows="5"></textarea>
+                </div>
+            </div>
+
+            <div class="row mb-2">
+                <label class="col-7 fw-bold">Клиент:</label>
+                <div class="col">
+                    <input class="form-control" value="@Model.Project.CreatedBy?.User.FirstName" disabled />
+                </div>
+            </div>
+
+        </div>
+    </form>
+
+</div>
+
+
+@* Applications *@
+<div class="row my-4">
+    <div class="col">
+        <h4 class="mb-4">Апликации</h4>
+        @if (Model.Project.ConsultantProjects!.Where(cp => cp.ApplicationStatus == ApplicationStatus.Applied).Any())
+        {
+            <table class="table table-striped table-hover">
+                <thead class="table-primary">
+                    <tr>
+                        <th>Дата на аплицирање</th>
+                        <th>Име</th>
+                        <th>Презиме</th>
+                        <th>Е-маил</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                    @foreach (var project in Model.Project.ConsultantProjects!.Where(cp => cp.ApplicationStatus == ApplicationStatus.Applied))
+                    {
+                        <tr>
+                            <td>@project.DateApplied</td>
+                            <td>@project.Consultant?.User.FirstName</td>
+                            <td>@project.Consultant?.User.LastName</td>
+                            <td>@project.Consultant?.User.Email</td>
+                            <td>
+                                <a class="btn btn-success" asp-action="AcceptApplication" asp-route-applicationId="@project.Id" asp-route-projectId="@Model.Project.Id"><i class="bi bi-check2"></i></a>
+                                <a class="btn btn-danger" asp-action="RejectApplication" asp-route-applicationId="@project.Id" asp-route-projectId="@Model.Project.Id"><i class="bi bi-x"></i></a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+        else
+        {
+            <h6>Нема апликации</h6>
+        }
+
+    </div>
+
+    <div class="col">
+        <h4 class="mb-4">Консултанти кои работат на проектот</h4>
+
+        <form method="post" asp-action="AddConsultantToProject" asp-route-projectId="@Model.Project.Id">
+            <div class="d-flex justify-content-between mb-3">
+                <select class="form-control me-2" name="consultantId">
+                    <option value="" selected disabled>-- Изберете консултант --</option>
+                    @if (Model.Consultants != null)
+                    {
+                        @foreach (var c in Model.Consultants)
+                        {
+                            <option value="@c.Id">@c.User.FirstName @c.User.LastName</option>
+                        }
+                    }
+                </select>
+                <button class="btn btn-dark" type="submit">Додади</button>
+            </div>
+        </form>
+
+        @if (Model.Project.ConsultantProjects!.Where(cp => cp.ApplicationStatus == ApplicationStatus.Accepted).Any())
+        {
+            <table class="table table-striped table-hover">
+                <thead class="table-primary">
+                    <tr>
+                        <th>Име</th>
+                        <th>Презиме</th>
+                        <th>Е-маил</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var project in Model.Project.ConsultantProjects!.Where(cp => cp.ApplicationStatus == ApplicationStatus.Accepted))
+                    {
+                        <tr>
+                            <td>@project.Consultant?.User.FirstName</td>
+                            <td>@project.Consultant?.User.LastName</td>
+                            <td>@project.Consultant?.User.Email</td>
+                            <td>
+                                <form method="post" asp-action="DeleteConsultantFromProject">
+                                    <input type="hidden" value="@project.Id" name="consultantProjectId"/>
+                                    <input type="hidden" value="@Model.Project.Id" name="projectId" />
+                                    <button class="btn btn-danger"><i class="bi bi-trash3"></i></button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+        else
+        {
+            <h6>Нема консултанит кои работат на проектот</h6>
+        }
+
+    </div>
+    @section Scripts {
+        @{
+            await Html.RenderPartialAsync("_ValidationScriptsPartial");
+        }
+    }
+</div>

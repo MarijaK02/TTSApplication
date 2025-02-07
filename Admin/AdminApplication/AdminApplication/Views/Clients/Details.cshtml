@@ -1,0 +1,104 @@
+﻿@using AdminApplication.Models.Enums
+@model Client
+
+<div class="my-4">
+    <div class="card shadow-sm w-50">
+        <form asp-action="EditClient" method="post">
+            <div class="card-header bg-opacity-50 bg-primary d-flex justify-content-between">
+                <h5 class="mb-0">Детали за клиентот</h5>
+                <button type="submit" class="btn btn-dark">Зачувај</button>
+            </div>
+            <div class="card-body">
+
+                <input type="hidden" asp-for="Id" />
+                <input type="hidden" asp-for="User.UserName" />
+                <input type="hidden" asp-for="UserId" />
+                <input type="hidden" asp-for="User.Id" />
+
+                <div class="row mb-2">
+                    <label class="col-5 fw-bold">Име:</label>
+                    <div class="col-7">
+                        <input type="text" class="form-control" asp-for="User.FirstName" required />
+                    </div>
+                </div>
+
+                <div class="row mb-2">
+                    <label class="col-5 fw-bold">Е-маил:</label>
+                    <div class="col-7">
+                        <input type="email" class="form-control" asp-for="User.Email" required />
+                    </div>
+                </div>
+
+                <div class="row mb-2">
+                    <label class="col-5 fw-bold">Адреса:</label>
+                    <div class="col-7">
+                        <input type="text" class="form-control" asp-for="Address" />
+                    </div>
+                </div>
+
+                <div class="row mb-2">
+                    <label class="col-5 fw-bold">Контакт тел.:</label>
+                    <div class="col-7">
+                        <input type="tel" class="form-control" asp-for="User.PhoneNumber" required />
+                    </div>
+                </div>
+
+                <div class="row mb-2">
+                    <label class="col-5 fw-bold">Индустрија:</label>
+                    <div class="col-7">
+                        <select class="form-control" asp-for="Industry">
+                            @foreach (var industry in Enum.GetValues(typeof(Industry)))
+                            {
+                                <option value="@industry" selected="@(Model.Industry == (Industry)industry ? "selected" : null)">
+                                    @industry.ToString()
+                                </option>
+                            }
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+
+
+    <div class="mt-4">
+        <h5>Проекти</h5>
+        @if (Model.Projects != null && Model.Projects.Any())
+        {
+            <div class="table-responsive">
+                <table class="table table striped table-hover">
+                    <thead class="table-primary">
+                        <tr>
+                            <th>Title</th>
+                            <th>Expertise</th>
+                            <th>Status</th>
+                            <th>Start Date</th>
+                            <th>End Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var project in Model.Projects)
+                        {
+                            <tr onclick="location.href='@Url.Action("Details", "Projects", new { projectId = project.Id })'">
+                                <td>@project.Title</td>
+                                <td>@project.Expertise</td>
+                                <td>@project.Status</td>
+                                <td>@project.StartDate.ToShortDateString()</td>
+                                <td>@(project.EndDate?.ToShortDateString() ?? "Ongoing")</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <p>Клиентот нема креирано проекти</p>
+        }
+    </div>
+    @section Scripts {
+        @{
+            await Html.RenderPartialAsync("_ValidationScriptsPartial");
+        }
+    }
+</div>
