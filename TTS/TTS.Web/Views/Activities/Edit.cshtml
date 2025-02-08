@@ -1,0 +1,63 @@
+﻿@using TTS.Domain.Enum
+@model TTS.Domain.DTO.CreateAndEditActivityDto
+
+@{
+    ViewData["Title"] = "Edit";
+    var status = Enum.GetValues(typeof(ActivityStatus)).Cast<ActivityStatus>();
+}
+
+<div class="container mt-4">
+    <div class="d-flex">
+        <div class="me-2">
+            <a asp-action="Index" asp-route-projectId="@Model.ProjectId" asp-route-projectTitle="@Model.ProjectTitle" class="btn btn-outline-warning">
+                <i class="bi bi-arrow-left"></i>
+            </a>
+        </div>
+        <h4>Промени ја активноста</h4>
+    </div>
+
+    <hr />
+    <div class="row">
+        <div>
+            <form method="post" asp-action="Edit" asp-route-activityId="@Model.ActivityId">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <div class="form-group mb-2">
+                    <label asp-for="Title" class="control-label">Наслов</label>
+                    <input asp-for="Title" class="form-control" />
+                    <span asp-validation-for="Title" class="text-danger"></span>
+                </div>
+                <div class="form-group mb-2">
+                    <label asp-for="Description" class="control-label">Опис</label>
+                    <textarea asp-for="Description" class="form-control" rows="10"></textarea>
+                    <span asp-validation-for="Description" class="text-danger"></span>
+                </div>
+                <div class="form-group mb-2 col-md-1">
+                    <label asp-for="ActivityStatus" class="control-label">Статус</label>
+                    <select asp-for="ActivityStatus" class="form-control">
+                        @foreach (var s in status)
+                        {
+                            <option value="@s">@s.ToString()</option>
+                        }
+                    </select>
+                    <span asp-validation-for="ActivityStatus" class="text-danger"></span>
+                </div>
+                <div class="form-group mb-2 col-md-2">
+                    <label asp-for="EndDate" class="control-label">Краен рок</label>
+                    <input asp-for="EndDate" class="form-control" type="datetime-local" />
+                    <span asp-validation-for="EndDate" class="text-danger"></span>
+                </div>
+                <input type="hidden" asp-for="ProjectTitle" />
+                <input type="hidden" asp-for="ProjectId" />
+                <div class="form-group">
+                    <input type="submit" value="Зачувај" class="btn btn-primary" />
+                </div>
+            </form>
+        </div>
+    </div>
+
+    @section Scripts {
+        @{
+            await Html.RenderPartialAsync("_ValidationScriptsPartial");
+        }
+    }
+</div>

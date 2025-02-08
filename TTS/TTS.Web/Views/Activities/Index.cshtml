@@ -1,0 +1,228 @@
+﻿@using TTS.Domain.DTO
+@model IndexActivitesDto
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<nav class="navbar navbar-expand-lg bg-body-secondary border-bottom border-warning shadow-lg mb-5">
+    <div class="container-fluid">
+        <div class="navbar-brand truncate-one-row fw-bold fs-5" style="width: 23%; display: block">@Model.ProjectTitle</div>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+            <div class="navbar-nav fs-5">
+                <a 
+                    asp-controller="Projects" 
+                    asp-action="Details"
+                   asp-route-projectId="@Model.ProjectId"
+                    asp-route-id="@Model.ProjectId"
+                    asp-route-proectTitle="@Model.ProjectTitle"
+                   class="nav-link fw-medium">
+                        Детали
+                </a>
+                <a 
+                    asp-controller="Activities" 
+                    asp-action="Index" 
+                    asp-route-projectId="@Model.ProjectId" 
+                    asp-route-projectTitle="@Model.ProjectTitle"
+                    class="nav-link active bg-warning fw-bold">
+                        Активности
+                </a>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<div class="container mt-3">
+    <div class="d-flex align-items-baseline w-100 justify-content-between">
+        <div class="me-3">
+            <a asp-action="MyProjects" asp-controller="Projects" class="btn btn-outline-warning border border-2 border-warning"><i class="bi bi-arrow-left fw-bolder"></i></a>
+        </div>
+        <form class="col-sm-3" method="get" asp-action="Index">
+            <input type="hidden" name="projectId" value="@Model.ProjectId" />
+            <input type="hidden" name="projectTitle" value="@Model.ProjectTitle" />
+
+            <div class="mb-3">
+                <select class="form-select" id="consultant" name="selectedConsultantId" onchange="this.form.submit()">
+                    <option selected>Сите консултанти</option>
+                    @foreach (var c in Model.Consultants)
+                    {
+                        <option value="@c.Id" selected="@(Model.SelectedConsultantId == c.Id ? "selected" : null)">@c.User.FirstName @c.User.LastName</option>
+                    }
+                </select>
+            </div>
+        </form>
+    </div>
+  
+    @if (!Model!.Activites!.Any())
+    {
+        <div class="row justify-content-center mb-4">
+            <div class="col-md-6 text-center p-4 border border-secondary border-dashed rounded-3 bg-light">
+                <i class="fas fa-tasks" style="font-size: 50px; color: #999;"></i>
+                <h2 class="mt-3 text-muted">Нема активности</h2>
+                <p class="text-secondary">
+                    За овој проект се уште не се креирани активности. Контактирај еден од консултантите или админот!
+                </p>
+                <p class="text-secondary">
+                    Прати е-маил на admin@admin.com или ако си консултант креирај и започни го проектот!
+                </p>
+
+            </div>
+        </div>
+    }else
+    {
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th class="fw-bold">#</th>
+                    <th class="fw-bold">
+                        Наслов
+                    </th>
+                    <th class="fw-bold">
+                        Статус
+                    </th>
+                    <th class="fw-bold">
+                        Датум на креирање
+                    </th>
+                    <th class="fw-bold">
+                        Одговорен консултант
+                    </th>
+                    @if (User.IsInRole("Consultant"))
+                    {
+                        <th>
+                        </th>
+                    }
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model!.Activites!)
+                {
+                    <tr onclick="location.href='@Url.Action("Details", new { id = item.Id, projectId = Model.ProjectId, projectTitle = Model.ProjectTitle })'">
+                        <td>@(Model.Activites.IndexOf(item) + 1)</td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Title)
+                        </td>
+                        <td class="text-@(item.Status == TTS.Domain.Enum.ActivityStatus.New ? "primary" :
+                item.Status == TTS.Domain.Enum.ActivityStatus.Active ? "warning" :
+                item.Status == TTS.Domain.Enum.ActivityStatus.Invalid ? "danger" :
+                "success")">
+                            @Html.DisplayFor(modelItem => item.Status)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.StartDate)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.ConsultantProject!.Consultant!.User.FirstName)
+                            @Html.DisplayFor(modelItem => item.ConsultantProject!.Consultant!.User.LastName)
+                        </td>
+                        @if (User.IsInRole("Consultant"))
+                        {
+                            <td>
+                                <a class="btn btn-outline-primary me-3" asp-action="Edit" asp-route-projectId="@Model.ProjectId" asp-route-id="@item.Id" asp-route-projectTitle="@Model.ProjectTitle">Промени</a>
+                                <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#myModal" onclick="event.stopPropagation();">
+                                    Избриши
+                                </button>
+                                <div class="modal fade" tabindex="-1" id="myModal">
+                                    <div class="modal-dialog">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title">Дали сте сигурни дека сакате да ја избришете @(item.Title)?</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <p>Со клик на копчето потврди ќе ја избриешете активноста засекогаш!</p>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button"
+                                                        class="btn btn-secondary"
+                                                        data-bs-dismiss="modal"
+                                                        asp-action="Index" asp-route-projectId="@Model.ProjectId" asp-route-projectTitle="@Model.ProjectTitle">
+                                                    Откажи
+                                                </button>
+                                                <form asp-action="DeleteConfirmed" method="post" asp-route-id="@item.Id">
+                                                    <input type="hidden" name="projectId" value="@Model.ProjectId" />
+                                                    <input type="hidden" name="projectTitle" value="@Model.ProjectTitle" />
+                                                    <button type="submit" class="btn btn-danger">Потврди</button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                        }
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+
+    <div class="container mb-3" id="createForm" style="display: none;">
+        <div class="row border border-1 border-dark p-3 rounded-2">
+            <form asp-action="Create" method="post">
+                <input type="hidden" name="projectId" value="@Model.ProjectId" />
+                <input type="hidden" name="projectTitle" value="@Model.ProjectTitle" />
+
+                <div class="mb-3">
+                    <label for="newActivityTitle" class="form-label">Наслов на активност</label>
+                    <input type="text" class="form-control" id="newActivityTitle" name="newActivityTitle" required>
+                </div>
+
+                <div class="mb-3">
+                    <label for="newActivityDescription" class="form-label">Опис на активност</label>
+                    <textarea class="form-control" id="newActivityDescription" name="newActivityDescription" rows="3" required></textarea>
+                </div>
+
+                <div class="mb-3 col-sm-2">
+                    <label for="endDate" class="form-label">Краен рок</label>
+                    <input type="datetime-local" class="form-control" id="endDate" name="endDate" required>
+                </div>
+
+                <button type="submit" class="btn btn-primary">Креирај</button>
+            </form>
+        </div>
+    </div>
+    @if (User.IsInRole("Consultant"))
+    {
+        <a id="showCreateForm" class="btn btn-outline-primary"><i class="bi bi-plus-lg" id="plusIcon"></i></a>
+    }
+   
+    @section Scripts {
+        @{
+            await Html.RenderPartialAsync("_ValidationScriptsPartial");
+        }
+
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                const showButton = document.getElementById('showCreateForm');
+                const createForm = document.getElementById('createForm');
+                const icon = document.getElementById('plusIcon')
+
+                showButton.addEventListener('click', function () {
+                    const isHidden = createForm.style.display === 'none';
+                    createForm.style.display = isHidden ? 'block' : 'none';
+                    if (isHidden) {
+                        createForm.style.display = 'block';
+                        icon.classList.remove("bi-plus-lg");
+                        icon.classList.add("bi-dash-lg");
+                        showButton.classList.remove("btn-outline-primary");
+                        showButton.classList.remove("border-primary")
+                        showButton.classList.add("btn-outline-danger");
+                        showButton.classList.add("border-danger");
+                    }else{
+                        createForm.style.display = 'none';
+                        icon.classList.remove("bi-dash-lg");
+                        icon.classList.add("bi-plus-lg");
+                        showButton.classList.remove("btn-outline-danger");
+                        showButton.classList.remove("border-danger");
+                        showButton.classList.add("btn-outline-primary");
+                        showButton.classList.add("border-primary");
+               
+                    }                      
+                });
+            });
+        </script>
+    }
+</div>
+

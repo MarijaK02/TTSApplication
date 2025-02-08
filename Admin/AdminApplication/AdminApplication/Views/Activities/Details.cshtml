@@ -1,0 +1,96 @@
+﻿@using AdminApplication.Models.DTO
+@using AdminApplication.Models.Enums
+@model ActivityDto
+
+<nav class="navbar navbar-expand-lg mb-3">
+    <div class="">
+        <ul class="nav nav-tabs">
+            <li class="nav-item">
+                <a class="nav-link" asp-controller="Projects" asp-action="Details" asp-route-projectId="@Model.ProjectId">Детали</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" asp-action="Index" asp-route-projectId="@Model.ProjectId">Активности</a>
+            </li>
+        </ul>
+    </div>
+</nav>
+
+<div class="card shadow-sm w-50">
+    <form asp-action="EditActivity" method="post">
+        <input type="hidden" name="Id" value="@Model.Activity.Id" />
+        <input type="hidden" name="ProjectId" value="@Model.ProjectId" />
+
+        <div class="card-header bg-opacity-50 bg-primary d-flex justify-content-between">
+            <h5 class="mb-0">Детали за активноста</h5>
+            <button type="submit" class="btn btn-dark">Зачувај</button>
+        </div>
+
+        <div class="card-body">
+
+            <div class="row mb-2">
+                <label class="col-6 fw-bold">Наслов:</label>
+                <div class="col">
+                    <input type="text" class="form-control" name="Title" value="@Model.Activity.Title" required />
+                </div>
+            </div>
+
+            <div class="row mb-2">
+                <label class="col-6 fw-bold">Статус:</label>
+                <div class="col">
+                    <select class="form-control" name="Status">
+                        <option selected>@Model.Activity.Status</option>
+                        @foreach (var s in Enum.GetValues(typeof(ActivityStatus)))
+                        {
+                            <option value="@s" selected="@(Model.Activity.Status == (ActivityStatus)s ? "selected" : null)">
+                                @s.ToString()
+                            </option>
+                        }
+                    </select>
+                </div>
+            </div>
+
+            <div class="row mb-2">
+                <label class="col-6 fw-bold">Почетен датум:</label>
+                <div class="col">
+                    <input type="datetime-local" class="form-control" name="StartDate"
+                           value="@Model.Activity.StartDate.ToString("yyyy-MM-ddTHH:mm")" required />
+                </div>
+            </div>
+
+            <div class="row mb-2">
+                <label class="col-6 fw-bold">Краен рок:</label>
+                <div class="col">
+                    <input type="datetime-local" class="form-control" name="EndDate"
+                           value="@Model.Activity.EndDate?.ToString("yyyy-MM-ddTHH:mm")" />
+                </div>
+            </div>
+
+            <div class="row mb-2">
+                <label class="col-6 fw-bold">Опис:</label>
+                <div class="col">
+                    <textarea class="form-control" name="Description">@Model.Activity.Description</textarea>
+                </div>
+            </div>
+
+            <div class="row mb-2">
+                <label class="col-6 fw-bold">Задолжен консултант:</label>
+                <div class="col">
+                    <p>
+                        @Model.Activity.ConsultantProject.Consultant?.User.FirstName
+                        @Model.Activity.ConsultantProject.Consultant?.User.LastName
+                    </p>
+                </div>
+            </div>
+
+        </div>
+    </form>
+
+    @section Scripts {
+        @{
+            await Html.RenderPartialAsync("_ValidationScriptsPartial");
+        }
+    }
+</div>
+
+
+

@@ -1,0 +1,94 @@
+﻿@using AdminApplication.Models.DTO
+@using AdminApplication.Models.Enums
+@model CreateActivityFormDto
+
+<nav class="navbar navbar-expand-lg mb-3">
+    <div class="">
+        <ul class="nav nav-tabs">
+            <li class="nav-item">
+                <a class="nav-link" asp-controller="Projects" asp-action="Details" asp-route-projectId="@Model.ProjectId">Детали</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" asp-action="Index" asp-route-projectId="@Model.ProjectId">Активности</a>
+            </li>
+        </ul>
+    </div>
+</nav>
+
+@if(Model.ConsultantProjects == null || !Model.ConsultantProjects.Any())
+{
+    <p>Не можете да креирате активност! На проектот не работи ниту еден консултант.</p>
+}
+else
+{
+    <form method="post" asp-action="Create" asp-route-projectId="@Model.ProjectId">
+        <div class="card">
+            <div class="card-header bg-opacity-50 bg-primary d-flex justify-content-between">
+                <h5 class="mb-0">Додади нова активност</h5>
+                <button type="submit" class="btn btn-dark">Зачувај</button>
+            </div>
+            <div class="card-body">
+
+                <div class="row mb-2">
+                    <label class="col-1 fw-bold">Наслов:</label>
+                    <div class="col-5">
+                        <input type="text" class="form-control" asp-for="Activity.Title" required />
+                    </div>
+                </div>
+
+                <div class="row mb-2">
+                    <label class="col-1 fw-bold">Статус:</label>
+                    <div class="col-5">
+                        <select class="form-control" asp-for="Activity.Status" asp-items="@(new SelectList(Enum.GetValues(typeof(ActivityStatus))))">
+                            <option value="" selected disabled>-- Изберете статус --</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="row mb-2">
+                    <label class="col-1 fw-bold">Опис:</label>
+                    <div class="col-5">
+                        <textarea class="form-control" asp-for="Activity.Description" rows="3"></textarea>
+                    </div>
+                </div>
+
+                <div class="row mb-2">
+                    <label class="col-1 fw-bold">Почетен датум:</label>
+                    <div class="col-5">
+                        <input type="datetime-local" class="form-control" asp-for="Activity.StartDate" />
+                    </div>
+                </div>
+
+                <div class="row mb-2">
+                    <label class="col-1 fw-bold">Краен датум:</label>
+                    <div class="col-5">
+                        <input type="datetime-local" class="form-control" asp-for="Activity.EndDate" />
+                    </div>
+                </div>
+
+                <div class="row mb-2">
+                    <label class="col-1 fw-bold">Задолжен консултант:</label>
+                    <div class="col-5">
+                        <select id="ConsultantProjectId" class="form-control" asp-for="Activity.ConsultantProjectId">
+                            <option value="" disabled selected>-- Select Consultant --</option>
+                            @foreach (var c in Model.ConsultantProjects)
+                            {
+                                <option value="@c.Id">@c.Consultant?.User.FirstName @c.Consultant?.User.LastName</option>
+                            }
+                        </select>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </form>
+
+}
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}
+
+

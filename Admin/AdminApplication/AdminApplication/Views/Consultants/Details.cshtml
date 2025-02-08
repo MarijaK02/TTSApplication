@@ -1,0 +1,106 @@
+﻿@using AdminApplication.Models.Enums
+@model Consultant
+
+<div class="my-4">
+    <div class="card shadow-sm w-50">
+        <form asp-action="EditConsultant" method="post">
+            <div class="card-header bg-opacity-50 bg-primary d-flex justify-content-between">
+                <h5 class="mb-0">Детали за консултантот</h5>
+                <button type="submit" class="btn btn-dark">Зачувај</button>
+            </div>
+            <div class="card-body">
+
+                <input type="hidden" asp-for="Id" />
+                <input type="hidden" asp-for="User.UserName" />
+                <input type="hidden" asp-for="UserId" />
+                <input type="hidden" asp-for="User.Id" />
+
+                <div class="row mb-2">
+                    <label class="col-5 fw-bold">Име:</label>
+                    <div class="col-7">
+                        <input type="text" class="form-control" asp-for="User.FirstName" required />
+                    </div>
+                </div>
+
+                <div class="row mb-2">
+                    <label class="col-5 fw-bold">Име:</label>
+                    <div class="col-7">
+                        <input type="text" class="form-control" asp-for="User.LastName" required />
+                    </div>
+                </div>
+
+                <div class="row mb-2">
+                    <label class="col-5 fw-bold">Е-маил:</label>
+                    <div class="col-7">
+                        <input type="email" class="form-control" asp-for="User.Email" required />
+                    </div>
+                </div>
+
+                <div class="row mb-2">
+                    <label class="col-5 fw-bold">Контакт тел.:</label>
+                    <div class="col-7">
+                        <input type="tel" class="form-control" asp-for="User.PhoneNumber" required />
+                    </div>
+                </div>
+
+                <div class="row mb-2">
+                    <label class="col-5 fw-bold">Експертиза:</label>
+                    <div class="col">
+                        <select class="form-control" asp-for="Expertise">
+                            @foreach (var e in Enum.GetValues(typeof(Expertise)))
+                            {
+                                <option value="@e" selected="@(Model.Expertise == (Expertise)e ? "selected" : null)">
+                                    @e.ToString()
+                                </option>
+                            }
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </form>
+
+    </div>
+
+    <div class="mt-4">
+        <h5>Проекти</h5>
+        @if (Model.Projects != null && Model.Projects.Any())
+        {
+            <div class="table-responsive">
+                <table class="table table striped table-hover">
+                    <thead class="table-primary">
+                        <tr>
+                            <th>Статус на апликација</th>
+                            <th>Дата на поднеснео барање за проект</th>
+                            <th>Наслов</th>
+                            <th>Статус</th>
+                            <th>Почетен датум</th>
+                            <th>Краен рок</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var project in Model.Projects)
+                        {
+                            <tr onclick="location.href='@Url.Action("Details", "Projects", new { projectId = project.ProjectId })'">
+                                <td>@project.ApplicationStatus</td>
+                                <td>@project.DateApplied</td>
+                                <td>@project.Project?.Title</td>
+                                <td>@project.Project?.Status</td>
+                                <td>@project.Project?.StartDate.ToShortDateString()</td>
+                                <td>@(project.Project?.EndDate?.ToShortDateString())</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <p>Консултантот нема проекти на кои работи или за кои аплицирал.</p>
+        }
+    </div>
+    @section Scripts {
+        @{
+            await Html.RenderPartialAsync("_ValidationScriptsPartial");
+        }
+    }
+</div>

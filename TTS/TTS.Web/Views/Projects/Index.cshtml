@@ -1,0 +1,66 @@
+﻿@model List<TTS.Domain.Domain.Project>
+
+@{
+    ViewData["Title"] = "Browse Projects";
+}
+
+<div class="container my-5">
+    @if (!Model.Any())
+    {
+        <div class="row justify-content-center">
+            <div class="col-md-6 text-center p-4 border border-secondary border-dashed rounded-3 bg-light">
+                <i class="fas fa-tasks" style="font-size: 50px; color: #999;"></i>
+                <h2 class="mt-3 text-muted">Нема нови проекти за вашата експертиза.</h2>
+                <p class="text-secondary">
+                    Достапните проекти ќе бидат видливи тука. Во меѓувреме проверете ги тековните проекти за кои аплициравте во делот <strong>Мои Апликации</strong> или продолжете со работа на Вашите проекти.
+                </p>
+            </div>
+        </div>
+    }
+    else
+    {
+        <h3 class="mb-4">Аплицирај за проект</h3>
+        <p class="text-muted mb-5">Кликнете на проект за повеќе детали и аплицирање.</p>
+
+        <div class="accordion" id="projectAccordion">
+            @foreach (var project in Model)
+            {
+                var statusClass = project.Status switch
+                {
+                    TTS.Domain.Enum.ProjectStatus.New => "text-info",
+                    TTS.Domain.Enum.ProjectStatus.InProgress => "text-warning",
+                    TTS.Domain.Enum.ProjectStatus.Invalid => "text-danger",
+                    TTS.Domain.Enum.ProjectStatus.Completed => "text-success",
+                    _ => "text-muted"
+                };
+
+                <div class="accordion-item mb-3">
+                    <h2 class="accordion-header" id="heading-@project.Id">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-@project.Id" aria-expanded="false" aria-controls="collapse-@project.Id">
+                            <div class="d-flex flex-column w-100">
+                                <span class="h5">@project.Title</span>
+                                <small class="text-secondary">@project.Expertise</small>
+                                <small class="@statusClass">@project.Status</small>
+                            </div>
+                        </button>
+                    </h2>
+                    <div id="collapse-@project.Id" class="accordion-collapse collapse" aria-labelledby="heading-@project.Id" data-bs-parent="#projectAccordion">
+                        <div class="accordion-body">
+                            <p><strong>Опис:</strong> @project.Description</p>
+                            <p><strong>Датум на креирање:</strong> @project.StartDate.ToShortDateString()</p>
+                            <p><strong>Краен рок:</strong> @(project.EndDate?.ToShortDateString() ?? "Не е зададен")</p>
+
+                            <div class="d-flex justify-content-end">
+                                <form asp-controller="Projects" asp-action="ApplyForProject" asp-route-projectId="@project.Id" method="post" class="me-2">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="bi bi-pencil me-1"></i> Аплицирај
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
