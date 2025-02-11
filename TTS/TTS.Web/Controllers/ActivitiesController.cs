@@ -14,6 +14,7 @@ using TTS.Service.Interface;
 namespace TTS.Web.Controllers
 {
     [Route("ConsultantActivites")]
+    [Authorize(Roles = "Client, Consultant")]
     public class ActivitiesController : Controller
     {
         private readonly UserManager<TTSApplicationUser> _userManager;
