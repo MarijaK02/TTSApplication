@@ -108,7 +108,7 @@ namespace AdminApplication.Controllers
             if (ModelState.IsValid)
             {
                 HttpClient client = new HttpClient();
-                string url = "https://localhost:44315/api/Admin/DeleteConsultantFromProject";
+                string url = "https://localhost:44315/api/Admin/DeleteConsultantProject";
 
                 var model = new
                 {

@@ -67,7 +67,7 @@ namespace TTS.Service.Implementation
             return _consultantProjectRepository.GetAll()
                 .Include(cp => cp.Consultant)
                 .Include("Consultant.User")
-                .Where(c => c.ProjectId == projectId)
+                .Where(c => c.ProjectId == projectId && c.ApplicationStatus == Domain.Enum.ApplicationStatus.Accepted)
                 .Select(c => c.Consultant)
                 .ToList();
         }

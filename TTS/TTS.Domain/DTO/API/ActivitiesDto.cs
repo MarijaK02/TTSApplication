@@ -7,9 +7,9 @@ using TTS.Domain.Domain;
 
 namespace TTS.Domain.DTO.API
 {
-    public class DetailsProjectDto
+    public class ActivitiesDto
     {
-        public Project Project { get; set; }
-        public List<Consultant>? Consultants { get; set; }
+        public List<Activity> Activities { get; set; }
+        public List<ConsultantProject> Consultants { get; set; }
     }
 }

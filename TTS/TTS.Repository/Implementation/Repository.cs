@@ -25,7 +25,7 @@ namespace TTS.Repository.Implementation
             return entities.AsQueryable<T>();
         }
 
-        public T Get(Guid id)
+        public T Get(Guid? id)
         {
             return entities.SingleOrDefault(s => s.Id == id);
         }

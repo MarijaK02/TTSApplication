@@ -1,8 +1,29 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Admin Dashboard";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="container text-center mt-5">
+    <h1 class="display-4 text-primary mb-4">Добредојдовте на Администраторската Платформа</h1>
+
+    <p class="lead">Управувајте со системот, следете активности, и управувајте со проекти и корисници.</p>
+
+    <div class="mt-4">
+        <a asp-action="Index" asp-controller="Projects" class="btn btn-success btn-lg mx-2">Проекти</a>
+        <a asp-action="Index" asp-controller="Clients" class="btn btn-info btn-lg mx-2">Клиенти</a>
+        <a asp-action="Index" asp-controller="Consultants" class="btn btn-info btn-lg mx-2">Консултанти</a>
+        <a asp-action="Index" asp-controller="Activities" class="btn btn-warning btn-lg mx-2">Активности</a>
+    </div>
+
+    <hr class="my-5">
+
+    <div class="row">
+        <div class="col-md-5">
+            <h4 class="text-muted">Брзи Акции</h4>
+            <p>Додај нов проект, активност или корисник директно од оваа страница.</p>
+            <a asp-action="Create" asp-controller="Projects" class="btn btn-outline-success">Додај Проект</a>
+            <a asp-action="Create" asp-controller="Activities" class="btn btn-outline-warning">Додај Активност</a>
+            <a asp-action="Create" asp-controller="Consultants" class="btn btn-outline-info">Додај Консултант</a>
+            <a asp-action="Create" asp-controller="Clients" class="btn btn-outline-info">Додај Клиент</a>
+        </div>
+    </div>
 </div>

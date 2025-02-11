@@ -16,7 +16,6 @@ namespace TTS.Web.Controllers
     [Route("ConsultantActivites")]
     public class ActivitiesController : Controller
     {
-        private readonly ApplicationDbContext _context;
         private readonly UserManager<TTSApplicationUser> _userManager;
         private readonly IActivitesService _activitesService;
         private readonly IUserService _userService;
@@ -24,7 +23,7 @@ namespace TTS.Web.Controllers
         private readonly ICommentsService _commentsService;
         private readonly IProjectsService _projectsService;
 
-        public ActivitiesController(ApplicationDbContext context, 
+        public ActivitiesController(
             UserManager<TTSApplicationUser> userManager, 
             IActivitesService activitesService,
             IUserService userService,
@@ -32,7 +31,6 @@ namespace TTS.Web.Controllers
             ICommentsService commentsService,
             IProjectsService projectsService)
         {
-            _context = context;
             _userManager = userManager;
             _activitesService = activitesService;
             _userService = userService;
@@ -45,47 +43,24 @@ namespace TTS.Web.Controllers
         [HttpGet]
         public IActionResult Index(Guid projectId, string projectTitle, Guid? selectedConsultantId)
         {
-            var activites = _activitesService.GetAllProjectActivites(projectId);
+            var activites = _activitesService.GetAllProjectActivites(projectId, projectTitle, selectedConsultantId);            
 
-            if(selectedConsultantId != null)
-            {
-                activites = _activitesService.FilterActivitiesByConsultant(activites, selectedConsultantId);
-            }
-
-            var dto = new IndexActivitesDto
-            {
-                ProjectId = projectId,
-                ProjectTitle = projectTitle ?? "",
-                Activites = activites,
-                Consultants = _userService.GetConsultantsForProject(projectId),
-                SelectedConsultantId = selectedConsultantId
-            };
-
-            return View(dto);
+            return View(activites);
         }
 
         // GET: ConsultantActivites/Details/5
         [HttpGet("Details/{id}")]
-        public IActionResult Details(Guid projectId, Guid id, string projectTitle)
+        public IActionResult Details(Guid projectId, Guid? id, string projectTitle)
         {
-            var activity = _activitesService.GetDetails(id);
-
-            if (activity == null)
+            if (id == null)
             {
                 return NotFound();
             }
 
-            var dto = new ActivityDto
-            {
-                ProjectId = projectId,
-                ProjectTitle = projectTitle,
-                Activity = activity,              
-                Comments = _commentsService.GetActivityComments(activity.Id),
-                TotalActiveHours = _activitesService.GetTotalActiveHours(activity),
-                TotalExpectedHours = _activitesService.GetTotalExpectedHours(activity)
-            };
+            var activity = _activitesService.GetDetails(id, projectId, projectTitle);
+            
 
-            return View(dto);
+            return View(activity);
         }
 
         // POST: ConsultantActivites/Create
@@ -113,7 +88,7 @@ namespace TTS.Web.Controllers
         [HttpGet("Edit/{id}")]
         public IActionResult Edit(Guid projectId, Guid id, string projectTitle)
         {
-            var activity = _activitesService.GetDetails(id);
+            var activity = _activitesService.Get(id);
             if (activity == null)
             {
                 return NotFound();
@@ -142,7 +117,7 @@ namespace TTS.Web.Controllers
         {
             if (ModelState.IsValid)
             {
-                var activity = _activitesService.GetDetails(activityId);
+                var activity = _activitesService.Get(activityId);
                 if (activity == null)
                 {
                     return NotFound();
@@ -150,7 +125,7 @@ namespace TTS.Web.Controllers
 
                 _activitesService.Edit(activityId, dto.Title, dto.Description, dto.ActivityStatus, dto.EndDate);
 
-                return RedirectToAction(nameof(Index), new { projectId = dto.ProjectId, projectTitle = dto.ProjectTitle });
+                return RedirectToAction(nameof(Details), new { projectId = dto.ProjectId, id = activityId, projectTitle = dto.ProjectTitle });
             }
             return View(dto);
         }
@@ -161,7 +136,7 @@ namespace TTS.Web.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult DeleteConfirmed(Guid projectId, Guid id, string projectTitle)
         {
-            var activity = _activitesService.GetDetails(id);
+            var activity = _activitesService.Get(id);
             if (activity != null)
             {
                 _activitesService.Delete(activity);
@@ -172,14 +147,14 @@ namespace TTS.Web.Controllers
 
         [HttpPost("AddComment")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> AddComment(Guid projectId, Guid id, string? commentBody, IFormFile[]? files)
+        public async Task<IActionResult> AddComment(Guid projectId, string projectTitle, Guid id, string? commentBody, IFormFile[]? files)
         {
             if(String.IsNullOrEmpty(commentBody) && (files==null || !files.Any()))
             {
                 return View("Error");
             }
 
-            var activity = _activitesService.GetDetails(id);
+            var activity = _activitesService.Get(id);
             var user = await _userManager.GetUserAsync(User);
             if (activity == null || user == null)
             {
@@ -188,7 +163,7 @@ namespace TTS.Web.Controllers
 
             _commentsService.Create(activity, user, commentBody, files);
 
-            return RedirectToAction(nameof(Details), new { projectId = projectId, id = activity.Id });
+            return RedirectToAction(nameof(Details), new { projectId = projectId, projectTitle = projectTitle, id = activity.Id });
         }
 
         [HttpGet("Download/{fileId}")]
@@ -207,7 +182,8 @@ namespace TTS.Web.Controllers
             return NotFound();
         }
 
-        [HttpGet("RemoveFile/{fileId}")]
+        [HttpPost("RemoveFile/{fileId}")]
+        [ValidateAntiForgeryToken]
         public IActionResult RemoveFile(Guid fileId, Guid projectId, Guid id, string projectTitle)
         {
             var attachment = _attachmentService.GetDetails(fileId);

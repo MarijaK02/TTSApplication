@@ -36,7 +36,7 @@ namespace AdminApplication.Controllers
             {
                 Consultants = consultants,
                 SelectedExpertise = selectedExpertise,
-                SearchTerm = searchTerm
+                SearchTerm = searchTerm,               
             };
 
             return View(dto);
@@ -57,7 +57,26 @@ namespace AdminApplication.Controllers
 
             var data = response.Content.ReadAsAsync<Consultant>().Result;
 
-            return View(data);
+            var consultantDto = new ConsultantDto
+            {
+                Consultant = data,
+                Projects = data.Projects.Select(p => new ConsultantProjectDto
+                {
+                    Project = p,
+                    TotalConsultantActivites = p.Activites.Count(),
+                    TotalConsultantActiveActivites = p.Activites.Where(a => a.Status == ActivityStatus.Active).Count(),
+                    TotalConsultantFinishedActivites = p.Activites.Where(a => a.Status == ActivityStatus.Completed).Count(),
+                    TotalConsultantInvalidActivities = p.Activites.Where(a => a.Status == ActivityStatus.Invalid).Count(),
+                    TotalConsultantNewActivities = p.Activites.Where(a => a.Status == ActivityStatus.New).Count(),
+                    TotalHoursWorkingOnProject = (int) p.Activites
+                        .Sum(a =>
+                            (a.Status == ActivityStatus.Invalid || a.Status == ActivityStatus.Completed
+                                ? (a.EndDate - a.StartDate)?.TotalHours
+                                : (DateTime.Now - a.StartDate).TotalHours) ?? 0)
+                }).ToList()
+            };
+
+            return View(consultantDto);
         }
 
         [HttpPost]
@@ -91,6 +110,33 @@ namespace AdminApplication.Controllers
             }
 
             return RedirectToAction("Details", new { consultantId = consultant.Id });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult DeleteProjectFromConsultant(Guid consultantId, Guid consultantProjectId)
+        {
+            if (ModelState.IsValid)
+            {
+                HttpClient client = new HttpClient();
+                string url = "https://localhost:44315/api/Admin/DeleteConsultantProject";
+
+                var model = new
+                {
+                    Id = consultantProjectId
+                };
+
+                HttpContent content = new StringContent(JsonConvert.SerializeObject(model), Encoding.UTF8, "application/json");
+                HttpResponseMessage response = client.PostAsync(url, content).Result;
+
+                if (!response.IsSuccessStatusCode || !response.Content.ReadAsAsync<bool>().Result)
+                {
+                    ModelState.AddModelError("", "Неуспешно бришење на проектот.");
+
+                }
+            }
+
+            return RedirectToAction("Details", new { consultantId = consultantId });
         }
     }
 }

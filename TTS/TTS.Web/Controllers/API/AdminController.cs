@@ -14,10 +14,12 @@ namespace TTS.Web.Controllers.API
     public class AdminController : ControllerBase
     {
         private readonly IAdminService _adminService;
+        private readonly SignInManager<TTSApplicationUser> _signInManager;
 
-        public AdminController(IAdminService adminService)
+        public AdminController(IAdminService adminService, SignInManager<TTSApplicationUser> signInManager)
         {
             _adminService = adminService;
+            _signInManager = signInManager;
         }        
 
 
@@ -58,7 +60,7 @@ namespace TTS.Web.Controllers.API
         }
 
         [HttpPost("[action]")]
-        public List<Activity> GetActivitiesForProject(BaseEntity model)
+        public ActivitiesDto GetActivitiesForProject(BaseEntity model)
         {
             return _adminService.GetActivitiesForProject(model);
         }
@@ -115,9 +117,9 @@ namespace TTS.Web.Controllers.API
         }
 
         [HttpPost("[action]")]
-        public bool DeleteConsultantFromProject(BaseEntity model)
+        public bool DeleteConsultantProject(BaseEntity model)
         {
-            return _adminService.DeleteConsultantFromProject(model.Id);
+            return _adminService.DeleteConsultantProject(model.Id);
         }
 
         [HttpPost("[action]")]
@@ -182,6 +184,12 @@ namespace TTS.Web.Controllers.API
         public bool DeleteActivity(BaseEntity model)
         {
             return _adminService.DeleteActivity(model.Id);
+        }
+
+        [HttpGet]
+        public async void Logout()
+        {
+            await _signInManager.SignOutAsync();
         }
     }
 }

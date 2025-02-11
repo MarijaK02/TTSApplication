@@ -18,21 +18,18 @@ namespace TTS.Web.Controllers
     [Authorize(Roles = "Client, Consultant")]
     public class ProjectsController : Controller
     {
-        private readonly ApplicationDbContext _context;
         private readonly UserManager<TTSApplicationUser> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly IProjectsService _projectsService;
         private readonly IUserService _userService;
 
         public ProjectsController(
-            ApplicationDbContext context, 
             UserManager<TTSApplicationUser> userManager, 
             RoleManager<IdentityRole> roleManager,
             IProjectsService projectsService,
             IUserService userService
         )
         {
-            _context = context;
             _userManager = userManager;
             _roleManager = roleManager;
             _projectsService = projectsService;
@@ -50,41 +47,18 @@ namespace TTS.Web.Controllers
             }
 
             var role = (await _userManager.GetRolesAsync(user)).FirstOrDefault();
-            var projects = new List<Project>();
+            var projects = new List<GetProjectDto>();
 
             if (role!.Equals("Client"))
             {
-                projects = _projectsService.GetProjectsForClient(user.Id);
-                var dto = _projectsService.FilterProjects(projects, searchTerm, expertiseList)
-                                    .Select(p => new GetProjectDto
-                                    {
-                                        Project = p,
-                                        NumConsultants = _projectsService.TotalConsultantsWorkingOnProject(p.Id),
-                                        TotalActivites = _projectsService.TotalActivitesForProject(p.Id),
-                                        EndDate = p.EndDate
-                                    }).ToList();
-
-                return View(dto);
+                projects = _projectsService.GetProjectsForClient(user.Id, searchTerm, expertiseList);
             }
             else if (role!.Equals("Consultant"))
             {
-                var consultant = _userService.GetConsultant(user.Id);
-                projects = _projectsService.GetProjectsForConsultant(user.Id);
-                var dto = _projectsService.FilterProjects(projects, searchTerm, expertiseList)
-                                    .Select(p => new GetProjectDto
-                                    {
-                                        Project = p,
-                                        NumConsultants = _projectsService.TotalConsultantsWorkingOnProject(p.Id),
-                                        TotalActivites = _projectsService.TotalActivitesForProject(p.Id),
-                                        NumOfConsultantActivites = _projectsService.TotalConsultantActivitesForProject(consultant.Id, p.Id),
-                                        TotalHours = _projectsService.TotalProjectActiveHours(p),
-                                        TotalExpectedHours = _projectsService.TotalProjectExpectedHours(p)
-                                    }).ToList();
-
-                return View(dto);
+                projects = _projectsService.GetProjectsForConsultant(user.Id, searchTerm);               
             }
 
-            return View(null);
+            return View(projects);
         }
 
         [Authorize(Roles = "Consultant")]
@@ -114,42 +88,22 @@ namespace TTS.Web.Controllers
                 return NotFound("Корисникот не е пронајден");
             }
 
-            var dto = new ConsultantApplicationsDto
-            {
-                Status = status ?? ApplicationStatus.Applied,
-                Applications = _projectsService.GetConsultantApplicationsFiltered(userId, status ?? ApplicationStatus.Applied) ?? []
-            };
+            var applicaitons = _projectsService.GetConsultantApplicationsFiltered(userId, status);
 
-            return View(dto);
+            return View(applicaitons);
         }
 
 
         // GET: Projects/Details/5
-        public IActionResult Details(Guid id)
-        {
-            var project = _projectsService.GetProjectDetails(id);
-
-            if (project == null)
+        public IActionResult Details(Guid? id)
+        {         
+            if (id == null)
             {
                 return NotFound("Проектот не е пронајден");
             }
+            var project = _projectsService.GetProjectDetails(id);
 
-            var applications = _projectsService.GetApplicationsForProject(id);
-            var responsibles = _projectsService.GetResponsiblesForProject(id);
-            var totalActiveHours = _projectsService.TotalProjectActiveHours(project);
-            var totalExpectedHours = _projectsService.TotalProjectExpectedHours(project);
-
-
-            ProjectDetailsDto dto = new ProjectDetailsDto
-            {
-                Project = project,
-                Applications = applications,
-                Responsibles = responsibles,
-                TotalExpectedHours = totalExpectedHours,
-                TotalHours = totalActiveHours
-            };
-
-            return View(dto);
+            return View(project);
         }
 
         [Authorize(Roles = "Client")]
@@ -193,9 +147,10 @@ namespace TTS.Web.Controllers
         }
 
         // GET: Projects/Edit/5
+        [Authorize(Roles = "Client")]
         public IActionResult Edit(Guid id)
         {
-            var project = _projectsService.GetProjectDetails(id);
+            var project = _projectsService.Get(id);
 
             if (project == null)
             {
@@ -207,8 +162,8 @@ namespace TTS.Web.Controllers
                 Id = project!.Id,
                 Title = project.Title,
                 Expertise = project.Expertise,
-                ProjectStatus = project.Status,
-                Description = project.Description
+                Description = project.Description,
+                EndDate = project.EndDate
             };
 
             return View(dto);
@@ -219,11 +174,12 @@ namespace TTS.Web.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Client")]
         public IActionResult Edit(Guid id, CreateAndEditProjectDto dto)
         {
             if (ModelState.IsValid)
             {
-                var project = _projectsService.GetProjectDetails(id);
+                var project = _projectsService.Get(id);
 
                 if (project == null)
                 {
@@ -232,7 +188,7 @@ namespace TTS.Web.Controllers
 
                 _projectsService.EditProject(id, dto);
                 
-                return RedirectToAction(nameof(MyProjects));
+                return RedirectToAction(nameof(Details), new { id = id });
             }
             return View(dto);
         }
@@ -240,7 +196,7 @@ namespace TTS.Web.Controllers
         // GET: Projects/Delete/5
         public IActionResult Delete(Guid id)
         {
-            var project = _projectsService.GetProjectDetails(id);
+            var project = _projectsService.Get(id);
             if (project == null)
             {
                 return NotFound("Проектот не посоти");
@@ -253,9 +209,9 @@ namespace TTS.Web.Controllers
         // POST: Projects/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(Guid id)
+        public IActionResult DeleteConfirmed(Guid id)
         {
-            var project = await _context.Projects.FindAsync(id);
+            var project = _projectsService.Get(id);
             if (project == null)
             {
                 return NotFound("Проектот не посоти");
@@ -269,7 +225,7 @@ namespace TTS.Web.Controllers
         [HttpPost]
         [Authorize(Roles = "Consultant")]
         [ValidateAntiForgeryToken]
-        public IActionResult ApplyForProject(Guid? projectId, Guid? applicationId)
+        public IActionResult ApplyForProject(Guid projectId, Guid? applicationId)
         {         
             var userId = _userManager.GetUserId(User);
             if (userId == null)
@@ -288,8 +244,6 @@ namespace TTS.Web.Controllers
 
         public IActionResult AcceptApplication(Guid applicationId, Guid projectId)
         {
-            var application = _projectsService.GetApplication(applicationId);
-
             _projectsService.AcceptApplication(applicationId);
 
             return RedirectToAction(nameof(Details), new { id = projectId });
@@ -300,8 +254,6 @@ namespace TTS.Web.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult RejectApplication(Guid applicationId, Guid projectId)
         {
-            var application = _projectsService.GetApplication(applicationId);
-
             _projectsService.RejectApplication(applicationId);
 
             return RedirectToAction(nameof(Details), new { id = projectId });
@@ -312,8 +264,6 @@ namespace TTS.Web.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult RemoveApplication(Guid applicationId)
         {
-            var application = _projectsService.GetApplication(applicationId);
-
             _projectsService.RemoveApplication(applicationId);
 
             return RedirectToAction(nameof(MyApplications), new { status = ApplicationStatus.Applied });
@@ -323,22 +273,13 @@ namespace TTS.Web.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult ChangeStatus(Guid projectId, ProjectStatus status)
         {
-            var project = _projectsService.GetProjectDetails(projectId);
+            var project = _projectsService.Get(projectId);
             if (project == null)
             {
                 return NotFound("Проектот не посоти");
             }
 
-            CreateAndEditProjectDto dto = new()
-            {
-                Title = project.Title,
-                Expertise = project.Expertise,
-                ProjectStatus = status,
-                Description = project.Description,
-                EndDate = project.EndDate
-            };
-
-            _projectsService.EditProject(projectId, dto);
+            _projectsService.ChangeProjectStatus(projectId, status);
 
             return RedirectToAction(nameof(Details), new { id = projectId });
         }

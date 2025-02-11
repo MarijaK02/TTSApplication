@@ -9,10 +9,9 @@ namespace TTS.Domain.DTO
 {
     public class CreateAndEditProjectDto
     {
-        public Guid? Id { get; set; }
+        public Guid Id { get; set; }
         public required string Title { get; set; }
         public required Expertise Expertise { get; set; }
-        public ProjectStatus? ProjectStatus { get; set; }
         public string? Description { get; set; }
         public DateTime? EndDate { get; set; }
     }

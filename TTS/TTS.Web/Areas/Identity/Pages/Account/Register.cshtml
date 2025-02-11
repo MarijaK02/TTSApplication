@@ -3,7 +3,7 @@
 @model RegisterModel
 @{
     ViewData["Title"] = "Регистрирај се!";
-    var roles = Enum.GetValues(typeof(TTSApplicationUserRole)).Cast<TTSApplicationUserRole>();
+    var roles = Html.GetEnumSelectList<TTSApplicationUserRole>();
     var expertises = Html.GetEnumSelectList<Expertise>();
     var industries = Html.GetEnumSelectList<Industry>();
 
@@ -24,7 +24,7 @@
                     <option value="" disabled selected>Изберете тип на корисник</option>
                     @foreach (var role in roles)
                     {
-                        <option value="@role">@role.ToString()</option>
+                        <option value="@role.Value">@role.Text</option>
                     }
                 </select>
                 <label asp-for="Input.Role">Тип корисник</label>

@@ -15,7 +15,7 @@
     </div>
 </nav>
 
-<div class="card shadow-sm w-50">
+<div class="card shadow-sm">
     <form asp-action="EditActivity" method="post">
         <input type="hidden" name="Id" value="@Model.Activity.Id" />
         <input type="hidden" name="ProjectId" value="@Model.ProjectId" />
@@ -26,19 +26,17 @@
         </div>
 
         <div class="card-body">
-
-            <div class="row mb-2">
-                <label class="col-6 fw-bold">Наслов:</label>
-                <div class="col">
+            <div class="row">
+                <!-- Title -->
+                <div class="col-md-6 mb-3">
+                    <label class="fw-bold">Наслов:</label>
                     <input type="text" class="form-control" name="Title" value="@Model.Activity.Title" required />
                 </div>
-            </div>
 
-            <div class="row mb-2">
-                <label class="col-6 fw-bold">Статус:</label>
-                <div class="col">
+                <!-- Status -->
+                <div class="col-md-6 mb-3">
+                    <label class="fw-bold">Статус:</label>
                     <select class="form-control" name="Status">
-                        <option selected>@Model.Activity.Status</option>
                         @foreach (var s in Enum.GetValues(typeof(ActivityStatus)))
                         {
                             <option value="@s" selected="@(Model.Activity.Status == (ActivityStatus)s ? "selected" : null)">
@@ -49,48 +47,52 @@
                 </div>
             </div>
 
-            <div class="row mb-2">
-                <label class="col-6 fw-bold">Почетен датум:</label>
-                <div class="col">
+            <div class="row">
+                <!-- Start Date -->
+                <div class="col-md-6 mb-3">
+                    <label class="fw-bold">Почетен датум:</label>
                     <input type="datetime-local" class="form-control" name="StartDate"
                            value="@Model.Activity.StartDate.ToString("yyyy-MM-ddTHH:mm")" required />
                 </div>
-            </div>
 
-            <div class="row mb-2">
-                <label class="col-6 fw-bold">Краен рок:</label>
-                <div class="col">
+                <!-- End Date -->
+                <div class="col-md-6 mb-3">
+                    <label class="fw-bold">Краен рок:</label>
                     <input type="datetime-local" class="form-control" name="EndDate"
                            value="@Model.Activity.EndDate?.ToString("yyyy-MM-ddTHH:mm")" />
                 </div>
             </div>
 
-            <div class="row mb-2">
-                <label class="col-6 fw-bold">Опис:</label>
-                <div class="col">
-                    <textarea class="form-control" name="Description">@Model.Activity.Description</textarea>
-                </div>
+            <!-- Description -->
+            <div class="mb-3">
+                <label class="fw-bold">Опис:</label>
+                <textarea class="form-control" name="Description" rows="10">@Model.Activity.Description</textarea>
             </div>
 
-            <div class="row mb-2">
-                <label class="col-6 fw-bold">Задолжен консултант:</label>
-                <div class="col">
-                    <p>
-                        @Model.Activity.ConsultantProject.Consultant?.User.FirstName
-                        @Model.Activity.ConsultantProject.Consultant?.User.LastName
+            <div class="row">
+                <!-- Assigned Consultant -->
+                <div class="col-md-6 mb-3">
+                    <label class="fw-bold">Задолжен консултант:</label>
+                    <p class="form-control-plaintext">
+                        @Model.Activity.ConsultantProject?.Consultant?.User.FirstName
+                        @Model.Activity.ConsultantProject?.Consultant?.User.LastName
+
+                        @((int)(DateTime.Now - Model.Activity.StartDate).TotalHours / 24) денови
+                        @((int)(DateTime.Now - Model.Activity.StartDate).TotalHours / 24) часови / 
+                        @((int)(DateTime.Now - Model.Activity.StartDate).TotalHours) часови
                     </p>
                 </div>
             </div>
-
         </div>
     </form>
 
-    @section Scripts {
-        @{
-            await Html.RenderPartialAsync("_ValidationScriptsPartial");
-        }
-    }
+    
 </div>
 
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}
 
 

@@ -11,7 +11,7 @@ namespace AdminApplication.Controllers
 {
     public class ActivitiesController : Controller
     {
-        public IActionResult Index(Guid projectId, string? searchTerm, ActivityStatus? selectedStatus)
+        public IActionResult Index(Guid projectId, string? searchTerm, ActivityStatus? selectedStatus, Guid? selectedConsultantId)
         {
             HttpClient client = new HttpClient();
             string url = "https://localhost:44315/api/Admin/GetActivitiesForProject";
@@ -24,8 +24,8 @@ namespace AdminApplication.Controllers
             HttpContent content = new StringContent(JsonConvert.SerializeObject(model), Encoding.UTF8, "application/json");
             HttpResponseMessage response = client.PostAsync(url, content).Result;
 
-            var activities = response.Content.ReadAsAsync<List<Activity>>().Result;
-            activities = activities.OrderByDescending(a => a.StartDate).ToList();
+            var data = response.Content.ReadAsAsync<ActivitiesDto>().Result;
+            var activities = data.Activities.OrderByDescending(a => a.StartDate).ToList();
 
             if (!activities.IsNullOrEmpty() && !searchTerm.IsNullOrEmpty())
             {
@@ -37,12 +37,19 @@ namespace AdminApplication.Controllers
                 activities = activities.Where(a => a.Status == selectedStatus).ToList();
             }
 
+            if(selectedConsultantId != null)
+            {
+                activities = activities.Where(a => a.ConsultantProjectId == selectedConsultantId).ToList();
+            }
+
             var dto = new ActivityListDto
             {
                 ProjectId = projectId,
                 Activities = activities,
+                ProjectConsultants = data.Consultants,
                 SearchTerm = searchTerm,
-                SelectedStatus = selectedStatus
+                SelectedStatus = selectedStatus,
+                SelectedConsultantId = selectedConsultantId
             };
 
             return View(dto);

@@ -79,8 +79,7 @@
                 Model?.Project.Status == TTS.Domain.Enum.ProjectStatus.Invalid ? "danger" :
                 "success")">
                 <form asp-action="ChangeStatus" asp-controller="Projects" asp-route-projectId="@Model?.Project.Id" method="post" class="d-flex w-25">
-                    @Html.AntiForgeryToken()
-                    <select name="status" class="form-select me-2">
+                    <select name="status" class="form-select me-2" disabled="@(User.IsInRole("Client"))">
                         <option value="">-- Избери статус --</option>
                         @foreach (var status in Html.GetEnumSelectList<ProjectStatus>())
                         {
@@ -88,7 +87,10 @@
                             <option value="@(status.Value)" selected="@selected">@status.Text</option>
                         }
                     </select>
-                    <button type="submit" class="btn btn-success">Зачувај</button>
+                    @if (User.IsInRole("Consultant"))
+                    {
+                        <button type="submit" class="btn btn-success">Зачувај</button>
+                    }
                 </form>
             </dd>
             <dt class="col-sm-2">

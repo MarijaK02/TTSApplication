@@ -3,6 +3,6 @@
     public class DetailsProjectDto
     {
         public Project Project { get; set; }
-        public List<Consultant> Consultants { get; set; }
+        public List<Consultant>? Consultants { get; set; }
     }
 }

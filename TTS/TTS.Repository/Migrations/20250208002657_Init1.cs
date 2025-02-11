@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace TTS.Repository.Migrations
 {
     /// <inheritdoc />
-    public partial class Reset : Migration
+    public partial class Init1 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -164,9 +164,9 @@ namespace TTS.Repository.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     Address = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Industry = table.Column<int>(type: "int", nullable: false),
-                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: true)
+                    Industry = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -175,7 +175,8 @@ namespace TTS.Repository.Migrations
                         name: "FK_Clients_AspNetUsers_UserId",
                         column: x => x.UserId,
                         principalTable: "AspNetUsers",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -183,8 +184,8 @@ namespace TTS.Repository.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Expertise = table.Column<int>(type: "int", nullable: false),
-                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: true)
+                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    Expertise = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -193,7 +194,8 @@ namespace TTS.Repository.Migrations
                         name: "FK_Consultants_AspNetUsers_UserId",
                         column: x => x.UserId,
                         principalTable: "AspNetUsers",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -227,8 +229,8 @@ namespace TTS.Repository.Migrations
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     ConsultantId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     ProjectId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    StartTime = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    EndTime = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    DateApplied = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    DateModified = table.Column<DateTime>(type: "datetime2", nullable: true),
                     ApplicationStatus = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
@@ -238,8 +240,7 @@ namespace TTS.Repository.Migrations
                         name: "FK_ConsultantProjects_Consultants_ConsultantId",
                         column: x => x.ConsultantId,
                         principalTable: "Consultants",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_ConsultantProjects_Projects_ProjectId",
                         column: x => x.ProjectId,
@@ -253,12 +254,12 @@ namespace TTS.Repository.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    ConsultantProjectId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Title = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Status = table.Column<int>(type: "int", nullable: false),
                     StartDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    EndDate = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    ConsultantProjectId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                    EndDate = table.Column<DateTime>(type: "datetime2", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -276,10 +277,11 @@ namespace TTS.Repository.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    CreatedById = table.Column<string>(type: "nvarchar(450)", nullable: true),
+                    CreatedById = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    ActivityId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     CreatedOn = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    CommentBody = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    ActivityId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                    CommentBody = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    TTSApplicationUserId = table.Column<string>(type: "nvarchar(450)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -293,6 +295,11 @@ namespace TTS.Repository.Migrations
                     table.ForeignKey(
                         name: "FK_Comments_AspNetUsers_CreatedById",
                         column: x => x.CreatedById,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_Comments_AspNetUsers_TTSApplicationUserId",
+                        column: x => x.TTSApplicationUserId,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id");
                 });
@@ -380,6 +387,11 @@ namespace TTS.Repository.Migrations
                 name: "IX_Comments_CreatedById",
                 table: "Comments",
                 column: "CreatedById");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Comments_TTSApplicationUserId",
+                table: "Comments",
+                column: "TTSApplicationUserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_ConsultantProjects_ConsultantId",

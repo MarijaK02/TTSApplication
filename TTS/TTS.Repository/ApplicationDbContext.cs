@@ -47,7 +47,7 @@ namespace TTS.Repository
             // Prevent cascade delete for User → Comments
             modelBuilder.Entity<Comment>()
                 .HasOne(c => c.CreatedBy)
-                .WithMany()  // No navigation property needed
+                .WithMany()
                 .HasForeignKey(c => c.CreatedById)
                 .OnDelete(DeleteBehavior.NoAction);
         }

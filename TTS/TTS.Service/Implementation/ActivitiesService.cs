@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using TTS.Domain.Domain;
+using TTS.Domain.DTO;
 using TTS.Domain.Enum;
 using TTS.Domain.Identity;
 using TTS.Repository;
@@ -16,7 +17,7 @@ namespace TTS.Service.Implementation
         private readonly IRepository<Project> _projectRepository;
         private readonly IRepository<Activity> _activitiesRepository;
         private readonly IRepository<ConsultantProject> _consultantProjectRepository;
-        private readonly IRepository<Comment> _commentRepository;
+        private readonly ICommentsService _commentsService;
         private readonly IAttachmentService _attachmentService;
         private readonly IUserService _userService;
 
@@ -24,7 +25,7 @@ namespace TTS.Service.Implementation
             IRepository<Project> projectRepository,
             IRepository<ConsultantProject> consultantProjectRepository,
             IRepository<Activity> activitiesRepository,
-            IRepository<Comment> commentRepository,
+            ICommentsService commentsService,
             IAttachmentService attachmentService,
             IUserService userService)
         {
@@ -32,12 +33,12 @@ namespace TTS.Service.Implementation
             _projectRepository = projectRepository;
             _activitiesRepository = activitiesRepository;
             _consultantProjectRepository = consultantProjectRepository;
-            _commentRepository = commentRepository;
+            _commentsService = commentsService;
             _attachmentService = attachmentService;
             _userService = userService;
         }
 
-        public List<Activity> GetAllProjectActivites(Guid projectId)
+        public IndexActivitesDto GetAllProjectActivites(Guid projectId, string projectTitle, Guid? selectedConsultantId)
         {
             var consultantProjects = _consultantProjectRepository.GetAll()
                 .Include(cp => cp.Activites)
@@ -52,24 +53,52 @@ namespace TTS.Service.Implementation
                 .SelectMany(cp => cp.Activites)
                 .ToList();
 
-            return activities;
+            activities = FilterActivitiesByConsultant(activities, selectedConsultantId);
+
+            var dto = new IndexActivitesDto
+            {
+                ProjectId = projectId,
+                ProjectTitle = projectTitle,
+                Activites = activities,
+                Consultants = _userService.GetConsultantsForProject(projectId),
+                SelectedConsultantId = selectedConsultantId
+            };
+
+            return dto;
         }
 
-        public List<Activity> FilterActivitiesByConsultant(List<Activity> rawActivities, Guid? selectedConsultantId)
+        private List<Activity> FilterActivitiesByConsultant(List<Activity> rawActivities, Guid? selectedConsultantId)
         {
-            return rawActivities.Where(a => a.ConsultantProject?.ConsultantId == selectedConsultantId).ToList();
+            return selectedConsultantId == null ? rawActivities : rawActivities.Where(a => a.ConsultantProject?.ConsultantId == selectedConsultantId).ToList();
         }
 
-        public Activity GetDetails(Guid activityId)
+        public Activity Get(Guid activityId)
         {
             return _activitiesRepository.Get(activityId);
         }
 
-        public int GetTotalActiveHours(Activity activity)
+        public ActivityDto GetDetails(Guid? activityId, Guid projectId, string projectTitle)
+        {
+            var activity = _activitiesRepository.Get(activityId);
+
+            var dto = new ActivityDto
+            {
+                ProjectId = projectId,
+                ProjectTitle = projectTitle,
+                Activity = activity,
+                Comments = _commentsService.GetActivityComments(activity.Id),
+                TotalActiveHours = GetTotalActiveHours(activity),
+                TotalExpectedHours = GetTotalExpectedHours(activity)
+            };
+
+            return dto;
+        }
+
+        private int GetTotalActiveHours(Activity activity)
         {
             return (int)((TimeSpan)(DateTime.Now - activity.StartDate)).TotalHours;
         }
-        public int GetTotalExpectedHours(Activity activity)
+        private int GetTotalExpectedHours(Activity activity)
         {
             return activity.EndDate != null ? (int)((TimeSpan)(activity.EndDate - activity.StartDate)).TotalHours : 0;
         }
@@ -110,12 +139,20 @@ namespace TTS.Service.Implementation
 
         public void Edit(Guid activityId, string title, string description, ActivityStatus status, DateTime? endDate)
         {
-            var activity = GetDetails(activityId);
+            var activity = Get(activityId);
 
             activity.Title = title;
             activity.Description = description;
             activity.Status = status;
-            activity.EndDate = endDate;
+
+            if(activity.Status == ActivityStatus.Invalid || activity.Status == ActivityStatus.Completed)
+            {
+                activity.EndDate = DateTime.Now;
+            }
+            else
+            {
+                activity.EndDate = endDate;
+            }
 
             _activitiesRepository.Update(activity);            
         }

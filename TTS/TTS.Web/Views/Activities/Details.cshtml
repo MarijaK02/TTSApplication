@@ -114,6 +114,7 @@
     <form asp-action="AddComment" asp-controller="Activities" enctype="multipart/form-data" method="post" class="mb-5 border p-4 bg-light rounded">
         <input type="hidden" name="projectId" value="@Model?.ProjectId" />
         <input type="hidden" name="id" value="@Model?.Activity.Id" />
+        <input type="hidden" name="projectTitle" value="@Model?.ProjectTitle" />
 
         <div class="form-group mb-3">
             <label for="CommentBody">Внеси коментар</label>
@@ -175,7 +176,7 @@
                                                         <input hidden name="projectId" value="@Model.ProjectId"/>
                                                         <input hidden name="id" value="@Model.Activity.Id"/>
                                                         <input hidden name="projectTitle" value="@Model.ProjectTitle"/>
-                                                        <button class="btn btn-danger btn-sm"></button>
+                                                        <button class="btn btn-danger btn-sm"><i class="bi bi-trash3"></i></button>
                                                     </form>
                                                 }
                                             </div>

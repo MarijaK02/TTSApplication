@@ -33,15 +33,11 @@
                     <button id="login-submit" type="submit" class="w-100 btn btn-lg btn-info shadow mb-3">Log in</button>
                 </div>
                 <div>
-                    <p>
-                        <a id="forgot-password" asp-page="./ForgotPassword" class="text-decoration-none link-opacity-75-hover">Заборавена лозинка?</a>
-                    </p>
+
                     <p>
                         <a asp-page="./Register" asp-route-returnUrl="@Model.ReturnUrl" class="text-decoration-none link-opacity-75-hover">Регистрирај се како нов корисник?</a>
                     </p>
-                    <p>
-                        <a id="resend-confirmation" asp-page="./ResendEmailConfirmation" class="text-decoration-none link-opacity-75-hover">Испрати потврда за e-mail</a>
-                    </p>
+                    
                 </div>
             </form>
         </section>

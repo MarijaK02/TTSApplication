@@ -28,5 +28,22 @@ namespace AdminApplication.Controllers
         {
             return View(new ErrorViewModel { RequestId = System.Diagnostics.Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
+
+        public IActionResult Logout()
+        {
+            HttpClient client = new HttpClient();
+            string url = "https://localhost:44315/api/Admin/Logout";
+
+            HttpResponseMessage response = client.GetAsync(url).Result;
+
+            if (response.IsSuccessStatusCode)
+            {
+                return Redirect("https://localhost:44315/");
+            }
+            else
+            {
+                return BadRequest("Logout failed");
+            }
+        }
     }
 }

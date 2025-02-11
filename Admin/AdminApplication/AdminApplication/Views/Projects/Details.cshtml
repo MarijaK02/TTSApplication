@@ -120,7 +120,7 @@
 
                     @foreach (var project in Model.Project.ConsultantProjects!.Where(cp => cp.ApplicationStatus == ApplicationStatus.Applied))
                     {
-                        <tr>
+                        <tr onclick="location.href='@Url.Action("Details", "Consultants", new { consultantId = project.ConsultantId })'">
                             <td>@project.DateApplied</td>
                             <td>@project.Consultant?.User.FirstName</td>
                             <td>@project.Consultant?.User.LastName</td>
@@ -174,7 +174,7 @@
                 <tbody>
                     @foreach (var project in Model.Project.ConsultantProjects!.Where(cp => cp.ApplicationStatus == ApplicationStatus.Accepted))
                     {
-                        <tr>
+                        <tr onclick="location.href='@Url.Action("Details", "Consultants", new { consultantId = project.ConsultantId })'">
                             <td>@project.Consultant?.User.FirstName</td>
                             <td>@project.Consultant?.User.LastName</td>
                             <td>@project.Consultant?.User.Email</td>

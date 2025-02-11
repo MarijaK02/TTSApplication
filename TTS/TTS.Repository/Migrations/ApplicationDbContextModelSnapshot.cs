@@ -17,7 +17,7 @@ namespace TTS.Repository.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.10")
+                .HasAnnotation("ProductVersion", "8.0.6")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -228,6 +228,7 @@ namespace TTS.Repository.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("UserId")
+                        .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
@@ -247,19 +248,26 @@ namespace TTS.Repository.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("CommentBody")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("CreatedById")
+                        .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<DateTime>("CreatedOn")
                         .HasColumnType("datetime2");
+
+                    b.Property<string>("TTSApplicationUserId")
+                        .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
 
                     b.HasIndex("ActivityId");
 
                     b.HasIndex("CreatedById");
+
+                    b.HasIndex("TTSApplicationUserId");
 
                     b.ToTable("Comments");
                 });
@@ -274,6 +282,7 @@ namespace TTS.Repository.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("UserId")
+                        .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
@@ -499,7 +508,9 @@ namespace TTS.Repository.Migrations
                 {
                     b.HasOne("TTS.Domain.Identity.TTSApplicationUser", "User")
                         .WithMany()
-                        .HasForeignKey("UserId");
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("User");
                 });
@@ -514,7 +525,13 @@ namespace TTS.Repository.Migrations
 
                     b.HasOne("TTS.Domain.Identity.TTSApplicationUser", "CreatedBy")
                         .WithMany()
-                        .HasForeignKey("CreatedById");
+                        .HasForeignKey("CreatedById")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("TTS.Domain.Identity.TTSApplicationUser", null)
+                        .WithMany("Comments")
+                        .HasForeignKey("TTSApplicationUserId");
 
                     b.Navigation("Activity");
 
@@ -525,7 +542,9 @@ namespace TTS.Repository.Migrations
                 {
                     b.HasOne("TTS.Domain.Identity.TTSApplicationUser", "User")
                         .WithMany()
-                        .HasForeignKey("UserId");
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("User");
                 });
@@ -535,7 +554,7 @@ namespace TTS.Repository.Migrations
                     b.HasOne("TTS.Domain.Domain.Consultant", "Consultant")
                         .WithMany("Projects")
                         .HasForeignKey("ConsultantId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.HasOne("TTS.Domain.Domain.Project", "Project")
@@ -588,6 +607,11 @@ namespace TTS.Repository.Migrations
             modelBuilder.Entity("TTS.Domain.Domain.Project", b =>
                 {
                     b.Navigation("ConsultantProjects");
+                });
+
+            modelBuilder.Entity("TTS.Domain.Identity.TTSApplicationUser", b =>
+                {
+                    b.Navigation("Comments");
                 });
 #pragma warning restore 612, 618
         }

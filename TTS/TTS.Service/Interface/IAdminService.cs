@@ -17,7 +17,7 @@ namespace TTS.Service.Interface
         public Client GetDetailsForClient(BaseEntity model);
         public Consultant GetDetailsForConsultant(BaseEntity model);
         public DetailsProjectDto GetDetailsForProject(BaseEntity model);
-        public List<Activity> GetActivitiesForProject(BaseEntity model);
+        public ActivitiesDto GetActivitiesForProject(BaseEntity model);
         public Activity GetActivityDetails(BaseEntity model);
         public List<ConsultantProject> GetAllConsultantsWorkingOnProject(Guid projectId);
 
@@ -32,7 +32,7 @@ namespace TTS.Service.Interface
         public bool DeleteProject(Guid projectId);
         public bool DeleteActivity(Guid actiivtyId);
 
-        public bool DeleteConsultantFromProject(Guid consultantProjectId);
+        public bool DeleteConsultantProject(Guid consultantProjectId);
         public bool AddConsultantToProjectDto(AddConsultantToProjectDto dto);
 
 

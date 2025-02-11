@@ -24,6 +24,10 @@ namespace TTS.Web.Controllers
 
         public IActionResult Index()
         {
+            if (User.IsInRole("Admin"))
+            {
+                return Redirect("https://localhost:44340/");
+            }
             return RedirectToAction("MyProjects", "Projects");
         }
 

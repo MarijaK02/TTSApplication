@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using TTS.Domain.Domain;
 using TTS.Domain.DTO.API;
+using TTS.Domain.Enum;
 using TTS.Domain.Shared;
 using TTS.Repository.Interface;
 using TTS.Service.Interface;
@@ -84,6 +85,7 @@ namespace TTS.Service.Implementation
                 .Include(c => c.User)
                 .Include(c => c.Projects)
                 .Include("Projects.Project")
+                .Include("Projects.Activites")
                 .First(c => c.Id == model.Id);
         }
 
@@ -99,24 +101,36 @@ namespace TTS.Service.Implementation
 
             var consultants = _consultantRepository.GetAll()
                 .Include(c => c.User)
+                .Include(c => c.Projects)
+                .Include("Projects.Project")
                 .Where(c => c.Expertise == project.Expertise)
                 .ToList();
 
             var dto = new DetailsProjectDto
             {
                 Project = project,
-                Consultants = consultants
+                Consultants = consultants.Where(c => c.Projects.IsNullOrEmpty() || !c.Projects!.Any(p => p.Project?.Id == model.Id)).ToList()
             };
 
             return dto;
         }
 
-        public List<Activity> GetActivitiesForProject(BaseEntity model)
+        public ActivitiesDto GetActivitiesForProject(BaseEntity model)
         {
-            return _activityRepository.GetAll()
+            var activities = _activityRepository.GetAll()
                 .Include(a => a.ConsultantProject)
                 .Where(a => a.ConsultantProject!.ProjectId == model.Id)                
                 .ToList();
+
+            var projectConsultants = GetAllConsultantsWorkingOnProject(model.Id);
+
+            var dto = new ActivitiesDto
+            {
+                Activities = activities,
+                Consultants = projectConsultants
+            };
+
+            return dto;
         }
 
         public Activity GetActivityDetails(BaseEntity model)
@@ -187,7 +201,18 @@ namespace TTS.Service.Implementation
             project.Status = dto.Status;
             project.Expertise = dto.Expertise;
             project.StartDate = dto.StartDate;
-            project.EndDate = dto.EndDate;
+
+            if(dto.EndDate != project.EndDate)
+            {
+                project.EndDate = (dto.Status == ProjectStatus.Invalid || dto.Status == ProjectStatus.Completed)
+                    ? DateTime.Now
+                    : dto.EndDate;
+            }
+            else
+            {
+                project.EndDate = dto.EndDate;
+            }
+            
 
             _projectRepository.Update(project);
 
@@ -214,7 +239,7 @@ namespace TTS.Service.Implementation
             return true;
         }
 
-        public bool DeleteConsultantFromProject(Guid consultantProjectId)
+        public bool DeleteConsultantProject(Guid consultantProjectId)
         {
             var cp = _consultantProjectRepository.Get(consultantProjectId);
 

@@ -1,5 +1,6 @@
-﻿@using AdminApplication.Models.Enums
-@model Consultant
+﻿@using AdminApplication.Models.DTO
+@using AdminApplication.Models.Enums
+@model ConsultantDto
 
 <div class="my-4">
     <div class="card shadow-sm w-50">
@@ -10,46 +11,45 @@
             </div>
             <div class="card-body">
 
-                <input type="hidden" asp-for="Id" />
-                <input type="hidden" asp-for="User.UserName" />
-                <input type="hidden" asp-for="UserId" />
-                <input type="hidden" asp-for="User.Id" />
+                <input type="hidden" asp-for="Consultant.Id" />
+                <input type="hidden" asp-for="Consultant.User.UserName" />
+                <input type="hidden" asp-for="Consultant.UserId" />
 
                 <div class="row mb-2">
                     <label class="col-5 fw-bold">Име:</label>
                     <div class="col-7">
-                        <input type="text" class="form-control" asp-for="User.FirstName" required />
+                        <input type="text" class="form-control" asp-for="Consultant.User.FirstName" required />
                     </div>
                 </div>
 
                 <div class="row mb-2">
                     <label class="col-5 fw-bold">Име:</label>
                     <div class="col-7">
-                        <input type="text" class="form-control" asp-for="User.LastName" required />
+                        <input type="text" class="form-control" asp-for="Consultant.User.LastName" required />
                     </div>
                 </div>
 
                 <div class="row mb-2">
                     <label class="col-5 fw-bold">Е-маил:</label>
                     <div class="col-7">
-                        <input type="email" class="form-control" asp-for="User.Email" required />
+                        <input type="email" class="form-control" asp-for="Consultant.User.Email" required />
                     </div>
                 </div>
 
                 <div class="row mb-2">
                     <label class="col-5 fw-bold">Контакт тел.:</label>
                     <div class="col-7">
-                        <input type="tel" class="form-control" asp-for="User.PhoneNumber" required />
+                        <input type="tel" class="form-control" asp-for="Consultant.User.PhoneNumber" required />
                     </div>
                 </div>
 
                 <div class="row mb-2">
                     <label class="col-5 fw-bold">Експертиза:</label>
                     <div class="col">
-                        <select class="form-control" asp-for="Expertise">
+                        <select class="form-control" asp-for="Consultant.Expertise">
                             @foreach (var e in Enum.GetValues(typeof(Expertise)))
                             {
-                                <option value="@e" selected="@(Model.Expertise == (Expertise)e ? "selected" : null)">
+                                <option value="@e" selected="@(Model.Consultant.Expertise == (Expertise)e ? "selected" : null)">
                                     @e.ToString()
                                 </option>
                             }
@@ -75,18 +75,40 @@
                             <th>Статус</th>
                             <th>Почетен датум</th>
                             <th>Краен рок</th>
+                            <th>Вкупно активности</th>
+                            <th>Нови активности</th>
+                            <th>Активни активности</th>
+                            <th>Сработени активности</th>
+                            <th>Невалидни активности</th>
+                            <th>Вкупно сработено време</th>
+                            <th>Вкупно сработено време (часови)</th>
+                            <th></th>
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach (var project in Model.Projects)
+                        @foreach (var item in Model.Projects)
                         {
-                            <tr onclick="location.href='@Url.Action("Details", "Projects", new { projectId = project.ProjectId })'">
-                                <td>@project.ApplicationStatus</td>
-                                <td>@project.DateApplied</td>
-                                <td>@project.Project?.Title</td>
-                                <td>@project.Project?.Status</td>
-                                <td>@project.Project?.StartDate.ToShortDateString()</td>
-                                <td>@(project.Project?.EndDate?.ToShortDateString())</td>
+                            <tr onclick="location.href='@Url.Action("Details", "Projects", new { projectId = item.Project.ProjectId })'">
+                                <td>@item.Project.ApplicationStatus</td>
+                                <td>@item.Project.DateApplied</td>
+                                <td>@item.Project.Project?.Title</td>
+                                <td>@item.Project.Project?.Status</td>
+                                <td>@item.Project.Project?.StartDate.ToShortDateString()</td>
+                                <td>@(item.Project.Project?.EndDate?.ToShortDateString())</td>
+                                <td>@(item.TotalConsultantActivites)</td>
+                                <td>@(item.TotalConsultantNewActivities)</td>
+                                <td>@(item.TotalConsultantActiveActivites)</td>
+                                <td>@(item.TotalConsultantNewActivities)</td>
+                                <td>@(item.TotalConsultantInvalidActivities)</td>
+                                <td>@(item.TotalHoursWorkingOnProject / 24) денови @(item.TotalHoursWorkingOnProject % 24) часови</td>
+                                <td>@(item.TotalHoursWorkingOnProject)</td>
+                                <td>
+                                    <form method="post" asp-action="DeleteProjectFromConsultant">
+                                        <input type="hidden" name="consultantId" value="@Model.Consultant.Id" />
+                                        <input type="hidden" name="consultantProjectId" value="@item.Project.Id" />
+                                        <button onclick="event.stopPropagation()" class="btn btn-danger"><i class="bi bi-trash3"></i></button>
+                                    </form>
+                                </td>
                             </tr>
                         }
                     </tbody>

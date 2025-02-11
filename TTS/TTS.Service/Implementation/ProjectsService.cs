@@ -38,34 +38,55 @@ namespace TTS.Service.Implementation
             return _projectRepository.GetAll().ToList();
         }
 
-        public List<Project> GetProjectsForClient(string userId)
+        public List<GetProjectDto> GetProjectsForClient(string userId, string? searchTerm, List<Expertise>? expertiseList)
         {
             var client = _userService.GetClient(userId);
                 
-            return _projectRepository.GetAll()
+            var projects = _projectRepository.GetAll()
                 .Where(p => p.CreatedById == client.Id)
-                .ToList();            
+                .ToList();
+
+            var dto = FilterProjects(projects, searchTerm, expertiseList)
+                                    .Select(p => new GetProjectDto
+                                    {
+                                        Project = p,
+                                        NumConsultants = TotalConsultantsWorkingOnProject(p.Id),
+                                        TotalActivites = TotalActivitesForProject(p.Id),
+                                        EndDate = p.EndDate
+                                    }).ToList();
+            return dto;
         }
 
-        public List<Project> GetProjectsForConsultant(string userId)
+        public List<GetProjectDto> GetProjectsForConsultant(string userId, string? searchTerm)
         {
-            var projects = new List<Project>();
+            var dto = new List<GetProjectDto>();
             var consultant = _userService.GetConsultant(userId);
 
             if (consultant!.Projects != null)
             {
-                projects = _projectRepository.GetAll()
+                var projects = _projectRepository.GetAll()
                     .Include(p => p.ConsultantProjects)
                     .Where(p => p.ConsultantProjects!
                        .Any(cp => cp.ConsultantId.Equals(consultant.Id) && cp.ApplicationStatus == ApplicationStatus.Accepted)
                     )
                     .ToList();
+
+                dto = FilterProjects(projects, searchTerm, null)
+                                    .Select(p => new GetProjectDto
+                                    {
+                                        Project = p,
+                                        NumConsultants = TotalConsultantsWorkingOnProject(p.Id),
+                                        TotalActivites = TotalActivitesForProject(p.Id),
+                                        NumOfConsultantActivites = TotalConsultantActivitesForProject(consultant.Id, p.Id),
+                                        TotalHours = TotalProjectActiveHours(p),
+                                        TotalExpectedHours = TotalProjectExpectedHours(p)
+                                    }).ToList();
             }
 
-            return projects;
+            return dto;
         }
 
-        public int TotalConsultantsWorkingOnProject(Guid projectId)
+        private int TotalConsultantsWorkingOnProject(Guid projectId)
         {
             var p = _projectRepository.GetAll()
                 .Include(p => p.ConsultantProjects)
@@ -74,7 +95,7 @@ namespace TTS.Service.Implementation
             return p.ConsultantProjects != null ? p.ConsultantProjects.Where(cp => cp.ApplicationStatus == ApplicationStatus.Accepted).Count() : 0;
         }
 
-        public int TotalActivitesForProject(Guid projectId)
+        private int TotalActivitesForProject(Guid projectId)
         {
             return _consultantProjectRepository.GetAll()
                 .Include(cp => cp.Activites)
@@ -83,7 +104,7 @@ namespace TTS.Service.Implementation
                 .Count();
         }
 
-        public int TotalConsultantActivitesForProject(Guid consultantId, Guid projectId)
+        private int TotalConsultantActivitesForProject(Guid consultantId, Guid projectId)
         {
             return _consultantProjectRepository.GetAll()
                 .Include(cp => cp.Activites)
@@ -92,12 +113,12 @@ namespace TTS.Service.Implementation
                 .Count();
         }
 
-        public int TotalProjectActiveHours(Project p)
+        private int TotalProjectActiveHours(Project p)
         {
             return (int)((TimeSpan)(DateTime.Now - p.StartDate)).TotalHours;
         }
 
-        public int TotalProjectExpectedHours(Project p)
+        private int TotalProjectExpectedHours(Project p)
         {
             return p.EndDate !=null ? (int)((TimeSpan)(p.EndDate - p.StartDate)).TotalHours : 0;
         }
@@ -114,7 +135,7 @@ namespace TTS.Service.Implementation
             return projects ?? [];
         }
 
-        public List<ConsultantProject> GetConsultantApplicationsFiltered(string userId, ApplicationStatus status)
+        public ConsultantApplicationsDto GetConsultantApplicationsFiltered(string userId, ApplicationStatus? status)
         {
             var consultant = _userService.GetConsultant(userId);
 
@@ -123,32 +144,60 @@ namespace TTS.Service.Implementation
                 .Where(cp => cp.ConsultantId == consultant.Id && cp.ApplicationStatus == status)
                 .ToList();
 
+            var dto = new ConsultantApplicationsDto
+            {
+                Status = status ?? ApplicationStatus.Applied,
+                Applications = projects
+            };
 
-            return projects ?? [];
+            return dto;
         }
 
-        public Project GetProjectDetails(Guid projectId)
+        public Project Get(Guid projectId)
         {
             return _projectRepository.Get(projectId);
         }
 
-
-        public List<ConsultantProject> GetApplicationsForProject (Guid projectId)
+        public ProjectDetailsDto GetProjectDetails(Guid? projectId)
         {
-            return _consultantProjectRepository.GetAll()
+            var project = _projectRepository.Get(projectId);
+
+            var applications = GetApplicationsForProject(projectId);
+            var responsibles = GetResponsiblesForProject(projectId);
+            var totalActiveHours = TotalProjectActiveHours(project);
+            var totalExpectedHours = TotalProjectExpectedHours(project);
+
+
+            ProjectDetailsDto dto = new ProjectDetailsDto
+            {
+                Project = project,
+                Applications = applications,
+                Responsibles = responsibles,
+                TotalExpectedHours = totalExpectedHours,
+                TotalHours = totalActiveHours
+            };
+
+            return dto;
+        }
+
+
+        private List<ConsultantProject> GetApplicationsForProject (Guid? projectId)
+        {
+            return projectId == null ? [] :_consultantProjectRepository.GetAll()
                 .Include(cp => cp.Consultant)
                 .Include("Consultant.User")
                 .Where(cp => cp.ProjectId == projectId && cp.ApplicationStatus == ApplicationStatus.Applied)
                 .ToList() ?? [];
         }
 
-        public List<Consultant> GetResponsiblesForProject(Guid projectId)
+        private List<Consultant> GetResponsiblesForProject(Guid? projectId)
         {
-            return _consultantProjectRepository.GetAll()
+            return projectId == null ? [] : _consultantProjectRepository.GetAll()
+                .Include(cp => cp.Consultant)
                 .Include("Consultant.User")
                 .Where(cp => cp.ProjectId == projectId && cp.ApplicationStatus == ApplicationStatus.Accepted)
                 .Select(cp => cp.Consultant)
-                .ToList() ?? [];
+                .ToList();
         }
 
         public void CreateProject (CreateAndEditProjectDto dto, Client client)
@@ -175,8 +224,20 @@ namespace TTS.Service.Implementation
             project.Title = dto.Title;
             project.Description = dto.Description;
             project.Expertise = dto.Expertise;
-            project.Status = dto.ProjectStatus ?? project.Status;
+            project.EndDate = dto.EndDate;
 
+            _projectRepository.Update(project);
+        }
+
+        public void ChangeProjectStatus(Guid projectId, ProjectStatus status)
+        {
+            var project = _projectRepository.Get(projectId);
+            project.Status = status;
+
+            if (project.Status == ProjectStatus.Invalid || project.Status == ProjectStatus.Completed)
+            {
+                project.EndDate = DateTime.Now;
+            }
             _projectRepository.Update(project);
         }
 
@@ -252,7 +313,7 @@ namespace TTS.Service.Implementation
             _consultantProjectRepository.Delete(application);
         }
 
-        public List<Project> FilterProjects(List<Project> rawProjects, string? searchTerm, List<Expertise>? expertiseList)
+        private List<Project> FilterProjects(List<Project> rawProjects, string? searchTerm, List<Expertise>? expertiseList)
         {
             return rawProjects
                 .Where(p =>
