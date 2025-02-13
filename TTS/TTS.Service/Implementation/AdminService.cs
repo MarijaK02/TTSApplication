@@ -115,6 +115,16 @@ namespace TTS.Service.Implementation
             return dto;
         }
 
+        public List<Activity> GetAllActivities()
+        {
+            return _activityRepository.GetAll()
+                .Include(a => a.ConsultantProject)
+                .Include("ConsultantProject.Consultant")
+                .Include("ConsultantProject.Consultant.User")
+                .Include("ConsultantProject.Project")
+                .ToList();
+        }
+
         public ActivitiesDto GetActivitiesForProject(BaseEntity model)
         {
             var activities = _activityRepository.GetAll()
@@ -201,19 +211,17 @@ namespace TTS.Service.Implementation
             project.Status = dto.Status;
             project.Expertise = dto.Expertise;
             project.StartDate = dto.StartDate;
+            project.EndDate = dto.EndDate;
 
-            if(dto.EndDate != project.EndDate)
+           if(project.Status == ProjectStatus.Completed)
             {
-                project.EndDate = (dto.Status == ProjectStatus.Invalid || dto.Status == ProjectStatus.Completed)
-                    ? DateTime.Now
-                    : dto.EndDate;
+                project.CompletedOn = DateTime.Now;
             }
             else
             {
-                project.EndDate = dto.EndDate;
+                project.CompletedOn = null;
             }
             
-
             _projectRepository.Update(project);
 
             return true;
@@ -233,6 +241,15 @@ namespace TTS.Service.Implementation
             activity.Status = dto.Status;
             activity.StartDate = dto.StartDate;
             activity.EndDate = dto.EndDate;
+
+            if(activity.Status == ActivityStatus.Completed)
+            {
+                activity.CompletedOn = DateTime.Now;
+            }
+            else
+            {
+                activity.CompletedOn = null;
+            }
 
             _activityRepository.Update(activity);
 
@@ -261,6 +278,7 @@ namespace TTS.Service.Implementation
                 Description = dto.Description,
                 Status = dto.Status,
                 Expertise = dto.Expertise,
+                CreatedOn = DateTime.Now,
                 StartDate = dto.StartDate,
                 EndDate = dto.EndDate,
                 CreatedById = dto.CreatedById
@@ -306,6 +324,7 @@ namespace TTS.Service.Implementation
                 Title = dto.Title,
                 Description = dto.Description,
                 Status = dto.Status,
+                CreatedOn = DateTime.Now,
                 StartDate = dto.StartDate,
                 EndDate = dto.EndDate,
                 Comments = new List<Comment>()

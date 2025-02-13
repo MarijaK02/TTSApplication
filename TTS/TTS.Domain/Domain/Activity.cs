@@ -13,12 +13,13 @@ namespace TTS.Domain.Domain
     {
         public Guid ConsultantProjectId { get; set; }
         public ConsultantProject? ConsultantProject { get; set; }
-
         public string Title { get; set; }
         public string? Description { get; set; }
         public ActivityStatus Status { get; set; }
+        public DateTime? CreatedOn { get; set; }
         public DateTime StartDate { get; set; }
-        public DateTime? EndDate { get; set; }
+        public DateTime EndDate { get; set; }
+        public DateTime? CompletedOn { get; set; }
 
         public virtual ICollection<Comment>? Comments { get; set; }
     }

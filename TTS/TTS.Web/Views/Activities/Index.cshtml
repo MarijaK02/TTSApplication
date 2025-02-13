@@ -1,4 +1,5 @@
 ﻿@using TTS.Domain.DTO
+@using TTS.Domain.Enum
 @model IndexActivitesDto
 
 @{
@@ -36,25 +37,46 @@
 </nav>
 
 <div class="container mt-3">
-    <div class="d-flex align-items-baseline w-100 justify-content-between">
-        <div class="me-3">
-            <a asp-action="MyProjects" asp-controller="Projects" class="btn btn-outline-warning border border-2 border-warning"><i class="bi bi-arrow-left fw-bolder"></i></a>
-        </div>
-        <form class="col-sm-3" method="get" asp-action="Index">
-            <input type="hidden" name="projectId" value="@Model.ProjectId" />
-            <input type="hidden" name="projectTitle" value="@Model.ProjectTitle" />
+    <a asp-action="MyProjects" asp-controller="Projects" class="btn btn-outline-warning border border-2 border-warning me-3">
+        <i class="bi bi-arrow-left fw-bolder"></i>
+    </a>
+    <form method="get" asp-action="Index">
+        <input type="hidden" name="projectId" value="@Model.ProjectId" />
+        <input type="hidden" name="projectTitle" value="@Model.ProjectTitle" />
 
-            <div class="mb-3">
-                <select class="form-select" id="consultant" name="selectedConsultantId" onchange="this.form.submit()">
-                    <option selected>Сите консултанти</option>
-                    @foreach (var c in Model.Consultants)
-                    {
-                        <option value="@c.Id" selected="@(Model.SelectedConsultantId == c.Id ? "selected" : null)">@c.User.FirstName @c.User.LastName</option>
-                    }
-                </select>
+        <div class="row mb-3 mt-3">
+            <div class="d-flex col-6">
+                <input type="text" name="searchTerm" class="form-control me-2 w-75" placeholder="@(Model.SearchTerm ?? "Пребарај по име на активност")" value="@Context.Request.Query["search"]" />
+                <button type="submit" class="btn btn-outline-primary">
+                    <i class="bi bi-search"></i> Пребарај
+                </button>
             </div>
-        </form>
-    </div>
+
+            <div class="d-flex col-6 justify-content-end">
+                <div class="me-3 w-100">
+                    <select class="form-select" id="expertise" name="selectedStatus" onchange="this.form.submit()">
+                        <option selected>Сите</option>
+                        @foreach (var s in Enum.GetValues<ActivityStatus>())
+                        {
+                            <option value="@s" selected="@(Model.SelectedStatus == s ? "selected" : null)">@s.ToString()</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="w-100">
+                    <select class="form-select" id="consultant" name="selectedConsultantId" onchange="this.form.submit()">
+                        <option selected>Сите консултанти</option>
+                        @foreach (var c in Model.Consultants)
+                        {
+                            <option value="@c.Id" selected="@(Model.SelectedConsultantId == c.Id ? "selected" : null)">@c.User.FirstName @c.User.LastName</option>
+                        }
+                    </select>
+                </div>
+            </div>            
+        </div>
+    </form>
+
+
   
     @if (!Model!.Activites!.Any())
     {
@@ -81,13 +103,20 @@
                         Наслов
                     </th>
                     <th class="fw-bold">
+                        Одговорен консултант
+                    </th>
+
+                    <th class="fw-bold">
+                        Време Од
+                    </th>
+                    <th class="fw-bold">
+                        Време До
+                    </th>
+                    <th class="fw-bold">
                         Статус
                     </th>
                     <th class="fw-bold">
-                        Датум на креирање
-                    </th>
-                    <th class="fw-bold">
-                        Одговорен консултант
+                        Завршена на
                     </th>
                     @if (User.IsInRole("Consultant"))
                     {
@@ -104,20 +133,27 @@
                         <td>
                             @Html.DisplayFor(modelItem => item.Title)
                         </td>
-                        <td class="text-@(item.Status == TTS.Domain.Enum.ActivityStatus.New ? "primary" :
-                item.Status == TTS.Domain.Enum.ActivityStatus.Active ? "warning" :
-                item.Status == TTS.Domain.Enum.ActivityStatus.Invalid ? "danger" :
-                "success")">
-                            @Html.DisplayFor(modelItem => item.Status)
-                        </td>
-                        <td>
-                            @Html.DisplayFor(modelItem => item.StartDate)
-                        </td>
                         <td>
                             @Html.DisplayFor(modelItem => item.ConsultantProject!.Consultant!.User.FirstName)
                             @Html.DisplayFor(modelItem => item.ConsultantProject!.Consultant!.User.LastName)
                         </td>
-                        @if (User.IsInRole("Consultant"))
+                        <td>
+                            @item.StartDate.ToString()
+                        </td>
+                        <td>
+                            @item.EndDate.ToString()
+                        </td>
+                        <td class="text-@(item.Status == TTS.Domain.Enum.ActivityStatus.New ? "primary" :
+                item.Status == TTS.Domain.Enum.ActivityStatus.Active ? "warning" :
+                item.Status == TTS.Domain.Enum.ActivityStatus.Invalid ? "danger" :
+                "success")">
+                            @item.Status
+                        </td>
+                        <td>
+                            @item.CompletedOn.ToString()
+                        </td>
+                       
+                        @if (User.IsInRole("Consultant") && User.Identity!.Name!.Equals(item.ConsultantProject?.Consultant?.User.Email))
                         {
                             <td>
                                 <a class="btn btn-outline-primary me-3" asp-action="Edit" asp-route-projectId="@Model.ProjectId" asp-route-id="@item.Id" asp-route-projectTitle="@Model.ProjectTitle">Промени</a>
@@ -129,7 +165,6 @@
                                         <div class="modal-content">
                                             <div class="modal-header">
                                                 <h5 class="modal-title">Дали сте сигурни дека сакате да ја избришете @(item.Title)?</h5>
-                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                             </div>
                                             <div class="modal-body">
                                                 <p>Со клик на копчето потврди ќе ја избриешете активноста засекогаш!</p>
@@ -138,13 +173,14 @@
                                                 <button type="button"
                                                         class="btn btn-secondary"
                                                         data-bs-dismiss="modal"
+                                                        onclick="event.stopPropagation();"
                                                         asp-action="Index" asp-route-projectId="@Model.ProjectId" asp-route-projectTitle="@Model.ProjectTitle">
                                                     Откажи
                                                 </button>
                                                 <form asp-action="DeleteConfirmed" method="post" asp-route-id="@item.Id">
                                                     <input type="hidden" name="projectId" value="@Model.ProjectId" />
                                                     <input type="hidden" name="projectTitle" value="@Model.ProjectTitle" />
-                                                    <button type="submit" class="btn btn-danger">Потврди</button>
+                                                    <button type="submit" class="btn btn-danger" onclick="event.stopPropagation();">Потврди</button>
                                                 </form>
                                             </div>
                                         </div>
@@ -162,7 +198,7 @@
         <div class="row border border-1 border-dark p-3 rounded-2">
             <form asp-action="Create" method="post">
                 <input type="hidden" name="projectId" value="@Model.ProjectId" />
-                <input type="hidden" name="projectTitle" value="@Model.ProjectTitle" />
+                <input type="hidden" name="projectTitle" value="@Model.ProjectTitle"/>
 
                 <div class="mb-3">
                     <label for="newActivityTitle" class="form-label">Наслов на активност</label>
@@ -171,11 +207,15 @@
 
                 <div class="mb-3">
                     <label for="newActivityDescription" class="form-label">Опис на активност</label>
-                    <textarea class="form-control" id="newActivityDescription" name="newActivityDescription" rows="10" required></textarea>
+                    <textarea class="form-control" id="newActivityDescription" name="newActivityDescription" rows="10"></textarea>
                 </div>
 
                 <div class="mb-3 col-sm-2">
-                    <label for="endDate" class="form-label">Краен рок</label>
+                    <label for="startDate" class="form-label">Време од</label>
+                    <input type="datetime-local" class="form-control" id="startDate" name="startDate" required>
+                </div>
+                <div class="mb-3 col-sm-2">
+                    <label for="endDate" class="form-label">Време до</label>
                     <input type="datetime-local" class="form-control" id="endDate" name="endDate" required>
                 </div>
 

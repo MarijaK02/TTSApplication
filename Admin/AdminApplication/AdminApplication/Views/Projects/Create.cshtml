@@ -60,7 +60,7 @@
                 <label class="col-1 fw-bold">Клиент:</label>
                 <div class="col-5">
                     <select id="ClientId" class="form-control" asp-for="Project.CreatedById">
-                        <option value="" disabled selected>-- Select Client --</option>
+                        <option value="" disabled selected>-- Изберете клиент --</option>
                         @foreach (var client in Model.Clients)
                         {
                             <option value="@client.Id">@client.User.FirstName</option>

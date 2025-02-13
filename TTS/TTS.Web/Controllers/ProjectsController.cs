@@ -38,7 +38,7 @@ namespace TTS.Web.Controllers
 
         [Route("MyProjects")]
         [Route("/")]
-        public async Task<IActionResult> MyProjects(string? searchTerm, List<Expertise>? expertiseList)
+        public async Task<IActionResult> MyProjects(string? searchTerm, Expertise? selectedExpertise)
         {
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
@@ -47,18 +47,25 @@ namespace TTS.Web.Controllers
             }
 
             var role = (await _userManager.GetRolesAsync(user)).FirstOrDefault();
-            var projects = new List<GetProjectDto>();
+            var projects = new List<Project>();
 
             if (role!.Equals("Client"))
             {
-                projects = _projectsService.GetProjectsForClient(user.Id, searchTerm, expertiseList);
+                projects = _projectsService.GetProjectsForClient(user.Id, searchTerm, selectedExpertise);
             }
             else if (role!.Equals("Consultant"))
             {
                 projects = _projectsService.GetProjectsForConsultant(user.Id, searchTerm);               
             }
 
-            return View(projects);
+            var dto = new IndexProjectsDto
+            {
+                Projects = projects,
+                SearchTerm = searchTerm,
+                SelectedExpertise = selectedExpertise
+            };
+
+            return View(dto);
         }
 
         [Authorize(Roles = "Consultant")]
@@ -101,7 +108,14 @@ namespace TTS.Web.Controllers
             {
                 return NotFound("Проектот не е пронајден");
             }
-            var project = _projectsService.GetProjectDetails(id);
+            var userId = _userManager.GetUserId(User);
+
+            if (userId == null)
+            {
+                return NotFound("Корисникот не е пронајден");
+            }
+
+            var project = _projectsService.GetProjectDetails(id, User.IsInRole("Consultant"), userId);
 
             return View(project);
         }
@@ -132,15 +146,9 @@ namespace TTS.Web.Controllers
                 if(userId == null)
                 {
                     return NotFound("Коирсинкот не постои");
-                }
-                
-                var client = _userService.GetClient(userId);
-                if(client == null)
-                {
-                    return BadRequest();
-                }
+                }              
 
-                _projectsService.CreateProject(dto, client);
+                _projectsService.CreateProject(dto, userId);
                 return RedirectToAction(nameof(MyProjects));                                            
             }
             return View(dto);
@@ -163,6 +171,7 @@ namespace TTS.Web.Controllers
                 Title = project.Title,
                 Expertise = project.Expertise,
                 Description = project.Description,
+                StartDate = project.StartDate,
                 EndDate = project.EndDate
             };
 
@@ -193,20 +202,8 @@ namespace TTS.Web.Controllers
             return View(dto);
         }
 
-        // GET: Projects/Delete/5
-        public IActionResult Delete(Guid id)
-        {
-            var project = _projectsService.Get(id);
-            if (project == null)
-            {
-                return NotFound("Проектот не посоти");
-            }
-
-            return View(project);
-        }
-
-
         // POST: Projects/Delete/5
+        [Authorize(Roles = "Client")]
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public IActionResult DeleteConfirmed(Guid id)

@@ -84,7 +84,7 @@
                                 <td>@project.Expertise</td>
                                 <td>@project.Status</td>
                                 <td>@project.StartDate.ToShortDateString()</td>
-                                <td>@(project.EndDate?.ToShortDateString() ?? "Ongoing")</td>
+                                <td>@(project.EndDate.ToShortDateString())</td>
                             </tr>
                         }
                     </tbody>

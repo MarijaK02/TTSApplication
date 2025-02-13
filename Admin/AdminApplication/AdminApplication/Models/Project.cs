@@ -12,10 +12,12 @@ namespace AdminApplication.Models
         public ProjectStatus Status { get; set; }
 
         public string? Description { get; set; }
+        public DateTime CreatedOn { get; set; }
 
         public DateTime StartDate { get; set; }
 
-        public DateTime? EndDate { get; set; }
+        public DateTime EndDate { get; set; }
+        public DateTime? CompletedOn { get; set; }
 
         public Guid CreatedById { get; set; }
         public Client? CreatedBy { get; set; }

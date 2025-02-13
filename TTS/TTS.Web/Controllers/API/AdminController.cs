@@ -59,6 +59,12 @@ namespace TTS.Web.Controllers.API
             return _adminService.GetDetailsForProject(model);
         }
 
+        [HttpGet("[action]")]
+        public List<Activity> GetAllActivities()
+        {
+            return _adminService.GetAllActivities();
+        }
+
         [HttpPost("[action]")]
         public ActivitiesDto GetActivitiesForProject(BaseEntity model)
         {

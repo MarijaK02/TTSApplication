@@ -55,19 +55,21 @@
                                 };
 
                                 <li class="list-group-item">
-                                        <div>
-                                            <h5>@application.Project.Title</h5>
-                                            <p><strong>Експертиза:</strong> @application.Project.Expertise</p>
-                                            <p class="truncate-two-rows">@application.Project.Description</p>
-                                            <p><strong>Креиран на:</strong> @application.Project.StartDate.ToShortDateString()</p>
-                                            <div class="d-flex"><strong class="me-2">Статус на проектот:</strong><p class="@statusClass"> @application.Project.Status</p></div>
-                                        </div>
+                                    <div>
+                                        <h5>@application.Project.Title</h5>
+                                        <p><strong>Датум на аплицирање:</strong> @application.DateApplied.ToShortDateString()</p>
+                                        <p><strong>Почетен датум на проектот:</strong> @application.Project.StartDate.ToShortDateString()</p>
+                                        <div class="d-flex"><strong class="me-2">Статус на проектот:</strong><p class="@statusClass"> @application.Project.Status</p></div>
 
-                                        @if(Model.Status == ApplicationStatus.Applied){
-                                            <form asp-action="RemoveApplication" method="post" asp-route-applicationId="@application.Id">
-                                                <button class="btn btn-danger">Откажете ја апликацијата</button>
-                                            </form>
-                                        }
+                                        <p>@application.Project.Description</p>
+
+                                    </div>
+
+                                    @if(Model.Status == ApplicationStatus.Applied){
+                                        <form asp-action="RemoveApplication" method="post" asp-route-applicationId="@application.Id">
+                                            <button class="btn btn-danger">Откажете ја апликацијата</button>
+                                        </form>
+                                    }
 
                                     @if(Model.Status == ApplicationStatus.Rejected)
                                     {

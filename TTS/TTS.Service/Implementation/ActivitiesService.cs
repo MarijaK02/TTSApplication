@@ -38,7 +38,7 @@ namespace TTS.Service.Implementation
             _userService = userService;
         }
 
-        public IndexActivitesDto GetAllProjectActivites(Guid projectId, string projectTitle, Guid? selectedConsultantId)
+        public IndexActivitesDto GetAllProjectActivites(Guid projectId, string projectTitle, Guid? selectedConsultantId, ActivityStatus? selectedStatus, string? searchTerm)
         {
             var consultantProjects = _consultantProjectRepository.GetAll()
                 .Include(cp => cp.Activites)
@@ -53,7 +53,7 @@ namespace TTS.Service.Implementation
                 .SelectMany(cp => cp.Activites)
                 .ToList();
 
-            activities = FilterActivitiesByConsultant(activities, selectedConsultantId);
+            activities = FilterActivitiesByConsultant(activities, selectedConsultantId, selectedStatus, searchTerm);
 
             var dto = new IndexActivitesDto
             {
@@ -67,9 +67,26 @@ namespace TTS.Service.Implementation
             return dto;
         }
 
-        private List<Activity> FilterActivitiesByConsultant(List<Activity> rawActivities, Guid? selectedConsultantId)
+        private List<Activity> FilterActivitiesByConsultant(List<Activity> rawActivities, Guid? selectedConsultantId, ActivityStatus? selectedStatus, string? searchTerm)
         {
-            return selectedConsultantId == null ? rawActivities : rawActivities.Where(a => a.ConsultantProject?.ConsultantId == selectedConsultantId).ToList();
+            var result = rawActivities;
+
+            if(selectedConsultantId != null)
+            {
+                result = result.Where(a => a.ConsultantProject?.ConsultantId == selectedConsultantId).ToList();
+            }
+
+            if(selectedStatus != null)
+            {
+                result = result.Where(a => a.Status == selectedStatus).ToList();
+            }
+
+            if(searchTerm != null)
+            {
+                return result.Where(a => a.Title.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)).ToList();
+            }
+
+            return result;
         }
 
         public Activity Get(Guid activityId)
@@ -96,14 +113,18 @@ namespace TTS.Service.Implementation
 
         private int GetTotalActiveHours(Activity activity)
         {
-            return (int)((TimeSpan)(DateTime.Now - activity.StartDate)).TotalHours;
+            if (activity.Status == ActivityStatus.Invalid || activity.Status == ActivityStatus.Completed)
+            {
+                return (int)(activity.EndDate - activity.StartDate).TotalHours;
+            }
+            return (int)(DateTime.Now - activity.StartDate).TotalHours;
         }
         private int GetTotalExpectedHours(Activity activity)
         {
-            return activity.EndDate != null ? (int)((TimeSpan)(activity.EndDate - activity.StartDate)).TotalHours : 0;
+            return (int)(activity.EndDate - activity.StartDate).TotalHours;
         }
 
-        public void Create(string userId, Guid projectId, string title, string? description, DateTime? endDate)
+        public void Create(string userId, Guid projectId, string title, string? description, DateTime startDate, DateTime endDate)
         {
             var consultant = _userService.GetConsultant(userId);
 
@@ -123,7 +144,8 @@ namespace TTS.Service.Implementation
                     Title = title,
                     Description = description,
                     Status = ActivityStatus.New,
-                    StartDate = DateTime.Now,
+                    CreatedOn = DateTime.Now,
+                    StartDate = startDate,
                     EndDate = endDate,
                     ConsultantProjectId = consultantProject.Id,
                     Comments = new List<Comment>()
@@ -137,22 +159,24 @@ namespace TTS.Service.Implementation
             }
         }
 
-        public void Edit(Guid activityId, string title, string description, ActivityStatus status, DateTime? endDate)
+        public void Edit(Guid activityId, string title, string? description, ActivityStatus status, DateTime startDate, DateTime endDate)
         {
             var activity = Get(activityId);
 
             activity.Title = title;
             activity.Description = description;
             activity.Status = status;
+            activity.StartDate = startDate;
+            activity.EndDate = endDate;
 
-            if(activity.Status == ActivityStatus.Invalid || activity.Status == ActivityStatus.Completed)
+            if (activity.Status == ActivityStatus.Completed)
             {
-                activity.EndDate = DateTime.Now;
+                activity.CompletedOn = DateTime.Now;
             }
             else
             {
-                activity.EndDate = endDate;
-            }
+                activity.CompletedOn = null;
+            }         
 
             _activitiesRepository.Update(activity);            
         }

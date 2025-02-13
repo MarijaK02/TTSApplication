@@ -18,11 +18,18 @@ namespace TTS.Domain.Domain
         [Display(Name = "Опис")]
         public string? Description { get; set; }
 
+
         [Display(Name = "Датум на креирање")]
+        public DateTime? CreatedOn { get; set; }
+
+        [Display(Name = "Почетен датум")]
         public DateTime StartDate { get; set; }
 
         [Display(Name = "Краен рок")]
-        public DateTime? EndDate { get; set; }
+        public DateTime EndDate { get; set; }
+
+        [Display(Name = "Датум на комплетирање")]
+        public DateTime? CompletedOn { get; set; }
 
         public Guid CreatedById { get; set; }
         public Client? CreatedBy { get; set; } 

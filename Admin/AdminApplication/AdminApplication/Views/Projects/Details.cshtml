@@ -19,83 +19,96 @@
 @* Deatils *@
 <div class="card shadow-sm w-75">
     <form asp-action="EditProject" method="post">
-        <div class="card-header bg-opacity-50 bg-primary d-flex justify-content-between">
-            <h5 class="mb-0">Детали за проектот</h5>
-            <button type="submit" class="btn btn-dark">Зачувај</button>
-        </div>
-        <div class="card-body">
+        <div class="card">
+            <div class="card-header bg-opacity-50 bg-primary d-flex justify-content-between">
+                <h5 class="mb-0">Детали за проектот</h5>
+                <button type="submit" class="btn btn-dark">Зачувај</button>
+            </div>
+            <div class="card-body">
+                <input type="hidden" asp-for="Project.Id" />
 
-            <input type="hidden" asp-for="Project.Id" />
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label class="fw-bold">Клиент:</label>
+                        <input class="form-control" style="max-width: 200px;"
+                               value="@Model.Project.CreatedBy?.User.FirstName @Model.Project.CreatedBy?.User.LastName" disabled />
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label class="fw-bold">Дата на креирање:</label>
+                        <input type="date" class="form-control" asp-for="Project.CreatedOn" disabled/>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label class="fw-bold">Дата на комплетирање:</label>
+                        <input type="date" class="form-control" asp-for="Project.CompletedOn" disabled />
+                    </div>
+                </div>
 
-            <div class="row mb-2">
-                <label class="col-7 fw-bold">Наслов:</label>
-                <div class="col">
-                    <input type="text" class="form-control" asp-for="Project.Title" required />
+                <div class="row">
+                    <!-- Title -->
+                    <div class="col-md-6 mb-3">
+                        <label class="fw-bold">Наслов:</label>
+                        <input type="text" class="form-control" asp-for="Project.Title" required />
+                    </div>
+
+                    <!-- Expertise -->
+                    <div class="col-md-6 mb-3">
+                        <label class="fw-bold">Експертиза:</label>
+                        <select class="form-control" asp-for="Project.Expertise" asp-items="@(new SelectList(Enum.GetValues(typeof(Expertise))))">
+                            <option value="" disabled>-- Изберете експертиза --</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <!-- Status -->
+                    <div class="col-md-6 mb-3">
+                        <label class="fw-bold">Статус:</label>
+                        <select class="form-control" asp-for="Project.Status" asp-items="@(new SelectList(Enum.GetValues(typeof(ProjectStatus))))">
+                            <option value="" disabled>-- Изберете статус --</option>
+                        </select>
+                    </div>
+
+                    <!-- Start Date -->
+                    <div class="col-md-6 mb-3">
+                        <label class="fw-bold">Дата на почеток:</label>
+                        <input type="date" class="form-control" asp-for="Project.StartDate" required />
+                    </div>
+                </div>
+
+                <div class="row">
+                    <!-- End Date -->
+                    <div class="col-md-6 mb-3">
+                        <label class="fw-bold">Краен рок:</label>
+                        <input type="date" class="form-control" asp-for="Project.EndDate" />
+                    </div>
+
+                    <div class="row col-md-6">
+                        <!-- Number of Consultants Working -->
+                        <div class="col-md-3 mb-3">
+                            <label class="fw-bold">Консултанти (активни):</label>
+                            <input type="number" class="form-control text-center" style="max-width: 80px;"
+                                   value="@Model.Project.ConsultantProjects?.Count(cp => cp.ApplicationStatus == ApplicationStatus.Accepted)" disabled />
+                        </div>
+
+                        <!-- Number of Applicants -->
+                        <div class="col-md-3 mb-3">
+                            <label class="fw-bold">Консултанти (аплицирани):</label>
+                            <input type="number" class="form-control text-center" style="max-width: 80px;"
+                                   value="@Model.Project.ConsultantProjects?.Count(cp => cp.ApplicationStatus == ApplicationStatus.Applied)" disabled />
+                        </div>
+                    </div>
+                </div>               
+
+                <!-- Description -->
+                <div class="mb-3">
+                    <label class="fw-bold">Опис:</label>
+                    <textarea class="form-control" asp-for="Project.Description" rows="10"></textarea>
                 </div>
             </div>
-
-            <div class="row mb-2">
-                <label class="col-7 fw-bold">Експертиза:</label>
-                <div class="col">
-                    <select class="form-control" asp-for="Project.Expertise" asp-items="@(new SelectList(Enum.GetValues(typeof(Expertise))))">
-                        <option value="" disabled>-- Изберете експертиза --</option>
-                    </select>
-                </div>
-            </div>
-
-            <div class="row mb-2">
-                <label class="col-7 fw-bold">Статус:</label>
-                <div class="col">
-                    <select class="form-control" asp-for="Project.Status" asp-items="@(new SelectList(Enum.GetValues(typeof(ProjectStatus))))">
-                        <option value="" disabled>-- Изберете статус --</option>
-                    </select>
-                </div>
-            </div>
-
-            <div class="row mb-2">
-                <label class="col-7 fw-bold">Дата на почеток:</label>
-                <div class="col">
-                    <input type="date" class="form-control" asp-for="Project.StartDate" required />
-                </div>
-            </div>
-
-            <div class="row mb-2">
-                <label class="col-7 fw-bold">Краен рок:</label>
-                <div class="col">
-                    <input type="date" class="form-control" asp-for="Project.EndDate" />
-                </div>
-            </div>
-
-            <div class="row mb-2">
-                <label class="col-7 fw-bold">Број на консултанти кои работат на проектот:</label>
-                <div class="col">
-                    <input type="number" class="form-control" value="@Model.Project.ConsultantProjects?.Where(cp => cp.ApplicationStatus == ApplicationStatus.Accepted).Count()" disabled />
-                </div>
-            </div>
-
-            <div class="row mb-2">
-                <label class="col-7 fw-bold">Број на консултанти кои аплицирале за работа на проектот:</label>
-                <div class="col">
-                    <input type="number" class="form-control" value="@Model.Project.ConsultantProjects?.Where(cp => cp.ApplicationStatus == ApplicationStatus.Applied).Count()" disabled />
-                </div>
-            </div>
-
-            <div class="row mb-2">
-                <label class="col-7 fw-bold">Опис:</label>
-                <div class="col">
-                    <textarea class="form-control" asp-for="Project.Description" rows="5"></textarea>
-                </div>
-            </div>
-
-            <div class="row mb-2">
-                <label class="col-7 fw-bold">Клиент:</label>
-                <div class="col">
-                    <input class="form-control" value="@Model.Project.CreatedBy?.User.FirstName" disabled />
-                </div>
-            </div>
-
         </div>
     </form>
+
+
 
 </div>
 
@@ -179,11 +192,34 @@
                             <td>@project.Consultant?.User.LastName</td>
                             <td>@project.Consultant?.User.Email</td>
                             <td>
-                                <form method="post" asp-action="DeleteConsultantFromProject">
-                                    <input type="hidden" value="@project.Id" name="consultantProjectId"/>
-                                    <input type="hidden" value="@Model.Project.Id" name="projectId" />
-                                    <button class="btn btn-danger"><i class="bi bi-trash3"></i></button>
-                                </form>
+                                <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#myModal" onclick="event.stopPropagation();">
+                                    <i class="bi bi-trash3"></i>
+                                </button>
+                                <div class="modal fade" tabindex="-1" id="myModal">
+                                    <div class="modal-dialog">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title">Дали сте сигурни дека сакате да продолжите со акцијата?</h5>
+                                            </div>
+                                            <div class="modal-body">
+                                                <p>Со клик на копчето потврди ќе го избришете објекотт заскогаш!</p>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <a class="btn btn-secondary"
+                                                   data-bs-dismiss="modal"
+                                                   onclick="event.stopPropagation();"
+                                                   asp-action="Details" asp-route-projectId="@project.ProjectId">
+                                                    Откажи
+                                                </a>
+                                                <form asp-action="DeleteConsultantFromProject" method="post">
+                                                    <input type="hidden" value="@project.Id" name="consultantProjectId" />
+                                                    <input type="hidden" value="@Model.Project.Id" name="projectId" />
+                                                    <button type="submit" class="btn btn-danger" onclick="event.stopPropagation();">Потврди</button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </td>
                         </tr>
                     }

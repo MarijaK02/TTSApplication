@@ -42,9 +42,9 @@ namespace TTS.Web.Controllers
 
         // GET: ConsultantActivites
         [HttpGet]
-        public IActionResult Index(Guid projectId, string projectTitle, Guid? selectedConsultantId)
+        public IActionResult Index(Guid projectId, string projectTitle, Guid? selectedConsultantId, ActivityStatus? selectedStatus, string? searchTerm)
         {
-            var activites = _activitesService.GetAllProjectActivites(projectId, projectTitle, selectedConsultantId);            
+            var activites = _activitesService.GetAllProjectActivites(projectId, projectTitle, selectedConsultantId, selectedStatus, searchTerm);            
 
             return View(activites);
         }
@@ -69,7 +69,7 @@ namespace TTS.Web.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost("Create")]
         [ValidateAntiForgeryToken]
-        public IActionResult Create(Guid projectId, string projectTitle, string newActivityTitle, string newActivityDescription, DateTime endDate)
+        public IActionResult Create(Guid projectId, string projectTitle, string newActivityTitle, string newActivityDescription, DateTime startDate, DateTime endDate)
         {
             if (ModelState.IsValid)
             {
@@ -79,7 +79,7 @@ namespace TTS.Web.Controllers
                     return NotFound("Коирсинкот не постои");
                 }
 
-                _activitesService.Create(userId, projectId, newActivityTitle, newActivityDescription, endDate);
+                _activitesService.Create(userId, projectId, newActivityTitle, newActivityDescription, startDate, endDate);
                                
             }
             return RedirectToAction(nameof(Index), new { projectId = projectId, projectTitle = projectTitle });
@@ -103,6 +103,7 @@ namespace TTS.Web.Controllers
                 Title = activity.Title,
                 Description = activity.Description ?? "",
                 ActivityStatus = activity.Status,
+                StartDate = activity.StartDate,
                 EndDate = activity.EndDate
             };   
             
@@ -124,7 +125,7 @@ namespace TTS.Web.Controllers
                     return NotFound();
                 }
 
-                _activitesService.Edit(activityId, dto.Title, dto.Description, dto.ActivityStatus, dto.EndDate);
+                _activitesService.Edit(activityId, dto.Title, dto.Description, dto.ActivityStatus, dto.StartDate, dto.EndDate);
 
                 return RedirectToAction(nameof(Details), new { projectId = dto.ProjectId, id = activityId, projectTitle = dto.ProjectTitle });
             }

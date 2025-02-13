@@ -17,6 +17,7 @@ namespace TTS.Service.Interface
         public Client GetDetailsForClient(BaseEntity model);
         public Consultant GetDetailsForConsultant(BaseEntity model);
         public DetailsProjectDto GetDetailsForProject(BaseEntity model);
+        public List<Activity> GetAllActivities();
         public ActivitiesDto GetActivitiesForProject(BaseEntity model);
         public Activity GetActivityDetails(BaseEntity model);
         public List<ConsultantProject> GetAllConsultantsWorkingOnProject(Guid projectId);

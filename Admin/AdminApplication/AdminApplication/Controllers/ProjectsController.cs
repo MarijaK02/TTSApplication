@@ -238,20 +238,25 @@ namespace AdminApplication.Controllers
             return RedirectToAction(nameof(Details), new { projectId = projectId });
         }
 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
         public IActionResult Delete(Guid projectId)
         {
 
-            HttpClient client = new HttpClient();
-            string url = "https://localhost:44315/api/Admin/DeleteProject";
-
-            var model = new
+            if(ModelState.IsValid)
             {
-                Id = projectId
-            };
+                HttpClient client = new HttpClient();
+                string url = "https://localhost:44315/api/Admin/DeleteProject";
 
-            HttpContent content = new StringContent(JsonConvert.SerializeObject(model), Encoding.UTF8, "application/json");
-            HttpResponseMessage response = client.PostAsync(url, content).Result;
+                var model = new
+                {
+                    Id = projectId
+                };
 
+                HttpContent content = new StringContent(JsonConvert.SerializeObject(model), Encoding.UTF8, "application/json");
+                HttpResponseMessage response = client.PostAsync(url, content).Result;
+            }
+            
             return RedirectToAction(nameof(Index));
         }
     }

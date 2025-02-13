@@ -14,6 +14,6 @@ namespace TTS.Domain.DTO.API
         public string? Description { get; set; }
         public ActivityStatus Status { get; set; }
         public DateTime StartDate { get; set; }
-        public DateTime? EndDate { get; set; }
+        public DateTime EndDate { get; set; }
     }
 }

@@ -2,6 +2,7 @@
 using AdminApplication.Models.DTO;
 using AdminApplication.Models.DTO.API;
 using AdminApplication.Models.Enums;
+using AdminApplication.Models.Helpers;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
@@ -68,15 +69,68 @@ namespace AdminApplication.Controllers
                     TotalConsultantFinishedActivites = p.Activites.Where(a => a.Status == ActivityStatus.Completed).Count(),
                     TotalConsultantInvalidActivities = p.Activites.Where(a => a.Status == ActivityStatus.Invalid).Count(),
                     TotalConsultantNewActivities = p.Activites.Where(a => a.Status == ActivityStatus.New).Count(),
-                    TotalHoursWorkingOnProject = (int) p.Activites
-                        .Sum(a =>
-                            (a.Status == ActivityStatus.Invalid || a.Status == ActivityStatus.Completed
-                                ? (a.EndDate - a.StartDate)?.TotalHours
-                                : (DateTime.Now - a.StartDate).TotalHours) ?? 0)
+                    TotalHoursWorkingOnProject = TotalHoursWorkingOnProject(p.Activites.ToList())
                 }).ToList()
             };
 
             return View(consultantDto);
+        }
+
+        private int TotalHoursWorkingOnProject(List<Activity> activities)
+        {
+            //zapocnata - kompletirana
+            //Activity 1 01.02 - 02.02
+            //Activity 2 04.02 - 08.02
+            //Activity 3 05.02 - 06.02
+            //Activity 4 07.02 - 10.02
+            //Activity 5 15.02 - 17.02
+            //Intervals: [ (01.02 - 02.02), (04.02 - 10.02) ]
+            if (activities == null || activities.Count == 0)
+            {
+                return 0;
+            }
+
+            var sortedActivities = activities.Where(a => a.StartDate < DateTime.Now).OrderBy(a => a.StartDate).ToList();
+
+            if (!sortedActivities.Any())
+            {
+                return 0;
+            }
+
+            var intervals = new List<Interval>();
+
+            intervals.Add(new Interval
+            {
+                From = sortedActivities[0].StartDate,
+                To = sortedActivities[0].CompletedOn ?? DateTime.Now
+            });
+
+            for (int i = 1; i < sortedActivities.Count; i++)
+            {
+                var activity = sortedActivities[i];
+                var lastInterval = intervals.Last();
+
+                if (activity.StartDate <= lastInterval.To)
+                {
+                    if (activity.EndDate > lastInterval.To)
+                    {
+                        lastInterval.To = sortedActivities[i].CompletedOn ?? DateTime.Now;
+                    }
+                }
+                else
+                {
+                    intervals.Add(new Interval
+                    {
+                        From = activity.StartDate,
+                        To = sortedActivities[i].CompletedOn ?? DateTime.Now
+                    });
+                }
+            }
+
+            var total = intervals.Sum(i => (i.To - i.From).TotalHours);
+
+            return (int)Math.Round(total);
+
         }
 
         [HttpPost]

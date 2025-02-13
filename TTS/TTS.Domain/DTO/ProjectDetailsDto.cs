@@ -10,9 +10,14 @@ namespace TTS.Domain.DTO
     public class ProjectDetailsDto
     {
         public required Project Project { get; set; }
+
         public List<ConsultantProject>? Applications { get; set; }
         public List<Consultant>? Responsibles{ get; set; }
         public int TotalHours { get; set; }
         public int TotalExpectedHours { get; set; }
+        public int TotalActivites { get; set; }
+
+        public int? NumOfConsultantActivites { get; set; }
+        public int? TotalConsultantWorkedHours { get; set; }
     }
 }

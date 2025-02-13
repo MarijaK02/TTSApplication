@@ -1,4 +1,5 @@
-﻿@model TTS.Domain.DTO.ActivityDto
+﻿@using TTS.Domain.Enum
+@model TTS.Domain.DTO.ActivityDto
 
 @{
     ViewData["Title"] = "Details";
@@ -35,47 +36,22 @@
 </nav>
 
 <div class="container-fluid w-75">
-    <div>
-        <h4>@Html.DisplayFor(model => model.Activity!.Title)</h4>
+    <div class="">
+
         <div class="d-flex justify-content-between mb-3">
+            <h4>@Html.DisplayFor(model => model.Activity!.Title)</h4>
             <div>
                 @if (User.IsInRole("Consultant"))
                 {
                     <a class="btn btn-outline-primary me-2" asp-action="Edit" asp-route-id="@Model.Activity!.Id" asp-route-projectId="@Model.ProjectId" asp-route-projectTitle="@Model.ProjectTitle">Промени</a>
-                }
-
-                <div class="modal fade" tabindex="-1" id="myModal">
-                    <div class="modal-dialog">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <h5 class="modal-title text-danger">Дали сте сигурни дека сакате да ја избришете @(Model.Activity.Title)?</h5>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                            </div>
-                            <div class="modal-body">
-                                <p>Со клик на копчето потврди ќе ја избришете активноста засекогаш!</p>
-                            </div>
-                            <div class="modal-footer">
-                                <button type="button"
-                                        class="btn btn-secondary"
-                                        data-bs-dismiss="modal"
-                                        asp-action="Details" asp-route-projectId="@Model.ProjectId" asp-route-id="@Model.Activity.Id">
-                                    Откажи
-                                </button>
-
-                                <form asp-action="DeleteConfirmed" method="post" asp-route-id="@Model.Activity.Id">
-                                    <input type="hidden" name="projectId" value="@Model.ProjectId" />
-                                    <input type="hidden" name="projectTitle" value="@Model.ProjectTitle" />
-                                    <button type="submit" class="btn btn-danger">Потврди</button>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                }               
             </div>            
         </div>
         <hr />
 
         <dl class="row">
+            <dt class="col-sm-2">Креирана на</dt>
+            <dd class="col-sm-10">@Model.Activity.CreatedOn.ToString()</dd>
             <dt class="col-sm-2">Опис</dt>
             <dd class="col-sm-10">@Html.DisplayFor(model => model.Activity!.Description)</dd>
 
@@ -88,18 +64,32 @@
                 @Html.DisplayFor(model => model.Activity!.Status)
             </dd>
 
-            <dt class="col-sm-2">Почетен датум</dt>
+            <dt class="col-sm-2">Време Од</dt>
             <dd class="col-sm-10">@Html.DisplayFor(model => model.Activity!.StartDate)</dd>
 
-            <dt class="col-sm-2">Краен рок</dt>
+            <dt class="col-sm-2">Време До</dt>
             <dd class="col-sm-10">@Html.DisplayFor(model => model.Activity!.EndDate)</dd>
+            <dt class="col-sm-2">Завршена на</dt>
+            <dd class="col-sm-10">@Html.DisplayFor(model => model.Activity!.CompletedOn)</dd>
         </dl>
     </div>
-    @if (Model.TotalActiveHours > Model.TotalExpectedHours)
+    @if (Model.Activity.Status != ActivityStatus.Completed && Model.TotalActiveHours > Model.TotalExpectedHours)
     {
         <div class="alert alert-danger alert-dismissible fade show" role="alert">
             <i class="bi bi-exclamation-circle-fill me-3"></i>
-            Активноста ги надминува очекуваните работни саати за @((Model.TotalActiveHours - Model.TotalExpectedHours) / 24) денови и   @((Model.TotalActiveHours - Model.TotalExpectedHours) % 24) часови!
+            Активноста ги надминува очекуваните работни саати за @((Model.TotalActiveHours - Model.TotalExpectedHours) / 24)  дена и   @((Model.TotalActiveHours - Model.TotalExpectedHours) % 24) часа!
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+    @if(Model.Activity.Status == ActivityStatus.Completed && Model.Activity.EndDate < Model.Activity.CompletedOn)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-circle-fill me-3"></i>
+            @{
+                var total = (int)(Model.Activity.CompletedOn - Model.Activity.EndDate)?.TotalHours;
+            }
+
+            Активноста е комплетирана @(total / 24) дена и @(total % 24) часа подоцна од крајниот рок!
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     }
@@ -136,7 +126,7 @@
             <div class="card mb-3 comment" data-index="@i">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <div>
-                        <h5>@item.CreatedBy.FirstName @item.CreatedBy.LastName</h5>
+                        <h5>@item.CreatedBy?.FirstName @item.CreatedBy?.LastName</h5>
                         <span class="text-muted">@item.CreatedOn.ToLongDateString() @item.CreatedOn.ToLongTimeString()</span>
                     </div>
                     @if (item.CreatedBy.UserName == User!.Identity!.Name)

@@ -67,10 +67,36 @@
                     <td>@project.Expertise</td>
                     <td>@project.Status</td>
                     <td>@project.StartDate.ToShortDateString()</td>
-                    <td>@(project.EndDate?.ToShortDateString() ?? "N/A")</td>
-                    <td>@(project.CreatedBy?.User.FirstName ?? "Unknown")</td>
+                    <td>@(project.EndDate.ToShortDateString())</td>
+                    <td>@(project.CreatedBy?.User.FirstName)</td>
                     <td>
-                        <a class="btn btn-danger" asp-action="Delete" asp-route-projectId="@project.Id" onclick="event.stopPropagation()"><i class="bi bi-trash3"></i></a>
+                        <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#myModal" onclick="event.stopPropagation();">
+                            <i class="bi bi-trash3"></i>
+                        </button>
+                        <div class="modal fade" tabindex="-1" id="myModal">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title">Дали сте сигурни дека сакате да продолжите со акцијата?</h5>
+                                    </div>
+                                    <div class="modal-body">
+                                        <p>Со клик на копчето потврди ќе го избришете објекотт заскогаш!</p>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <a class="btn btn-secondary"
+                                                data-bs-dismiss="modal"
+                                                onclick="event.stopPropagation();"
+                                                asp-action="Index">
+                                            Откажи
+                                        </a>
+                                        <form asp-action="Delete" method="post">
+                                            <input type="hidden" value="@project.Id" name="projectId" />
+                                            <button type="submit" class="btn btn-danger" onclick="event.stopPropagation();">Потврди</button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </td>
                 </tr>
             }

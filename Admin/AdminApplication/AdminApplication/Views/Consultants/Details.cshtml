@@ -14,6 +14,7 @@
                 <input type="hidden" asp-for="Consultant.Id" />
                 <input type="hidden" asp-for="Consultant.User.UserName" />
                 <input type="hidden" asp-for="Consultant.UserId" />
+                <input type="hidden" asp-for="Consultant.User.Id" />
 
                 <div class="row mb-2">
                     <label class="col-5 fw-bold">Име:</label>
@@ -70,7 +71,7 @@
                     <thead class="table-primary">
                         <tr>
                             <th>Статус на апликација</th>
-                            <th>Дата на поднеснео барање за проект</th>
+                            <th>Дата на аплицирање</th>
                             <th>Наслов</th>
                             <th>Статус</th>
                             <th>Почетен датум</th>
@@ -94,20 +95,43 @@
                                 <td>@item.Project.Project?.Title</td>
                                 <td>@item.Project.Project?.Status</td>
                                 <td>@item.Project.Project?.StartDate.ToShortDateString()</td>
-                                <td>@(item.Project.Project?.EndDate?.ToShortDateString())</td>
+                                <td>@(item.Project.Project?.EndDate.ToShortDateString())</td>
                                 <td>@(item.TotalConsultantActivites)</td>
                                 <td>@(item.TotalConsultantNewActivities)</td>
                                 <td>@(item.TotalConsultantActiveActivites)</td>
                                 <td>@(item.TotalConsultantNewActivities)</td>
                                 <td>@(item.TotalConsultantInvalidActivities)</td>
-                                <td>@(item.TotalHoursWorkingOnProject / 24) денови @(item.TotalHoursWorkingOnProject % 24) часови</td>
+                                <td>@(item.TotalHoursWorkingOnProject / 24) дена @(item.TotalHoursWorkingOnProject % 24) часа</td>
                                 <td>@(item.TotalHoursWorkingOnProject)</td>
                                 <td>
-                                    <form method="post" asp-action="DeleteProjectFromConsultant">
-                                        <input type="hidden" name="consultantId" value="@Model.Consultant.Id" />
-                                        <input type="hidden" name="consultantProjectId" value="@item.Project.Id" />
-                                        <button onclick="event.stopPropagation()" class="btn btn-danger"><i class="bi bi-trash3"></i></button>
-                                    </form>
+                                    <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#myModal" onclick="event.stopPropagation();">
+                                        <i class="bi bi-trash3"></i>
+                                    </button>
+                                    <div class="modal fade" tabindex="-1" id="myModal">
+                                        <div class="modal-dialog">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title">Дали сте сигурни дека сакате да продолжите со акцијата?</h5>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <p>Со клик на копчето потврди ќе го избришете објекотт заскогаш!</p>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <a      class="btn btn-secondary"
+                                                            data-bs-dismiss="modal"
+                                                            onclick="event.stopPropagation();"
+                                                            asp-action="Details" asp-route-consultantId="@Model.Consultant.Id">
+                                                        Откажи
+                                                    </a>
+                                                    <form asp-action="DeleteProjectFromConsultant" method="post">
+                                                        <input type="hidden" name="consultantId" value="@Model.Consultant.Id" />
+                                                        <input type="hidden" name="consultantProjectId" value="@item.Project.Id" />
+                                                        <button type="submit" class="btn btn-danger" onclick="event.stopPropagation();">Потврди</button>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </td>
                             </tr>
                         }

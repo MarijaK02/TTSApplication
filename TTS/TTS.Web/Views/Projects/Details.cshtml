@@ -45,7 +45,7 @@
             <div class="me-2">
                 <a asp-action="MyProjects" class="btn btn-outline-warning border border-2 border-warning"><i class="bi bi-arrow-left fw-bolder"></i></a>
             </div>
-            <h3>@Model!.Project.Title</h3>
+            <h3>@Model!.Project.Title   </h3>
         </div>
 
         @if (User.IsInRole("Client"))
@@ -56,34 +56,27 @@
     </div>
 
 
-    <div>
+    <div class="container">
         <hr />
+        <h4 class="mb-3"><i class="bi bi-people-fill"></i> @(Model!.Responsibles.Count())</h4>
         <dl class="row">
-            <dt class="col-sm-2">
-                @Html.DisplayNameFor(model => model.Project.Title)
-            </dt>
-            <dd class="col-sm-10">
-                @Html.DisplayFor(model => model.Project.Title)
-            </dd>
-            <dt class="col-sm-2">
-                @Html.DisplayNameFor(model => model.Project.Expertise)
-            </dt>
-            <dd class="col-sm-10">
-                @Html.DisplayFor(model => model.Project.Expertise)
-            </dd>
-            <dt class="col-sm-2">
-                @Html.DisplayNameFor(model => model.Project.Status)
-            </dt>
-            <dd class="col-sm-10 text-@(Model?.Project.Status == TTS.Domain.Enum.ProjectStatus.New ? "info" :
-                Model?.Project.Status == TTS.Domain.Enum.ProjectStatus.InProgress ? "warning" :
-                Model?.Project.Status == TTS.Domain.Enum.ProjectStatus.Invalid ? "danger" :
-                "success")">
-                <form asp-action="ChangeStatus" asp-controller="Projects" asp-route-projectId="@Model?.Project.Id" method="post" class="d-flex w-25">
+            <dt class="col-sm-3 fw-bold">@Html.DisplayNameFor(model => model.Project.Title)</dt>
+            <dd class="col-sm-9">@Html.DisplayFor(model => model.Project.Title)</dd>
+
+            <dt class="col-sm-3 fw-bold">@Html.DisplayNameFor(model => model.Project.CreatedOn)</dt>
+            <dd class="col-sm-9">@Html.DisplayFor(model => model.Project.CreatedOn)</dd>
+
+            <dt class="col-sm-3 fw-bold">@Html.DisplayNameFor(model => model.Project.Expertise)</dt>
+            <dd class="col-sm-9">@Html.DisplayFor(model => model.Project.Expertise)</dd>
+
+            <dt class="col-sm-3 fw-bold">@Html.DisplayNameFor(model => model.Project.Status)</dt>
+            <dd class="col-sm-9">
+                <form asp-action="ChangeStatus" asp-controller="Projects" asp-route-projectId="@Model?.Project.Id" method="post" class="d-flex align-items-center">
                     <select name="status" class="form-select me-2" disabled="@(User.IsInRole("Client"))">
-                        <option value="">-- Избери статус --</option>
+                        <option value="" disabled>-- Избери статус --</option>
                         @foreach (var status in Html.GetEnumSelectList<ProjectStatus>())
                         {
-                            var selected = Model.Project.Status == (ProjectStatus)Enum.Parse(typeof(ProjectStatus), status.Value) ? true : false;
+                            var selected = Model.Project.Status == (ProjectStatus)Enum.Parse(typeof(ProjectStatus), status.Value);
                             <option value="@(status.Value)" selected="@selected">@status.Text</option>
                         }
                     </select>
@@ -93,53 +86,63 @@
                     }
                 </form>
             </dd>
-            <dt class="col-sm-2">
-                @Html.DisplayNameFor(model => model.Project.Description)
-            </dt>
-            <dd class="col-sm-10">
-                @Html.DisplayFor(model => model.Project.Description)
-            </dd>
-            <dt class="col-sm-2">
-                @Html.DisplayNameFor(model => model.Project.StartDate)
-            </dt>
-            <dd class="col-sm-10">
-                @(Model!.Project.StartDate.ToLongDateString())
-            </dd>
-            <dt class="col-sm-2">
-                @Html.DisplayNameFor(model => model.Project.EndDate)
-            </dt>
-            <dd class="col-sm-10">
-                @(Model.Project.EndDate == null ? "-" : Model.Project.EndDate.GetValueOrDefault().ToLongDateString())
-            </dd>
-            <dt class="col-sm-2">
-                    Одговорни
-            </dt>
-            @if (Model.Responsibles!.Any())
-            {
-                @foreach (var responsible in Model.Responsibles!)
+
+            <dt class="col-sm-3 fw-bold">@Html.DisplayNameFor(model => model.Project.Description)</dt>
+            <dd class="col-sm-9">@Html.DisplayFor(model => model.Project.Description)</dd>
+
+            <dt class="col-sm-3 fw-bold">@Html.DisplayNameFor(model => model.Project.StartDate)</dt>
+            <dd class="col-sm-9">@(Model!.Project.StartDate.ToLongDateString())</dd>
+
+            <dt class="col-sm-3 fw-bold">@Html.DisplayNameFor(model => model.Project.EndDate)</dt>
+            <dd class="col-sm-9">@(Model!.Project.EndDate.ToLongDateString())</dd>
+
+            <dt class="col-sm-3 fw-bold">Одговорни</dt>
+            <dd class="col-sm-9">
+                @if (Model.Responsibles!.Any())
                 {
-                <dd class="col-sm-10">
-                        @responsible.User.FirstName @responsible.User.LastName (@responsible.User.UserName)
-                </dd>
+                    <ul class="list-group">
+                        @foreach (var responsible in Model.Responsibles!)
+                        {
+                            <li class="list-group-item">@responsible.User.FirstName @responsible.User.LastName (@responsible.User.UserName)</li>
+                        }
+                    </ul>
                 }
-            }
-            @if (Model.TotalHours > Model.TotalExpectedHours)
+                else
+                {
+                    <p>/</p>
+                }
+            </dd>
+
+            <dt class="col-sm-3 fw-bold">Вкупно активности</dt>
+            <dd class="col-sm-9">@(Model!.TotalActivites)</dd>
+
+            @if (User.IsInRole("Consultant"))
             {
-                <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                    <i class="bi bi-exclamation-circle-fill me-3"></i>
-                    Проектот ги надминува очекуваните работни саати за @((Model.TotalHours - Model.TotalExpectedHours) / 24) денови и @((Model.TotalHours - Model.TotalExpectedHours) % 24) часови!
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
+                <dt class="col-sm-3 fw-bold">Мои активности</dt>
+                <dd class="col-sm-9">@(Model.NumOfConsultantActivites)</dd>
+
+                <dt class="col-sm-3 fw-bold">Сработени часови</dt>
+                <dd class="col-sm-9">@(Model.TotalConsultantWorkedHours / 24) дена @(Model.TotalConsultantWorkedHours % 24) часа (@Model.TotalConsultantWorkedHours часови)</dd>
             }
+            <dt class="col-sm-3 fw-bold">Завршен на</dt>
+            <dd class="col-sm-9">@(Model.Project.CompletedOn)</dd>
         </dl>
 
-
+        @if (Model.Project.Status != ProjectStatus.Completed && Model.TotalHours > Model.TotalExpectedHours)
+        {
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="bi bi-exclamation-circle-fill me-2"></i>
+                Проектот ги надминува очекуваните работни саати за @((Model.TotalHours - Model.TotalExpectedHours) / 24) денови и @((Model.TotalHours - Model.TotalExpectedHours) % 24) часови!
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
     </div>
+
 
     @if (User.IsInRole("Client"))
     {
         <div class="mt-5">
-
+            <hr />
             @if (Model.Applications != null && Model.Applications.Any())
             {
                 <h4 class="text-secondary">Апликации</h4>
@@ -149,8 +152,9 @@
                         <div class="list-group-item d-flex justify-content-between align-items-center">
                             <div>
                                 <h5>@application.Consultant!.User.FirstName @application.Consultant.User.LastName</h5>
-                                <p>Username: @application.Consultant.User.UserName</p>
-                                <p>Expertise: @application.Consultant.Expertise</p>
+                                <p>Корисничко име: @application.Consultant.User.UserName</p>
+                                <p>Експертиза на консултантот: @application.Consultant.Expertise</p>
+                                <p>Дата на аплицирање: @application.DateApplied.ToShortDateString()</p>
                             </div>
 
                             <div class="d-flex">

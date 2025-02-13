@@ -8,8 +8,10 @@ namespace AdminApplication.Models
         public string Title { get; set; }
         public string? Description { get; set; }
         public ActivityStatus Status { get; set; }
+        public DateTime CreatedOn { get; set; }
         public DateTime StartDate { get; set; }
-        public DateTime? EndDate { get; set; }
+        public DateTime EndDate { get; set; }
+        public DateTime? CompletedOn { get; set; }
         public ICollection<Comment>? Comments { get; set; }
 
         public Guid ConsultantProjectId { get; set; }

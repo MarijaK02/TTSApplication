@@ -2,6 +2,7 @@
 using AdminApplication.Models.DTO;
 using AdminApplication.Models.DTO.API;
 using AdminApplication.Models.Enums;
+using ClosedXML.Excel;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
@@ -170,6 +171,8 @@ namespace AdminApplication.Controllers
             return RedirectToAction(nameof(Create), new { projectId = projectId } );
         }
 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
         public IActionResult Delete(Guid activityId, Guid projectId)
         {
 
@@ -185,6 +188,58 @@ namespace AdminApplication.Controllers
             HttpResponseMessage response = client.PostAsync(url, content).Result;
 
             return RedirectToAction(nameof(Index), new { projectId = projectId });
+        }
+
+        public FileContentResult ExportAllActivities()
+        {
+            string fileName = "Активности.xlsx";
+            string contentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+
+            using(var workbook = new XLWorkbook())
+            {
+                IXLWorksheet worksheet = workbook.Worksheets.Add("Активности");
+
+                worksheet.Cell(1, 1).Value = "Бр.";
+                worksheet.Cell(1, 2).Value = "ИД";
+                worksheet.Cell(1, 3).Value = "Активност";
+                worksheet.Cell(1, 4).Value = "Проект";
+                worksheet.Cell(1, 5).Value = "Почетен Датум";
+                worksheet.Cell(1, 6).Value = "Краен рок";
+                worksheet.Cell(1, 7).Value = "Статус";
+                worksheet.Cell(1, 8).Value = "Дата на комплетирање";
+                worksheet.Cell(1, 9).Value = "Задолжен консултант";
+
+                HttpClient client = new HttpClient();
+                string url = "https://localhost:44315/api/Admin/GetAllActivities";
+
+                HttpResponseMessage response = client.GetAsync(url).Result;
+                var activities = response.Content.ReadAsAsync<List<Activity>>().Result;
+
+                var numActivities = activities.Count;
+
+                for (int i=0; i<numActivities; i++)
+                {
+                    worksheet.Cell(i+2, 1).Value = i+1;
+                    worksheet.Cell(i+2, 2).Value = activities[i].Id.ToString();
+                    worksheet.Cell(i+2, 3).Value = activities[i].Title;
+                    worksheet.Cell(i+2, 4).Value = activities[i].ConsultantProject?.Project?.Title;
+                    worksheet.Cell(i+2, 5).Value = activities[i].StartDate.ToString();
+                    worksheet.Cell(i+2, 6).Value = activities[i].EndDate.ToString();
+                    worksheet.Cell(i+2, 7).Value = activities[i].Status.ToString();
+                    worksheet.Cell(i+2, 8).Value = activities[i].CompletedOn != null  ? activities[i].CompletedOn.ToString() : "N/A";
+
+                    var c = activities[i].ConsultantProject?.Consultant;
+                    worksheet.Cell(i+2, 9).Value = c.User.FirstName + " " + c.User.LastName;                   
+                }
+
+                using (var stream = new MemoryStream())
+                {
+                    workbook.SaveAs(stream);
+                    var content = stream.ToArray();
+                    return File(content, contentType, fileName);
+                }
+
+            }
         }
     }
 }

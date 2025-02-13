@@ -48,6 +48,23 @@
             </div>
 
             <div class="row">
+                <div class="col-md-3 mb-3">
+                    <label class="fw-bold">Дата на креирање:</label>
+                    <input type="datetime-local" class="form-control"
+                           value="@Model.Activity.CreatedOn.ToString("yyyy-MM-ddTHH:mm")"
+                           disabled />
+                </div>
+
+                <div class="col-md-3 mb-3">
+                    <label class="fw-bold">Дата на комплетирање:</label>
+                    <input type="datetime-local" class="form-control"
+                           value="@Model.Activity.CompletedOn?.ToString("yyyy-MM-ddTHH:mm")"
+                           disabled />
+                </div>
+
+            </div>
+
+            <div class="row">
                 <!-- Start Date -->
                 <div class="col-md-6 mb-3">
                     <label class="fw-bold">Почетен датум:</label>
@@ -59,7 +76,7 @@
                 <div class="col-md-6 mb-3">
                     <label class="fw-bold">Краен рок:</label>
                     <input type="datetime-local" class="form-control" name="EndDate"
-                           value="@Model.Activity.EndDate?.ToString("yyyy-MM-ddTHH:mm")" />
+                           value="@Model.Activity.EndDate.ToString("yyyy-MM-ddTHH:mm")" required/>
                 </div>
             </div>
 
@@ -77,9 +94,9 @@
                         @Model.Activity.ConsultantProject?.Consultant?.User.FirstName
                         @Model.Activity.ConsultantProject?.Consultant?.User.LastName
 
-                        @((int)(DateTime.Now - Model.Activity.StartDate).TotalHours / 24) денови
-                        @((int)(DateTime.Now - Model.Activity.StartDate).TotalHours / 24) часови / 
-                        @((int)(DateTime.Now - Model.Activity.StartDate).TotalHours) часови
+                        @((int)(DateTime.Now - Model.Activity.StartDate).TotalHours / 24) дена
+                        @((int)(DateTime.Now - Model.Activity.StartDate).TotalHours % 24) часа / 
+                        @((int)(DateTime.Now - Model.Activity.StartDate).TotalHours) часа
                     </p>
                 </div>
             </div>

@@ -47,8 +47,9 @@
                     <div id="collapse-@project.Id" class="accordion-collapse collapse" aria-labelledby="heading-@project.Id" data-bs-parent="#projectAccordion">
                         <div class="accordion-body">
                             <p><strong>Опис:</strong> @project.Description</p>
-                            <p><strong>Датум на креирање:</strong> @project.StartDate.ToShortDateString()</p>
-                            <p><strong>Краен рок:</strong> @(project.EndDate?.ToShortDateString() ?? "Не е зададен")</p>
+                            <p><strong>Датум на креирање:</strong> @project.CreatedOn?.ToShortDateString()</p>
+                            <p><strong>Почетен датум:</strong> @project.StartDate.ToShortDateString()</p>
+                            <p><strong>Краен рок:</strong> @(project.EndDate.ToShortDateString())</p>
 
                             <div class="d-flex justify-content-end">
                                 <form asp-controller="Projects" asp-action="ApplyForProject" asp-route-projectId="@project.Id" method="post" class="me-2">
