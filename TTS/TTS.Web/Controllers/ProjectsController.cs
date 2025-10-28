@@ -204,7 +204,7 @@ namespace TTS.Web.Controllers
 
         // POST: Projects/Delete/5
         [Authorize(Roles = "Client")]
-        [HttpPost, ActionName("Delete")]
+        [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult DeleteConfirmed(Guid id)
         {

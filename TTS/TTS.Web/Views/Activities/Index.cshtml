@@ -55,7 +55,8 @@
             <div class="d-flex col-6 justify-content-end">
                 <div class="me-3 w-100">
                     <select class="form-select" id="expertise" name="selectedStatus" onchange="this.form.submit()">
-                        <option selected>Сите</option>
+                        <option value="" disabled selected>---Селектирај статус---</option>
+                        <option value="">Сите</option>
                         @foreach (var s in Enum.GetValues<ActivityStatus>())
                         {
                             <option value="@s" selected="@(Model.SelectedStatus == s ? "selected" : null)">@s.ToString()</option>
@@ -65,7 +66,8 @@
 
                 <div class="w-100">
                     <select class="form-select" id="consultant" name="selectedConsultantId" onchange="this.form.submit()">
-                        <option selected>Сите консултанти</option>
+                        <option value="" disabled selected>---Селектирај консултант---</option>
+                        <option value="">Сите консултанти</option>
                         @foreach (var c in Model.Consultants)
                         {
                             <option value="@c.Id" selected="@(Model.SelectedConsultantId == c.Id ? "selected" : null)">@c.User.FirstName @c.User.LastName</option>

@@ -61,7 +61,9 @@ namespace TTS.Service.Implementation
                 ProjectTitle = projectTitle,
                 Activites = activities,
                 Consultants = _userService.GetConsultantsForProject(projectId),
-                SelectedConsultantId = selectedConsultantId
+                SelectedConsultantId = selectedConsultantId,
+                SearchTerm = searchTerm,
+                SelectedStatus = selectedStatus
             };
 
             return dto;
