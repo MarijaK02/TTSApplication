@@ -15,6 +15,10 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Logging;
 using TTS.Domain.Identity;
+using System.Security.Claims;
+using System.IdentityModel.Tokens.Jwt;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 namespace TTS.Web.Areas.Identity.Pages.Account
 {
@@ -23,12 +27,14 @@ namespace TTS.Web.Areas.Identity.Pages.Account
         private readonly SignInManager<TTSApplicationUser> _signInManager;
         private readonly UserManager<TTSApplicationUser> _userManager;
         private readonly ILogger<LoginModel> _logger;
+        private readonly IConfiguration _config;
 
-        public LoginModel(SignInManager<TTSApplicationUser> signInManager, UserManager<TTSApplicationUser> userManager, ILogger<LoginModel> logger)
+        public LoginModel(SignInManager<TTSApplicationUser> signInManager, UserManager<TTSApplicationUser> userManager, ILogger<LoginModel> logger, IConfiguration config)
         {
             _signInManager = signInManager;
             _userManager = userManager;
             _logger = logger;
+            _config = config;
         }
 
         /// <summary>
@@ -121,7 +127,11 @@ namespace TTS.Web.Areas.Identity.Pages.Account
 
                     if (await _userManager.IsInRoleAsync(user, "Admin"))
                     {
-                        return Redirect("https://localhost:44340/");
+                        var token = GenerateAdminJwt(user);
+
+                        var adminUrl = _config["AdminApp:Url"];
+
+                        return Redirect($"{adminUrl}Auth/LogInWithToken?token={token}");
                     }
 
                     _logger.LogInformation("User logged in.");
@@ -145,6 +155,32 @@ namespace TTS.Web.Areas.Identity.Pages.Account
 
             // If we got this far, something failed, redisplay form
             return Page();
+        }
+
+        private string GenerateAdminJwt(TTSApplicationUser user)
+        {
+            var claims = new[]
+            {
+                new Claim(JwtRegisteredClaimNames.Sub, user.Email),
+                new Claim(ClaimTypes.Name, user.UserName),
+                new Claim(ClaimTypes.Role, "Admin")
+            };
+
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("5e6ef5a753433ec2e6d9ce676c8d52cb"));
+            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+            var issuer = _config["Jwt:Issuer"];
+            var audience = _config["Jwt:Audience"];
+            var expires = DateTime.Now.AddMinutes(double.Parse(_config["Jwt:ExpiresInMinutes"] ?? "60"));
+
+            var token = new JwtSecurityToken(
+                issuer: issuer,
+                audience: audience,
+                claims: claims,
+                expires: expires,
+                signingCredentials: creds
+            );
+
+            return new JwtSecurityTokenHandler().WriteToken(token);
         }
     }
 }

@@ -59,7 +59,7 @@
                     <label class="fw-bold">Дата на комплетирање:</label>
                     <input type="datetime-local" class="form-control"
                            value="@Model.Activity.CompletedOn?.ToString("yyyy-MM-ddTHH:mm")"
-                           disabled />
+                           />
                 </div>
 
             </div>
@@ -93,10 +93,10 @@
                     <p class="form-control-plaintext">
                         @Model.Activity.ConsultantProject?.Consultant?.User.FirstName
                         @Model.Activity.ConsultantProject?.Consultant?.User.LastName
-
-                        @((int)(DateTime.Now - Model.Activity.StartDate).TotalHours / 24) дена
-                        @((int)(DateTime.Now - Model.Activity.StartDate).TotalHours % 24) часа / 
-                        @((int)(DateTime.Now - Model.Activity.StartDate).TotalHours) часа
+                        
+                        @((int)(Model.TotalHours / 24)) дена
+                         @((int)(Model.TotalHours % 24)) часа
+                        (@((int)Model.TotalHours) часа)
                     </p>
                 </div>
             </div>

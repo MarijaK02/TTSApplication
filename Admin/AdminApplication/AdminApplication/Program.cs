@@ -1,18 +1,56 @@
-using AdminApplication.Data;
+using AdminApplication.Models;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(connectionString));
-builder.Services.AddDatabaseDeveloperPageExceptionFilter();
+builder.Services.Configure<MainAppSettings>(builder.Configuration.GetSection("MainApp"));
 
-builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
-    .AddEntityFrameworkStores<ApplicationDbContext>();
+builder.Services.AddRazorPages();
+
 builder.Services.AddControllersWithViews();
+
+builder.Services.AddDistributedMemoryCache();
+builder.Services.AddSession();
+builder.Services.AddHttpContextAccessor();
+
+builder.Services.AddHttpClient("MainAppClient", client =>
+{
+    client.BaseAddress = new Uri(builder.Configuration["MainApp:ApiBaseUrl"]);
+});
+
+
+var key = Encoding.UTF8.GetBytes(builder.Configuration["Jwt:SecretKey"]);
+
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidIssuer = builder.Configuration["Jwt:Issuer"],
+            ValidateAudience = true,
+            ValidAudience = builder.Configuration["Jwt:Audience"],
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(key),
+            ClockSkew = TimeSpan.Zero
+        };
+    });
+
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("AdminOnly", policy =>
+        policy.RequireClaim("http://schemas.microsoft.com/ws/2008/06/identity/claims/role", "Admin"));
+});
+
+
+
 
 var app = builder.Build();
 
@@ -28,11 +66,61 @@ else
     app.UseHsts();
 }
 
+app.Urls.Add("http://+:5000");
+app.Urls.Add("https://+:5001");
+
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
 
+app.UseSession();
+
+//app.Use(async (context, next) =>
+//{
+//    var token = context.Session.GetString("AdminJwt");
+
+//    if (string.IsNullOrEmpty(token))
+//    {
+//        var mainAppUrl = app.Configuration["MainApp:BaseUrl"] ?? "https://localhost:44315/";
+//        context.Response.Redirect($"{mainAppUrl}Home/Index");
+//        return;
+//    }
+
+//    var handler = new JwtSecurityTokenHandler();
+//    try
+//    {
+//        var jwtToken = handler.ReadJwtToken(token);
+//        if (jwtToken.ValidTo < DateTime.UtcNow)
+//        {
+//            context.Session.Remove("AdminJwt");
+//            var mainAppUrl = app.Configuration["MainApp:BaseUrl"] ?? "https://localhost:44315/";
+//            context.Response.Redirect($"{mainAppUrl}Home/Index");
+//            return;
+//        }
+//    }
+//    catch
+//    {
+//        context.Session.Remove("AdminJwt");
+//        var mainAppUrl = app.Configuration["MainApp:BaseUrl"] ?? "https://localhost:44315/";
+//        context.Response.Redirect($"{mainAppUrl}Home/Index");
+//        return;
+//    }
+
+//    await next();
+//});
+
+app.Use(async (context, next) =>
+{
+    var token = context.Session.GetString("AdminJwt");
+    if (!string.IsNullOrEmpty(token))
+    {
+        context.Request.Headers["Authorization"] = "Bearer " + token;
+    }
+    await next();
+});
+
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllerRoute(

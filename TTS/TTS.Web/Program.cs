@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using TTS.Domain.Identity;
+using TTS.Domain.Shared;
 using TTS.Repository;
 using TTS.Repository.Implementation;
 using TTS.Repository.Interface;
@@ -9,13 +11,24 @@ using TTS.Service.Interface;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
+
 // Add services to the container.
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(connectionString));
+    options.UseSqlServer(connectionString, sqlOptions =>
+    {
+        sqlOptions.EnableRetryOnFailure(
+            maxRetryCount: 10,
+            maxRetryDelay: TimeSpan.FromSeconds(10),
+            errorNumbersToAdd: null);
+    }));
+
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
+
+builder.Services.AddTransient<IEmailService, EmailService>();
 
 builder.Services.AddTransient<IProjectsService, ProjectsService>();
 builder.Services.AddTransient<IUserService, UserService>();
@@ -32,8 +45,17 @@ builder.Services.AddDefaultIdentity<TTSApplicationUser>(options => options.SignI
 builder.Services.AddControllersWithViews().AddNewtonsoftJson(options =>
     options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);
 
+double expiryMinutes = Convert.ToDouble(builder.Configuration["Authentication:ExpiryMinutes"]);
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    options.ExpireTimeSpan = TimeSpan.FromMinutes(expiryMinutes);
+    options.SlidingExpiration = true;
+});
+
+builder.Configuration.AddEnvironmentVariables();
 
 var app = builder.Build();
+
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

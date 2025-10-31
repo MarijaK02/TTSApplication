@@ -3,19 +3,30 @@ using AdminApplication.Models.DTO;
 using AdminApplication.Models.DTO.API;
 using AdminApplication.Models.Enums;
 using Humanizer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
 using System.Text;
 
 namespace AdminApplication.Controllers
 {
+    [Authorize(Policy = "AdminOnly")]
     public class ClientsController : Controller
     {
+        private readonly MainAppSettings _mainAppSettings;
+        private readonly IHttpClientFactory _httpClientFactory;
+        public ClientsController(IOptions<MainAppSettings> mainAppSettings, IHttpClientFactory httpClientFactory)
+        {
+            _mainAppSettings = mainAppSettings.Value;
+            _httpClientFactory = httpClientFactory;
+        }
+
         public IActionResult Index(string? searchTerm, Industry? selectedIndustry)
         {
-            HttpClient client = new HttpClient();
-            string url = "https://localhost:44315/api/Admin/GetAllClients";
+            HttpClient client = _httpClientFactory.CreateClient("MainAppClient");
+            string url = "GetAllClients";
 
             HttpResponseMessage response = client.GetAsync(url).Result;
             var clients = response.Content.ReadAsAsync<List<Client>>().Result;
@@ -42,8 +53,8 @@ namespace AdminApplication.Controllers
 
         public IActionResult Details(Guid clientId)
         {
-            HttpClient client = new HttpClient();
-            string url = "https://localhost:44315/api/Admin/GetDetailsForClient";
+            HttpClient client = _httpClientFactory.CreateClient("MainAppClient");
+            string url = "GetDetailsForClient";
 
             var model = new
             {
@@ -65,8 +76,9 @@ namespace AdminApplication.Controllers
         {
             if (ModelState.IsValid)
             {
-                HttpClient httpClient = new HttpClient();
-                string url = "https://localhost:44315/api/Admin/EditClient";
+                HttpClient httpClient = _httpClientFactory.CreateClient("MainAppClient");
+
+                string url = "EditClient";
 
                 var dto = new EditClientDto
                 {

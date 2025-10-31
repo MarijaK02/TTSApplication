@@ -1,4 +1,6 @@
-﻿namespace AdminApplication.Models.DTO
+﻿using AdminApplication.Models.Enums;
+
+namespace AdminApplication.Models.DTO
 {
     public class ConsultantProjectDto
     {

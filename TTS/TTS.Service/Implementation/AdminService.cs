@@ -24,6 +24,7 @@ namespace TTS.Service.Implementation
         private readonly IRepository<Consultant> _consultantRepository;
         private readonly IRepository<Client> _clientRepository;
         private readonly IProjectsService _projectsService;
+        private readonly IEmailService _emailService;
 
         public AdminService(IRepository<Project> projectRepository, 
             IRepository<ConsultantProject> consultantProjectRepository, 
@@ -32,7 +33,8 @@ namespace TTS.Service.Implementation
             IRepository<Attachment> attachmentRepository,
             IRepository<Consultant> consultantRepository,
             IRepository<Client> clientRepository,
-            IProjectsService projectsService)
+            IProjectsService projectsService,
+            IEmailService emailService)
         {
             _projectRepository = projectRepository;
             _consultantProjectRepository = consultantProjectRepository;
@@ -42,6 +44,7 @@ namespace TTS.Service.Implementation
             _consultantRepository = consultantRepository;
             _clientRepository = clientRepository;
             _projectsService = projectsService;
+            _emailService = emailService;
         }
 
 
@@ -265,7 +268,11 @@ namespace TTS.Service.Implementation
                 return false;
             }
 
+            string message = "Ве известуваме дека сте отстранет од проектот" + cp.Project.Title + ". Доколку имате било какви прашања или ви е " +
+                "потребно дополнително објаснување, ве молиме контактирајте го администраторот на системот.  \r\n\r\nВи благодариме за разбирањето и соработката.";
+
             _consultantProjectRepository.Delete(cp);
+            _emailService.SendEmailAsync(cp.Consultant.User.Email, cp.Consultant.User.FirstName, cp.Consultant.User.LastName, "Известување за проект" + cp.Project.Title, message);
             return true;
         }
 

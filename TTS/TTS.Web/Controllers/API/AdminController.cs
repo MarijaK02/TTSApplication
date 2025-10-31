@@ -12,15 +12,16 @@ namespace TTS.Web.Controllers.API
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize(Roles = "Admin")]
     public class AdminController : ControllerBase
     {
         private readonly IAdminService _adminService;
+        private readonly IEmailService _emailService;
         private readonly SignInManager<TTSApplicationUser> _signInManager;
 
-        public AdminController(IAdminService adminService, SignInManager<TTSApplicationUser> signInManager)
+        public AdminController(IAdminService adminService, SignInManager<TTSApplicationUser> signInManager, IEmailService emailService)
         {
             _adminService = adminService;
+            _emailService = emailService;
             _signInManager = signInManager;
         }        
 
@@ -194,10 +195,11 @@ namespace TTS.Web.Controllers.API
             return _adminService.DeleteActivity(model.Id);
         }
 
-        [HttpGet]
-        public async void Logout()
+        [HttpGet("ExternalLogout")]
+        public async Task<IActionResult> ExternalLogout()
         {
             await _signInManager.SignOutAsync();
+            return RedirectToAction("Index", "Home");
         }
     }
 }

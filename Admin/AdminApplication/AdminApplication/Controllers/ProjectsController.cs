@@ -8,15 +8,27 @@ using Newtonsoft.Json;
 using System;
 using System.Text;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.Extensions.Options;
+using ClosedXML;
+using Microsoft.AspNetCore.Authorization;
 
 namespace AdminApplication.Controllers
 {
+    [Authorize(Policy = "AdminOnly")]
     public class ProjectsController : Controller
     {
+        private readonly MainAppSettings _mainAppSettings;
+        private readonly IHttpClientFactory _httpClientFactory;
+        public ProjectsController(IOptions<MainAppSettings> mainAppSettings, IHttpClientFactory httpClientFactory)
+        {
+            _mainAppSettings = mainAppSettings.Value;
+            _httpClientFactory = httpClientFactory;
+        }
+
         public IActionResult Index(string? searchTerm, Expertise? selectedExpertise, ProjectStatus? selectedStatus)
         {
-            HttpClient client = new HttpClient();
-            string url = "https://localhost:44315/api/Admin/GetAllProjects";
+            HttpClient client = _httpClientFactory.CreateClient("MainAppClient");
+            string url = "GetAllProjects";
 
             HttpResponseMessage response = client.GetAsync(url).Result;
             var projects = response.Content.ReadAsAsync<List<Project>>().Result;
@@ -51,8 +63,8 @@ namespace AdminApplication.Controllers
 
         public IActionResult Details(Guid projectId)
         {
-            HttpClient client = new HttpClient();
-            string url = "https://localhost:44315/api/Admin/GetDetailsForProject";
+            HttpClient client = _httpClientFactory.CreateClient("MainAppClient");
+            string url = "GetDetailsForProject";
 
             var model = new
             {
@@ -73,8 +85,8 @@ namespace AdminApplication.Controllers
         {
             if (ModelState.IsValid)
             {
-                HttpClient httpClient = new HttpClient();
-                string url = "https://localhost:44315/api/Admin/EditProject";
+                HttpClient httpClient = _httpClientFactory.CreateClient("MainAppClient");
+                string url = "EditProject";
 
                 var dto = new EditProjectDto
                 {
@@ -107,8 +119,8 @@ namespace AdminApplication.Controllers
         {
             if (ModelState.IsValid)
             {
-                HttpClient client = new HttpClient();
-                string url = "https://localhost:44315/api/Admin/DeleteConsultantProject";
+                HttpClient client = _httpClientFactory.CreateClient("MainAppClient");
+                string url = "DeleteConsultantProject";
 
                 var model = new
                 {
@@ -130,8 +142,8 @@ namespace AdminApplication.Controllers
 
         public IActionResult Create()
         {
-            HttpClient client = new HttpClient();
-            string url = "https://localhost:44315/api/Admin/GetAllClients";
+            HttpClient client = _httpClientFactory.CreateClient("MainAppClient");
+            string url = "GetAllClients";
 
             HttpResponseMessage response = client.GetAsync(url).Result;
             var clients = response.Content.ReadAsAsync<List<Client>>().Result;
@@ -150,8 +162,8 @@ namespace AdminApplication.Controllers
         {
             if (ModelState.IsValid)
             {
-                HttpClient httpClient = new HttpClient();
-                string url = "https://localhost:44315/api/Admin/CreateProject";
+                HttpClient httpClient = _httpClientFactory.CreateClient("MainAppClient");
+                string url = "CreateProject";
 
                 var dto = new CreateProjectDto
                 {
@@ -186,8 +198,8 @@ namespace AdminApplication.Controllers
         {
             if (ModelState.IsValid)
             {
-                HttpClient client = new HttpClient();
-                string url = "https://localhost:44315/api/Admin/AddConsultantToProject";
+                HttpClient client = _httpClientFactory.CreateClient("MainAppClient");
+                string url = "AddConsultantToProject";
 
                 var dto = new AddConsultantToProjectDto
                 {
@@ -207,8 +219,8 @@ namespace AdminApplication.Controllers
         public IActionResult AcceptApplication(Guid applicationId, Guid projectId)
         {
 
-            HttpClient client = new HttpClient();
-            string url = "https://localhost:44315/api/Admin/AcceptApplication";
+            HttpClient client = _httpClientFactory.CreateClient("MainAppClient");
+            string url = "AcceptApplication";
 
             var model = new
             {
@@ -224,8 +236,8 @@ namespace AdminApplication.Controllers
         public IActionResult RejectApplication(Guid applicationId, Guid projectId)
         {
 
-            HttpClient client = new HttpClient();
-            string url = "https://localhost:44315/api/Admin/RejectApplication";
+            HttpClient client = _httpClientFactory.CreateClient("MainAppClient");
+            string url = "RejectApplication";
 
             var model = new
             {
@@ -245,8 +257,8 @@ namespace AdminApplication.Controllers
 
             if(ModelState.IsValid)
             {
-                HttpClient client = new HttpClient();
-                string url = "https://localhost:44315/api/Admin/DeleteProject";
+                HttpClient client = _httpClientFactory.CreateClient("MainAppClient");
+                string url = "DeleteProject";
 
                 var model = new
                 {

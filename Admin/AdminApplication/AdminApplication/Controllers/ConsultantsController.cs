@@ -3,19 +3,30 @@ using AdminApplication.Models.DTO;
 using AdminApplication.Models.DTO.API;
 using AdminApplication.Models.Enums;
 using AdminApplication.Models.Helpers;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
 using System.Text;
 
 namespace AdminApplication.Controllers
 {
+    [Authorize(Policy = "AdminOnly")]
     public class ConsultantsController : Controller
     {
+        private readonly MainAppSettings _mainAppSettings;
+        private readonly IHttpClientFactory _httpClientFactory;
+        public ConsultantsController(IOptions<MainAppSettings> mainAppSettings, IHttpClientFactory httpClientFactory)
+        {
+            _mainAppSettings = mainAppSettings.Value;
+            _httpClientFactory = httpClientFactory;
+        }
+
         public IActionResult Index(string? searchTerm, Expertise? selectedExpertise)
         {
-            HttpClient client = new HttpClient();
-            string url = "https://localhost:44315/api/Admin/GetAllConsultants";
+            HttpClient client = _httpClientFactory.CreateClient("MainAppClient");
+            string url = "GetAllConsultants";
 
             HttpResponseMessage response = client.GetAsync(url).Result;
             var consultants = response.Content.ReadAsAsync<List<Consultant>>().Result;
@@ -45,8 +56,8 @@ namespace AdminApplication.Controllers
 
         public IActionResult Details(Guid consultantId)
         {
-            HttpClient client = new HttpClient();
-            string url = "https://localhost:44315/api/Admin/GetDetailsForConsultant";
+            HttpClient client = _httpClientFactory.CreateClient("MainAppClient");
+            string url = "GetDetailsForConsultant";
 
             var model = new
             {
@@ -139,8 +150,8 @@ namespace AdminApplication.Controllers
         {
             if (ModelState.IsValid)
             {
-                HttpClient httpClient = new HttpClient();
-                string url = "https://localhost:44315/api/Admin/EditConsultant";
+                HttpClient httpClient = _httpClientFactory.CreateClient("MainAppClient");
+                string url = "EditConsultant";
 
                 var dto = new EditConsultantDto
                 {
@@ -172,8 +183,8 @@ namespace AdminApplication.Controllers
         {
             if (ModelState.IsValid)
             {
-                HttpClient client = new HttpClient();
-                string url = "https://localhost:44315/api/Admin/DeleteConsultantProject";
+                HttpClient client = _httpClientFactory.CreateClient("MainAppClient");
+                string url = "DeleteConsultantProject";
 
                 var model = new
                 {

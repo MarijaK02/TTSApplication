@@ -1,9 +1,12 @@
 using AdminApplication.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using System.Diagnostics;
 
 namespace AdminApplication.Controllers
 {
+    [Authorize(Policy = "AdminOnly")]
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
@@ -27,23 +30,6 @@ namespace AdminApplication.Controllers
         public IActionResult Error()
         {
             return View(new ErrorViewModel { RequestId = System.Diagnostics.Activity.Current?.Id ?? HttpContext.TraceIdentifier });
-        }
-
-        public IActionResult Logout()
-        {
-            HttpClient client = new HttpClient();
-            string url = "https://localhost:44315/api/Admin/Logout";
-
-            HttpResponseMessage response = client.GetAsync(url).Result;
-
-            if (response.IsSuccessStatusCode)
-            {
-                return Redirect("https://localhost:44315/");
-            }
-            else
-            {
-                return BadRequest("Logout failed");
-            }
         }
     }
 }

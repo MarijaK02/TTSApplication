@@ -22,16 +22,19 @@ namespace TTS.Service.Implementation
         private readonly IRepository<Activity> _activitiesRepository;
         private readonly IRepository<ConsultantProject> _consultantProjectRepository;
         private readonly IUserService _userService;
+        private readonly IEmailService _emailService;
 
         public ProjectsService(IRepository<Project> projectRepository, 
             IRepository<ConsultantProject> consultantProjectRepository, 
             IRepository<Activity> activitiesRepository, 
-            IUserService userService)
+            IUserService userService,
+            IEmailService emailService) 
         {
             _projectRepository = projectRepository;
             _activitiesRepository = activitiesRepository;
             _consultantProjectRepository = consultantProjectRepository;
             _userService = userService;
+             _emailService = emailService;
         }
 
         public List<Project> GetAllProjects()
@@ -175,7 +178,7 @@ namespace TTS.Service.Implementation
 
             var projects = _projectRepository.GetAll()
                 .Include(p => p.ConsultantProjects)
-                .Where(p => p.Expertise == consultant.Expertise && !p.ConsultantProjects!.Any(cp => cp.ConsultantId == consultant.Id) && (p.Status != ProjectStatus.Invalid || p.Status != ProjectStatus.Completed))
+                .Where(p => p.Expertise == consultant.Expertise && !p.ConsultantProjects!.Any(cp => cp.ConsultantId == consultant.Id) && p.Status == ProjectStatus.New)
                 .ToList();              
 
             return projects ?? [];
@@ -347,8 +350,13 @@ namespace TTS.Service.Implementation
                     project.ConsultantProjects?.Add(application);
 
                     _projectRepository.Update(project);
+
+                    _emailService.SendEmailAsync(project.CreatedBy.User.Email, project.CreatedBy.User.FirstName, project.CreatedBy.User.LastName,
+                        "Известување за апликации на проект " + project.Title,
+                        $"Почитуван/а {project.CreatedBy.User.FirstName} {project.CreatedBy.User.LastName}, \r\n\r\nНов консултант, {consultant.User.FirstName} {consultant.User.LastName}, аплицираше да се придружи на вашиот проект „{project.Title}“.\r\n\r\nВе молиме разгледајте ја неговата апликација и одлучете дали да ја прифатите или одбиете.\r\n\r\nВи благодариме за вашето внимание.");
                 }                
-            }           
+            }  
+                       
         }
 
         public ConsultantProject GetApplication(Guid applicationId)
@@ -359,11 +367,13 @@ namespace TTS.Service.Implementation
         public void AcceptApplication(Guid applicationId)
         {
             var application = _consultantProjectRepository.Get(applicationId);
-
-
             application.ApplicationStatus = ApplicationStatus.Accepted;
             
             _consultantProjectRepository.Update(application);
+
+            _emailService.SendEmailAsync(application.Consultant!.User!.Email, application.Consultant.User.FirstName, application.Consultant.User.LastName,
+                "Известување за вашата апликација на проектот" + application.Project.Title, 
+                $"Вашата апликација за проектот '{application.Project!.Title}' е прифатена. Вашите апликации можете да ги прегледате во делот Мои Проекти. Ви благодариме за разбирањето и соработката.");
         }
 
         public void RejectApplication(Guid applicationId)
@@ -373,6 +383,10 @@ namespace TTS.Service.Implementation
             application.ApplicationStatus = ApplicationStatus.Rejected;
 
             _consultantProjectRepository.Update(application);
+
+            _emailService.SendEmailAsync(application.Consultant!.User!.Email, application.Consultant.User.FirstName, application.Consultant.User.LastName,
+                "Известување за вашата апликација на проектот" + application.Project.Title,
+                $"Вашата апликација за проектот '{application.Project!.Title}' е одбиена. Вашите апликации можете да ги прегледате во делот Мои Проекти. Ви благодариме за разбирањето и соработката.");        
         }
 
         public void RemoveApplication(Guid applicationId)

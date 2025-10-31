@@ -158,7 +158,12 @@
         <h4 class="mb-4">Консултанти кои работат на проектот</h4>
 
         <form method="post" asp-action="AddConsultantToProject" asp-route-projectId="@Model.Project.Id">
-            <div class="d-flex justify-content-between mb-3">
+            <p class="alert alert-info d-flex align-items-center" role="alert">
+                <i class="bi bi-info-circle-fill me-2"></i>
+                Консултантите дадени за избор ја имаат истата експертиза како и експертизата на проектот.
+                Доколку сакате да додадете консултант изберете еден и кликнете на копчето "Додади".
+            </p>
+            <div class="d-flex justify-content-between mb-3">                
                 <select class="form-control me-2" name="consultantId">
                     <option value="" selected disabled>-- Изберете консултант --</option>
                     @if (Model.Consultants != null)
