@@ -11,6 +11,8 @@ using TTS.Service.Interface;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Configuration.AddEnvironmentVariables();
+
 builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
 
 // Add services to the container.
@@ -51,8 +53,6 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.ExpireTimeSpan = TimeSpan.FromMinutes(expiryMinutes);
     options.SlidingExpiration = true;
 });
-
-builder.Configuration.AddEnvironmentVariables();
 
 var app = builder.Build();
 

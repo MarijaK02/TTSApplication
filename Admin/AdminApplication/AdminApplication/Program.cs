@@ -9,6 +9,8 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Configuration.AddEnvironmentVariables();
+
 builder.Services.Configure<MainAppSettings>(builder.Configuration.GetSection("MainApp"));
 
 builder.Services.AddRazorPages();
@@ -48,9 +50,6 @@ builder.Services.AddAuthorization(options =>
     options.AddPolicy("AdminOnly", policy =>
         policy.RequireClaim("http://schemas.microsoft.com/ws/2008/06/identity/claims/role", "Admin"));
 });
-
-builder.Configuration.AddEnvironmentVariables();
-
 
 var app = builder.Build();
 
