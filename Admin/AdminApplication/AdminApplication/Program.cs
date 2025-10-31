@@ -49,7 +49,7 @@ builder.Services.AddAuthorization(options =>
         policy.RequireClaim("http://schemas.microsoft.com/ws/2008/06/identity/claims/role", "Admin"));
 });
 
-
+builder.Configuration.AddEnvironmentVariables();
 
 
 var app = builder.Build();
@@ -65,9 +65,6 @@ else
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
-
-app.Urls.Add("http://+:5000");
-app.Urls.Add("https://+:5001");
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
