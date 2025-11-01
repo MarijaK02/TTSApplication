@@ -29,3 +29,21 @@ jobs:
         run: |
           docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/adminapp:latest ./Admin/AdminApplication
           docker push ${{ secrets.DOCKERHUB_USERNAME }}/adminapp:latest
+
+  refresh-azure:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    steps:
+      - name: Azure CLI Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Restart Main Azure Web App
+        run: |
+          az webapp restart --name ttsapp --resource-group TTS
+
+      - name: Restart Admin Azure Web App
+        run: |
+          az webapp restart --name ttsadminapp --resource-group TTS
+
