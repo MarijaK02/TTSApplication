@@ -129,7 +129,7 @@ namespace TTS.Web.Areas.Identity.Pages.Account
                     {
                         var token = GenerateAdminJwt(user);
 
-                        var adminUrl = _config["AdminApp:Url"];
+                        var adminUrl = _config["AdminApp:BaseUrl"];
 
                         return Redirect($"{adminUrl}Auth/LogInWithToken?token={token}");
                     }
