@@ -176,7 +176,7 @@
                                     asp-route-id="@item.Id" 
                                     asp-route-projectTitle="@Model.ProjectTitle"
                                    asp-route-from="@Model.ProjectDeadline.From.ToString("yyyy-MM-dd")"
-                                   asp-route-toEnd="@Model.ProjectDeadline.To.ToString("yyyy-MM-dd")">
+                                   asp-route-to="@Model.ProjectDeadline.To.ToString("yyyy-MM-dd")">
                                         Промени
                                 </a>
 
@@ -251,7 +251,7 @@
         <a id="showCreateForm" class="btn btn-outline-primary"><i class="bi bi-plus-lg" id="plusIcon"></i></a>
     }
    
-    @section Scripts {
+@section Scripts {
         @{
             await Html.RenderPartialAsync("_ValidationScriptsPartial");
         }

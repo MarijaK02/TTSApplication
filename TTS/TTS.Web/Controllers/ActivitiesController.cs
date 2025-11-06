@@ -56,14 +56,14 @@ namespace TTS.Web.Controllers
 
         // GET: ConsultantActivites/Details/5
         [HttpGet("Details/{id}")]
-        public IActionResult Details(Guid projectId, Guid? id, string projectTitle, Interval projectDeadline, DateTime from, DateTime to)
+        public IActionResult Details(Guid projectId, Guid? id, string projectTitle, DateTime from, DateTime to)
         {
             if (id == null)
             {
                 return NotFound();
             }
 
-            var activity = _activitesService.GetDetails(id, projectId, projectTitle, projectDeadline ?? new Interval { From = from, To = to });
+            var activity = _activitesService.GetDetails(id, projectId, projectTitle, new Interval { From = from, To = to });
             
 
             return View(activity);
@@ -92,7 +92,7 @@ namespace TTS.Web.Controllers
 
         // GET: ConsultantActivites/Edit/5
         [HttpGet("Edit/{id}")]
-        public IActionResult Edit(Guid projectId, Guid id, string projectTitle, DateTime from, DateTime toEnd)
+        public IActionResult Edit(Guid projectId, Guid id, string projectTitle, DateTime from, DateTime to)
         {
             var activity = _activitesService.Get(id);
             if (activity == null)
@@ -104,7 +104,7 @@ namespace TTS.Web.Controllers
             {
                 ProjectId = projectId,
                 ProjectTitle = projectTitle,
-                ProjectDeadline = new Interval() { From = from, To = toEnd },
+                ProjectDeadline = new Interval() { From = from, To = to },
                 ActivityId = activity.Id,
                 Title = activity.Title,
                 Description = activity.Description ?? "",
@@ -133,7 +133,7 @@ namespace TTS.Web.Controllers
 
                 _activitesService.Edit(activityId, dto.Title, dto.Description, dto.ActivityStatus, dto.StartDate, dto.EndDate);
 
-                return RedirectToAction(nameof(Details), new { projectId = dto.ProjectId, id = activityId, projectTitle = dto.ProjectTitle, projectDeadline = dto.ProjectDeadline });
+                return RedirectToAction(nameof(Details), new { projectId = dto.ProjectId, id = activityId, projectTitle = dto.ProjectTitle, from = dto.ProjectDeadline.From, to = dto.ProjectDeadline.To });
             }
             return View(dto);
         }
@@ -155,7 +155,7 @@ namespace TTS.Web.Controllers
 
         [HttpPost("AddComment")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> AddComment(Guid projectId, string projectTitle, Interval projectDeadline, Guid id, string? commentBody, IFormFile[]? files)
+        public async Task<IActionResult> AddComment(Guid projectId, string projectTitle, DateTime from, DateTime to, Guid id, string? commentBody, IFormFile[]? files)
         {
             if(String.IsNullOrEmpty(commentBody) && (files==null || !files.Any()))
             {
@@ -171,7 +171,7 @@ namespace TTS.Web.Controllers
 
             _commentsService.CreateAsync(activity, user, commentBody, files);
 
-            return RedirectToAction(nameof(Details), new { projectId = projectId, projectTitle = projectTitle, id = activity.Id, projectDeadline = projectDeadline });
+            return RedirectToAction(nameof(Details), new { projectId = projectId, projectTitle = projectTitle, id = activity.Id, from = from, to = to });
         }
 
         [HttpGet("Download/{fileId}")]
@@ -208,7 +208,7 @@ namespace TTS.Web.Controllers
 
         [HttpPost("RemoveFile/{fileId}")]
         [ValidateAntiForgeryToken]
-        public IActionResult RemoveFile(Guid fileId, Guid projectId, Guid id, string projectTitle, Interval projectDeadline)
+        public IActionResult RemoveFile(Guid fileId, Guid projectId, Guid id, string projectTitle, DateTime from, DateTime to)
         {
             var attachment = _attachmentService.GetDetails(fileId);
             if (attachment != null && System.IO.File.Exists(attachment.FilePath))
@@ -217,12 +217,12 @@ namespace TTS.Web.Controllers
                 _attachmentService.Delete(attachment);
             }
 
-            return RedirectToAction(nameof(Details), new { projectId = projectId, id = id, projectTitle = projectTitle, projectDeadline = projectDeadline });
+            return RedirectToAction(nameof(Details), new { projectId = projectId, id = id, projectTitle = projectTitle, from = from, to = to });
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult DeleteComment(Guid projectId, Guid activityId, Guid commentId, string projectTitle, Interval projectDeadline)
+        public IActionResult DeleteComment(Guid projectId, Guid activityId, Guid commentId, string projectTitle, DateTime from, DateTime to)
         {  
             var comment = _commentsService.GetDetails(commentId);
             if (comment != null)
@@ -230,7 +230,7 @@ namespace TTS.Web.Controllers
                 _commentsService.Delete(comment);
             }
             
-            return RedirectToAction(nameof(Details), new { projectId = projectId, id = activityId, projectTitle = projectTitle, projectDeadline = projectDeadline });
+            return RedirectToAction(nameof(Details), new { projectId = projectId, id = activityId, projectTitle = projectTitle, from = from, to = to });
         }
     }
 }

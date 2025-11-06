@@ -13,6 +13,7 @@ namespace TTS.Domain.DTO
         public Guid ProjectId { get; set; }
         public required string ProjectTitle { get; set; }
         public Interval ProjectDeadline { get; set; }
+        public string OwnerEmail { get; set; }
         public Activity Activity { get; set; }
         public List<Comment> Comments { get; set; }
         public int TotalActiveHours { get; set; }

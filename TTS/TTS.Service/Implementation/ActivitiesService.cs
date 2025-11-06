@@ -113,6 +113,7 @@ namespace TTS.Service.Implementation
                 ProjectId = projectId,
                 ProjectTitle = projectTitle,
                 ProjectDeadline = projectDeadline,
+                OwnerEmail = activity.ConsultantProject?.Consultant?.User.Email ?? "",
                 Activity = activity,
                 Comments = _commentsService.GetActivityComments(activity.Id),
                 TotalActiveHours = GetTotalActiveHours(activity),

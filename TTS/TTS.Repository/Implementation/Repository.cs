@@ -36,6 +36,10 @@ namespace TTS.Repository.Implementation
             {
                 return entities.Include("Consultant").Include("Consultant.User").Include("Project").SingleOrDefault(s => s.Id == id);
             }
+            if (typeof(T) == typeof(Activity))
+            {
+                return entities.Include("ConsultantProject").Include("ConsultantProject.Consultant").Include("ConsultantProject.Consultant.User").SingleOrDefault(s => s.Id == id);
+            }
 
             return entities.SingleOrDefault(s => s.Id == id);
         }
