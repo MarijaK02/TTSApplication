@@ -43,7 +43,9 @@
             <div>
                 @if (User.IsInRole("Consultant"))
                 {
-                    <a class="btn btn-outline-primary me-2" asp-action="Edit" asp-route-id="@Model.Activity!.Id" asp-route-projectId="@Model.ProjectId" asp-route-projectTitle="@Model.ProjectTitle">Промени</a>
+                    <a class="btn btn-outline-primary me-2" asp-action="Edit" asp-route-id="@Model.Activity!.Id" 
+                    asp-route-projectId="@Model.ProjectId" asp-route-projectTitle="@Model.ProjectTitle" 
+                    asp-route-from="@Model.ProjectDeadline.From" asp-route-asp-protocol="@Model.ProjectDeadline.To">Промени</a>
                 }               
             </div>            
         </div>
