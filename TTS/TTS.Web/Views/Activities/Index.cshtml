@@ -170,7 +170,16 @@
                         @if (User.IsInRole("Consultant") && User.Identity!.Name!.Equals(item.ConsultantProject?.Consultant?.User.Email))
                         {
                             <td>
-                                <a class="btn btn-outline-primary me-3" asp-action="Edit" asp-route-projectId="@Model.ProjectId" asp-route-id="@item.Id" asp-route-projectTitle="@Model.ProjectTitle" asp-route-projectDeadline="@Model.ProjectDeadline">Промени</a>
+                                <a class="btn btn-outline-primary me-3" 
+                                    asp-action="Edit" 
+                                    asp-route-projectId="@Model.ProjectId" 
+                                    asp-route-id="@item.Id" 
+                                    asp-route-projectTitle="@Model.ProjectTitle"
+                                   asp-route-from="@Model.ProjectDeadline.From.ToString("yyyy-MM-dd")"
+                                   asp-route-toEnd="@Model.ProjectDeadline.To.ToString("yyyy-MM-dd")">
+                                        Промени
+                                </a>
+
                                 <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#myModal" onclick="event.stopPropagation();">
                                     Избриши
                                 </button>

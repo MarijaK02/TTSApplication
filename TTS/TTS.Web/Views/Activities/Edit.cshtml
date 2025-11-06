@@ -52,7 +52,9 @@
                 </div>
                 <input type="hidden" asp-for="ProjectTitle" />
                 <input type="hidden" asp-for="ProjectId" />
-                <input type="hidden" asp-for="ProjectDeadline" />
+                <input type="hidden" name="ProjectDeadline.From" value="@Model.ProjectDeadline.From.ToString("yyyy-MM-ddTHH:mm:ss")" />
+                <input type="hidden" name="ProjectDeadline.To" value="@Model.ProjectDeadline.To.ToString("yyyy-MM-ddTHH:mm:ss")" />
+
                 <div class="form-group">
                     <input type="submit" value="Зачувај" class="btn btn-primary" />
                 </div>

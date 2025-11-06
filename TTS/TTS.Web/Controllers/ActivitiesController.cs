@@ -92,7 +92,7 @@ namespace TTS.Web.Controllers
 
         // GET: ConsultantActivites/Edit/5
         [HttpGet("Edit/{id}")]
-        public IActionResult Edit(Guid projectId, Guid id, string projectTitle, Interval projectDedaline, DateTime from, DateTime to)
+        public IActionResult Edit(Guid projectId, Guid id, string projectTitle, DateTime from, DateTime toEnd)
         {
             var activity = _activitesService.Get(id);
             if (activity == null)
@@ -104,7 +104,7 @@ namespace TTS.Web.Controllers
             {
                 ProjectId = projectId,
                 ProjectTitle = projectTitle,
-                ProjectDeadline = projectDedaline ?? new Interval() { From = from, To = to },
+                ProjectDeadline = new Interval() { From = from, To = toEnd },
                 ActivityId = activity.Id,
                 Title = activity.Title,
                 Description = activity.Description ?? "",

@@ -10,5 +10,7 @@ namespace TTS.Domain.Shared
     {
         public DateTime From { get; set; }
         public DateTime To { get; set; }
+
+        public Interval() { }
     }
 }
