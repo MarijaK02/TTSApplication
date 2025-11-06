@@ -15,6 +15,6 @@ namespace TTS.Service.Interface
         public Comment GetDetails(Guid commentId);
 
         public void Delete(Comment comment);
-        public void Create(Activity activity, TTSApplicationUser user, string? commentBody, IFormFile[]? files);
+        public Task CreateAsync(Activity activity, TTSApplicationUser user, string? commentBody, IFormFile[]? files);
     }
 }

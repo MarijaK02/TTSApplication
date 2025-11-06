@@ -1,5 +1,7 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Azure.Storage.Blobs;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,10 +18,12 @@ namespace TTS.Service.Implementation
     public class CommentsService : ICommentsService
     {
         public readonly IRepository<Comment> _commentRepository;
+        private readonly IConfiguration _config;
 
-        public CommentsService(IRepository<Comment> commentRepository) 
+        public CommentsService(IRepository<Comment> commentRepository, IConfiguration config) 
         {
-            _commentRepository = commentRepository; 
+            _commentRepository = commentRepository;
+            _config = config;
         }
 
         public List<Comment> GetActivityComments(Guid ActivityId)
@@ -38,7 +42,7 @@ namespace TTS.Service.Implementation
             return _commentRepository.Get(commentId);
         }
 
-        public void Create(Activity activity, TTSApplicationUser user, string? commentBody, IFormFile[]? files)
+        public async Task CreateAsync(Activity activity, TTSApplicationUser user, string? commentBody, IFormFile[]? files)
         {
             if (activity.Status == ActivityStatus.New)
             {
@@ -55,37 +59,68 @@ namespace TTS.Service.Implementation
                 Attachments = new List<Attachment>()
             };
 
-            if (files != null && files.Any())
+            if (string.IsNullOrEmpty(_config["AzureBlobStorage:ConnectionString"]))
             {
-                var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
-                if (!Directory.Exists(uploadsFolder))
+                if (files != null && files.Any())
                 {
-                    Directory.CreateDirectory(uploadsFolder);
+                    var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
+                    if (!Directory.Exists(uploadsFolder))
+                    {
+                        Directory.CreateDirectory(uploadsFolder);
+                    }
+
+                    foreach (var file in files)
+                    {
+                        var fileName = file.FileName + Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
+                        var filePath = Path.Combine(uploadsFolder, fileName);
+
+                        using (var fileStream = new FileStream(filePath, FileMode.Create))
+                        {
+                            file.CopyTo(fileStream);
+                        }
+
+                        var attachment = new Attachment
+                        {
+                            Id = Guid.NewGuid(),
+                            FileName = file.FileName,
+                            FilePath = filePath,
+                            CommentId = comment.Id
+                        };
+
+                        comment.Attachments.Add(attachment);
+                    }
+
                 }
+            }
+            else
+            {
+                var blobServiceClient = new BlobServiceClient(_config["AzureBlobStorage:ConnectionString"]);
+                var containerClient = blobServiceClient.GetBlobContainerClient(_config["AzureBlobStorage:ContainerName"]);
 
                 foreach (var file in files)
                 {
-                    var fileName = file.FileName + Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
-                    var filePath = Path.Combine(uploadsFolder, fileName);
+                    var blobName = $"{Guid.NewGuid()}_{file.FileName}";
+                    var blobClient = containerClient.GetBlobClient(blobName);
 
-                    using (var fileStream = new FileStream(filePath, FileMode.Create))
+                    using (var stream = file.OpenReadStream())
                     {
-                        file.CopyTo(fileStream);
+                        await blobClient.UploadAsync(stream);
                     }
 
                     var attachment = new Attachment
                     {
                         Id = Guid.NewGuid(),
                         FileName = file.FileName,
-                        FilePath = filePath,
+                        FilePath = blobName,
                         CommentId = comment.Id
                     };
 
                     comment.Attachments.Add(attachment);
                 }
-
             }
-            _commentRepository.Insert(comment);
+
+
+                _commentRepository.Insert(comment);
         }
 
         public void Delete(Comment comment)

@@ -91,10 +91,10 @@
             <dd class="col-sm-9">@Html.DisplayFor(model => model.Project.Description)</dd>
 
             <dt class="col-sm-3 fw-bold">@Html.DisplayNameFor(model => model.Project.StartDate)</dt>
-            <dd class="col-sm-9">>@Html.DisplayFor(model => model.Project.StartDate)</dd>
+            <dd class="col-sm-9">@Model.Project.StartDate.ToShortDateString()</dd>
 
             <dt class="col-sm-3 fw-bold">@Html.DisplayNameFor(model => model.Project.EndDate)</dt>
-            <dd class="col-sm-9">@Html.DisplayFor(model => model.Project.EndDate)</dd>
+            <dd class="col-sm-9">@Model.Project.EndDate.ToShortDateString()</dd>
 
             <dt class="col-sm-3 fw-bold">Одговорни</dt>
             <dd class="col-sm-9">

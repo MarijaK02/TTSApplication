@@ -1,8 +1,10 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using Azure.Storage.Blobs;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.CodeAnalysis;
 using Microsoft.EntityFrameworkCore;
+using System.Net.Mail;
 using TTS.Domain.Domain;
 using TTS.Domain.DTO;
 using TTS.Domain.Enum;
@@ -23,6 +25,7 @@ namespace TTS.Web.Controllers
         private readonly IAttachmentService _attachmentService;
         private readonly ICommentsService _commentsService;
         private readonly IProjectsService _projectsService;
+        private readonly IConfiguration _config;
 
         public ActivitiesController(
             UserManager<TTSApplicationUser> userManager, 
@@ -30,7 +33,8 @@ namespace TTS.Web.Controllers
             IUserService userService,
             IAttachmentService attachmentService,
             ICommentsService commentsService,
-            IProjectsService projectsService)
+            IProjectsService projectsService,
+            IConfiguration config)
         {
             _userManager = userManager;
             _activitesService = activitesService;
@@ -38,6 +42,7 @@ namespace TTS.Web.Controllers
             _attachmentService = attachmentService;
             _commentsService = commentsService;
             _projectsService = projectsService;
+            _config = config;
         }
 
         // GET: ConsultantActivites
@@ -164,13 +169,13 @@ namespace TTS.Web.Controllers
                 return NotFound();
             }
 
-            _commentsService.Create(activity, user, commentBody, files);
+            _commentsService.CreateAsync(activity, user, commentBody, files);
 
             return RedirectToAction(nameof(Details), new { projectId = projectId, projectTitle = projectTitle, id = activity.Id, projectDeadline = projectDeadline });
         }
 
         [HttpGet("Download/{fileId}")]
-        public IActionResult Download(Guid fileId)
+        public async Task<IActionResult> DownloadAsync(Guid fileId)
         {
             var attacment = _attachmentService.GetDetails(fileId);
             if (attacment == null)
@@ -178,10 +183,26 @@ namespace TTS.Web.Controllers
                 return NotFound();
             }
 
-            if (System.IO.File.Exists(attacment.FilePath))
+            if (string.IsNullOrEmpty(_config["AzureBlobStorage:ConnectionString"]))
             {
-                return File(System.IO.File.OpenRead(attacment.FilePath), "application/octet-stream", attacment.FileName);
+                if (System.IO.File.Exists(attacment.FilePath))
+                {
+                    return File(System.IO.File.OpenRead(attacment.FilePath), "application/octet-stream", attacment.FileName);
+                }
             }
+            else
+            {
+                var blobServiceClient = new BlobServiceClient(_config["AzureBlobStorage:ConnectionString"]);
+                var containerClient = blobServiceClient.GetBlobContainerClient(_config["AzureBlobStorage:ContainerName"]);
+                var blobClient = containerClient.GetBlobClient(attacment.FilePath);
+
+                if (await blobClient.ExistsAsync())
+                {
+                    var stream = await blobClient.OpenReadAsync();
+                    return File(stream, "application/octet-stream", attacment.FileName);
+                }
+            }
+
             return NotFound();
         }
 
