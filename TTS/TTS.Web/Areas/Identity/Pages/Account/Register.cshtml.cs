@@ -198,7 +198,7 @@ namespace TTS.Web.Areas.Identity.Pages.Account
                         "/Account/ConfirmEmail",
                         pageHandler: null,
                         values: new { area = "Identity", userId = userId, code = code, returnUrl = returnUrl },
-                        protocol: Request.Scheme);
+                        protocol: "https");
 
                     await _emailService.SendEmailAsync(Input.Email, Input.FirstName, Input.LastName ?? " ", "Потвредете ја вашата е-пошта!",
                         $"Ве замолуваме да ја потврдите вашата е-пошта со клик на следниот линк <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>link</a>. Во спротивно нема да можете да се најавите користејќи ги креденцијалите со кои се регистриравте.");
