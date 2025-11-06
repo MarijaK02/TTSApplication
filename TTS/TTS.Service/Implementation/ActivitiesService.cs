@@ -5,6 +5,7 @@ using TTS.Domain.Domain;
 using TTS.Domain.DTO;
 using TTS.Domain.Enum;
 using TTS.Domain.Identity;
+using TTS.Domain.Shared;
 using TTS.Repository;
 using TTS.Repository.Interface;
 using TTS.Service.Interface;
@@ -40,25 +41,25 @@ namespace TTS.Service.Implementation
 
         public IndexActivitesDto GetAllProjectActivites(Guid projectId, string projectTitle, Guid? selectedConsultantId, ActivityStatus? selectedStatus, string? searchTerm)
         {
-            var consultantProjects = _consultantProjectRepository.GetAll()
-                .Include(cp => cp.Activites)
-                .Include(cp => cp.Consultant)
-                .Include("Consultant.User")
-                .Where(cp => cp.ProjectId == projectId)
-                .ToList()
-                .Where(cp => cp.Activites != null)
-                .ToList();
+            var consultantProject = _consultantProjectRepository.GetAll()
+                                    .Include(cp => cp.Activites)
+                                    .Include(cp => cp.Consultant)
+                                    .Include(cp => cp.Project)
+                                    .Include("Consultant.User")
+                                    .SingleOrDefault(cp => cp.ProjectId == projectId);
 
-            var activities = consultantProjects
-                .SelectMany(cp => cp.Activites)
-                .ToList();
 
-            activities = FilterActivitiesByConsultant(activities, selectedConsultantId, selectedStatus, searchTerm);
+            var activities = FilterActivitiesByConsultant(consultantProject!.Activites!.ToList(), selectedConsultantId, selectedStatus, searchTerm);
 
             var dto = new IndexActivitesDto
             {
                 ProjectId = projectId,
                 ProjectTitle = projectTitle,
+                ProjectDeadline = new Domain.Shared.Interval()
+                {
+                    From = consultantProject.Project!.StartDate,
+                    To = consultantProject.Project.EndDate
+                },
                 Activites = activities,
                 Consultants = _userService.GetConsultantsForProject(projectId),
                 SelectedConsultantId = selectedConsultantId,
@@ -96,7 +97,7 @@ namespace TTS.Service.Implementation
             return _activitiesRepository.Get(activityId);
         }
 
-        public ActivityDto GetDetails(Guid? activityId, Guid projectId, string projectTitle)
+        public ActivityDto GetDetails(Guid? activityId, Guid projectId, string projectTitle, Interval projectDeadline)
         {
             var activity = _activitiesRepository.Get(activityId);
 
@@ -104,6 +105,7 @@ namespace TTS.Service.Implementation
             {
                 ProjectId = projectId,
                 ProjectTitle = projectTitle,
+                ProjectDeadline = projectDeadline,
                 Activity = activity,
                 Comments = _commentsService.GetActivityComments(activity.Id),
                 TotalActiveHours = GetTotalActiveHours(activity),

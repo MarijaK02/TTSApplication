@@ -4,6 +4,7 @@
 
 @{
     ViewData["Title"] = "Index";
+    var rowClass = "";
 }
 
 <nav class="navbar navbar-expand-lg bg-body-secondary border-bottom border-warning shadow-lg mb-5">
@@ -15,21 +16,21 @@
         <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
             <div class="navbar-nav fs-5">
                 <a 
-                    asp-controller="Projects" 
-                    asp-action="Details"
-                   asp-route-projectId="@Model.ProjectId"
-                    asp-route-id="@Model.ProjectId"
-                    asp-route-proectTitle="@Model.ProjectTitle"
-                   class="nav-link fw-medium">
-                        Детали
+                asp-controller="Projects" 
+                asp-action="Details"
+                asp-route-projectId="@Model.ProjectId"
+                asp-route-id="@Model.ProjectId"
+                asp-route-proectTitle="@Model.ProjectTitle"
+                class="nav-link fw-medium">
+                    Детали
                 </a>
                 <a 
-                    asp-controller="Activities" 
-                    asp-action="Index" 
-                    asp-route-projectId="@Model.ProjectId" 
-                    asp-route-projectTitle="@Model.ProjectTitle"
-                    class="nav-link active bg-warning fw-bold">
-                        Активности
+                asp-controller="Activities" 
+                asp-action="Index" 
+                asp-route-projectId="@Model.ProjectId" 
+                asp-route-projectTitle="@Model.ProjectTitle"
+                class="nav-link active bg-warning fw-bold">
+                    Активности
                 </a>
             </div>
         </div>
@@ -79,7 +80,7 @@
     </form>
 
 
-  
+
     @if (!Model!.Activites!.Any())
     {
         <div class="row justify-content-center mb-4">
@@ -130,7 +131,18 @@
             <tbody>
                 @foreach (var item in Model!.Activites!)
                 {
-                    <tr onclick="location.href='@Url.Action("Details", new { id = item.Id, projectId = Model.ProjectId, projectTitle = Model.ProjectTitle })'">
+                    {
+                        
+                        if (item.EndDate > Model.ProjectDeadline.To)
+                        {
+                            rowClass = "table-danger";
+                        }
+                        else if (item.EndDate.Date == DateTime.Today)
+                        {
+                            rowClass = "table-warning";
+                        }
+                    }
+                    <tr class="@rowClass" onclick="location.href='@Url.Action("Details", new { id = item.Id, projectId = Model.ProjectId, projectTitle = Model.ProjectTitle })'">
                         <td>@(Model.Activites.IndexOf(item) + 1)</td>
                         <td>
                             @Html.DisplayFor(modelItem => item.Title)
@@ -182,6 +194,7 @@
                                                 <form asp-action="DeleteConfirmed" method="post" asp-route-id="@item.Id">
                                                     <input type="hidden" name="projectId" value="@Model.ProjectId" />
                                                     <input type="hidden" name="projectTitle" value="@Model.ProjectTitle" />
+                                                    <input type="hidden" name="projectDeadline" value="@Model.ProjectDeadline"/>
                                                     <button type="submit" class="btn btn-danger" onclick="event.stopPropagation();">Потврди</button>
                                                 </form>
                                             </div>

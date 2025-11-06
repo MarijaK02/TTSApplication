@@ -65,7 +65,7 @@ namespace TTS.Service.Implementation
 
                 foreach (var file in files)
                 {
-                    var fileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
+                    var fileName = file.FileName + Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
                     var filePath = Path.Combine(uploadsFolder, fileName);
 
                     using (var fileStream = new FileStream(filePath, FileMode.Create))
@@ -76,7 +76,7 @@ namespace TTS.Service.Implementation
                     var attachment = new Attachment
                     {
                         Id = Guid.NewGuid(),
-                        FileName = fileName,
+                        FileName = file.FileName,
                         FilePath = filePath,
                         CommentId = comment.Id
                     };

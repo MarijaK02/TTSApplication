@@ -51,14 +51,14 @@ namespace TTS.Web.Controllers
 
         // GET: ConsultantActivites/Details/5
         [HttpGet("Details/{id}")]
-        public IActionResult Details(Guid projectId, Guid? id, string projectTitle)
+        public IActionResult Details(Guid projectId, Guid? id, string projectTitle, Interval projectDeadline)
         {
             if (id == null)
             {
                 return NotFound();
             }
 
-            var activity = _activitesService.GetDetails(id, projectId, projectTitle);
+            var activity = _activitesService.GetDetails(id, projectId, projectTitle, projectDeadline);
             
 
             return View(activity);
