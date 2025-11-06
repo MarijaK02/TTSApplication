@@ -224,34 +224,35 @@ namespace AdminApplication.Controllers
 
                 foreach (var group in activituesByProject)
                 {
-                    IXLWorksheet worksheet = workbook.Worksheets.Add(group.First().ConsultantProject.Project.Title);
+                    var projectTitle = group.First().ConsultantProject.Project.Title;
+                    IXLWorksheet worksheet = workbook.Worksheets.Add(projectTitle.Length >= 31 ? projectTitle.Substring(0, 28) + "..." : projectTitle);
+                    
 
                     worksheet.Cell(1, 1).Value = "Бр.";
-                    worksheet.Cell(1, 2).Value = "ИД";
-                    worksheet.Cell(1, 3).Value = "Активност";
-                    worksheet.Cell(1, 4).Value = "Проект";
-                    worksheet.Cell(1, 5).Value = "Почетен Датум";
-                    worksheet.Cell(1, 6).Value = "Краен рок";
-                    worksheet.Cell(1, 7).Value = "Статус";
-                    worksheet.Cell(1, 8).Value = "Дата на комплетирање";
-                    worksheet.Cell(1, 9).Value = "Задолжен консултант";
+                    worksheet.Cell(1, 2).Value = "Активност";
+                    worksheet.Cell(1, 3).Value = "Проект";
+                    worksheet.Cell(1, 4).Value = "Почетен Датум";
+                    worksheet.Cell(1, 5).Value = "Краен рок";
+                    worksheet.Cell(1, 6).Value = "Статус";
+                    worksheet.Cell(1, 7).Value = "Дата на комплетирање";
+                    worksheet.Cell(1, 8).Value = "Задолжен консултант";
 
 
 
                     int row = 2;
                     foreach (var activity in group)
                     {
-                        worksheet.Cell(row, 1).Value = row - 1;
-                        worksheet.Cell(row, 2).Value = activity.Id.ToString();
-                        worksheet.Cell(row, 3).Value = activity.Title;
-                        worksheet.Cell(row, 4).Value = activity.ConsultantProject?.Project?.Title;
-                        worksheet.Cell(row, 5).Value = activity.StartDate.ToString();
-                        worksheet.Cell(row, 6).Value = activity.EndDate.ToString();
-                        worksheet.Cell(row, 7).Value = activity.Status.ToString();
-                        worksheet.Cell(row, 8).Value = activity.CompletedOn?.ToString() ?? "N/A";
+                        int col = 1;
+                        worksheet.Cell(row, col++).Value = row - 1;
+                        worksheet.Cell(row, col++).Value = activity.Title;
+                        worksheet.Cell(row, col++).Value = activity.ConsultantProject?.Project?.Title;
+                        worksheet.Cell(row, col++).Value = activity.StartDate.ToString();
+                        worksheet.Cell(row, col++).Value = activity.EndDate.ToString();
+                        worksheet.Cell(row, col++).Value = activity.Status.ToString();
+                        worksheet.Cell(row, col++).Value = activity.CompletedOn?.ToString() ?? "N/A";
 
                         var consultant = activity.ConsultantProject?.Consultant?.User;
-                        worksheet.Cell(row, 9).Value = consultant != null ? consultant.FirstName + " " + consultant.LastName : "N/A";
+                        worksheet.Cell(row, col).Value = consultant != null ? consultant.FirstName + " " + consultant.LastName : "N/A";
 
                         row++;
                     }
