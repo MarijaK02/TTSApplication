@@ -61,7 +61,7 @@
         <tbody>
             @foreach (var project in Model.Projects)
             {
-                <tr onclick="location.href='@Url.Action("Details" + project.Id)'">
+                <tr onclick="location.href='@Url.Action("Details", "Projects", new { projectId = project.Id })'">
                     <td>@(Model.Projects.IndexOf(project) + 1)</td>
                     <td>@project.Title</td>
                     <td>@project.Expertise</td>

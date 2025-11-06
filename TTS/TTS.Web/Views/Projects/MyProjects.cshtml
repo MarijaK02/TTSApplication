@@ -101,9 +101,9 @@
                                     TTS.Domain.Enum.ProjectStatus.InProgress => "text-warning",
                                     TTS.Domain.Enum.ProjectStatus.Invalid => "text-danger",
                                     _ => "text-success"
-                                };                             
+                                };
 
-                                <tr onclick="location.href='@Url.Action("Details/" + project.Id)'">
+                                <tr onclick="location.href='@Url.Action("Details", "Projects", new { id = project.Id })'">
                                     <td>@(Model.Projects.IndexOf(project) + 1)</td>
                                     <td class="fw-medium">@project.Title</td>
                                     @if (User.IsInRole("Consultant"))
