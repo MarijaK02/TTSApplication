@@ -133,7 +133,7 @@
                 {
                     {
                         
-                        if (item.EndDate > Model.ProjectDeadline.To)
+                        if (item.EndDate.Date > Model.ProjectDeadline.To.Date)
                         {
                             rowClass = "table-danger";
                         }
