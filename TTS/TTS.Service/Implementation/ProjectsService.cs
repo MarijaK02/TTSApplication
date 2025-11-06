@@ -375,7 +375,7 @@ namespace TTS.Service.Implementation
             application.ApplicationStatus = ApplicationStatus.Accepted;
 
             _emailService.SendEmailAsync(application.Consultant!.User!.Email, application.Consultant.User.FirstName, application.Consultant.User.LastName,
-                "Известување за вашата апликација на проектот" + application.Project.Title,
+                "Известување за вашата апликација на проектот " + application.Project.Title,
                 $"Вашата апликација за проектот '{application.Project!.Title}' е <strong>прифатена</strong>. Вашите апликации можете да ги прегледате во делот Мои Апликации.");
 
             _consultantProjectRepository.Update(application);           
@@ -388,7 +388,7 @@ namespace TTS.Service.Implementation
             application.ApplicationStatus = ApplicationStatus.Rejected;
 
             _emailService.SendEmailAsync(application.Consultant!.User!.Email, application.Consultant.User.FirstName, application.Consultant.User.LastName,
-                "Известување за вашата апликација на проектот" + application.Project.Title,
+                "Известување за вашата апликација на проектот " + application.Project.Title,
                 $"Вашата апликација за проектот '{application.Project!.Title}' е <strong>одбиена</strong>. Вашите апликации можете да ги прегледате во делот Мои Апликации. Ви благодариме за разбирањето и соработката.");
             _consultantProjectRepository.Update(application);                   
         }
