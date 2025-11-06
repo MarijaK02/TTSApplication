@@ -238,21 +238,22 @@ namespace AdminApplication.Controllers
 
 
 
-                    var numActivities = activities.Count;
-
-                    for (int i = 2; i < numActivities; i++)
+                    int row = 2;
+                    foreach (var activity in group)
                     {
-                        worksheet.Cell(i, 1).Value = i - 1;
-                        worksheet.Cell(i, 2).Value = activities[i].Id.ToString();
-                        worksheet.Cell(i, 3).Value = activities[i].Title;
-                        worksheet.Cell(i, 4).Value = activities[i].ConsultantProject?.Project?.Title;
-                        worksheet.Cell(i, 5).Value = activities[i].StartDate.ToString();
-                        worksheet.Cell(i, 6).Value = activities[i].EndDate.ToString();
-                        worksheet.Cell(i, 7).Value = activities[i].Status.ToString();
-                        worksheet.Cell(i, 8).Value = activities[i].CompletedOn != null ? activities[i].CompletedOn.ToString() : "N/A";
+                        worksheet.Cell(row, 1).Value = row - 1;
+                        worksheet.Cell(row, 2).Value = activity.Id.ToString();
+                        worksheet.Cell(row, 3).Value = activity.Title;
+                        worksheet.Cell(row, 4).Value = activity.ConsultantProject?.Project?.Title;
+                        worksheet.Cell(row, 5).Value = activity.StartDate.ToString();
+                        worksheet.Cell(row, 6).Value = activity.EndDate.ToString();
+                        worksheet.Cell(row, 7).Value = activity.Status.ToString();
+                        worksheet.Cell(row, 8).Value = activity.CompletedOn?.ToString() ?? "N/A";
 
-                        var c = activities[i-2].ConsultantProject?.Consultant;
-                        worksheet.Cell(i, 9).Value = c.User.FirstName + " " + c.User.LastName;
+                        var consultant = activity.ConsultantProject?.Consultant?.User;
+                        worksheet.Cell(row, 9).Value = consultant != null ? consultant.FirstName + " " + consultant.LastName : "N/A";
+
+                        row++;
                     }
 
                     worksheet.Columns().AdjustToContents();
