@@ -51,14 +51,14 @@ namespace TTS.Web.Controllers
 
         // GET: ConsultantActivites/Details/5
         [HttpGet("Details/{id}")]
-        public IActionResult Details(Guid projectId, Guid? id, string projectTitle, Interval projectDeadline)
+        public IActionResult Details(Guid projectId, Guid? id, string projectTitle, Interval projectDeadline, DateTime from, DateTime to)
         {
             if (id == null)
             {
                 return NotFound();
             }
 
-            var activity = _activitesService.GetDetails(id, projectId, projectTitle, projectDeadline);
+            var activity = _activitesService.GetDetails(id, projectId, projectTitle, projectDeadline ?? new Interval { From = from, To = to });
             
 
             return View(activity);
@@ -87,7 +87,7 @@ namespace TTS.Web.Controllers
 
         // GET: ConsultantActivites/Edit/5
         [HttpGet("Edit/{id}")]
-        public IActionResult Edit(Guid projectId, Guid id, string projectTitle, Interval projectDedaline)
+        public IActionResult Edit(Guid projectId, Guid id, string projectTitle, Interval projectDedaline, DateTime from, DateTime to)
         {
             var activity = _activitesService.Get(id);
             if (activity == null)
@@ -99,7 +99,7 @@ namespace TTS.Web.Controllers
             {
                 ProjectId = projectId,
                 ProjectTitle = projectTitle,
-                ProjectDeadline = projectDedaline,
+                ProjectDeadline = projectDedaline ?? new Interval() { From = from, To = to },
                 ActivityId = activity.Id,
                 Title = activity.Title,
                 Description = activity.Description ?? "",
