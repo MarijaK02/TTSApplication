@@ -46,6 +46,7 @@
                     </h2>
                     <div id="collapse-@project.Id" class="accordion-collapse collapse" aria-labelledby="heading-@project.Id" data-bs-parent="#projectAccordion">
                         <div class="accordion-body">
+                            <p><strong>Клиент:</strong> @project.CreatedBy.User.FirstName</p>
                             <p><strong>Опис:</strong> @project.Description</p>
                             <p><strong>Датум на креирање:</strong> @project.CreatedOn?.ToShortDateString()</p>
                             <p><strong>Почетен датум:</strong> @project.StartDate.ToShortDateString()</p>

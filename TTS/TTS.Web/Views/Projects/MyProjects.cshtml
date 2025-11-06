@@ -9,10 +9,10 @@
 
 <div class="container-fluid my-4">
     <div class="row">
-       
+
         <!-- Main Content -->
         <div class="col-md-9 container">
-           
+
             <!-- Existing Content -->
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <h4 class="text-capitalize">Мои проекти</h4>
@@ -23,15 +23,15 @@
                     </a>
                 }
             </div>
-           
-                <form method="get" asp-action="MyProjects">
-                    <div class="row d-flex justify-content-between mb-3">
-                        <div class="col-6 d-flex">
+
+            <form method="get" asp-action="MyProjects">
+                <div class="row d-flex justify-content-between mb-3">
+                    <div class="col-6 d-flex">
                         <input type="text" name="searchTerm" class="form-control me-2 w-75" placeholder="@(Model.SearchTerm ?? "Пребарај по име на проект")" value="@Context.Request.Query["search"]" />
-                            <button type="submit" class="btn btn-outline-primary w-25">
-                                <i class="bi bi-search"></i> Пребарај
-                            </button>
-                        </div>
+                        <button type="submit" class="btn btn-outline-primary w-25">
+                            <i class="bi bi-search"></i> Пребарај
+                        </button>
+                    </div>
                     @if (User.IsInRole("Client"))
                     {
                         <div class="col-3">
@@ -45,10 +45,10 @@
                             </select>
                         </div>
                     }
-                    </div>
-                    
-                </form>
-            
+                </div>
+
+            </form>
+
 
             @if (!Model.Projects.Any())
             {
@@ -80,6 +80,10 @@
                             <tr>
                                 <th>#</th>
                                 <th><i class="bi bi-bookmark"></i> Проект</th>
+                                @if (User.IsInRole("Consultant"))
+                                {
+                                    <th>Клиент</th>
+                                }
                                 <th>Експертиза</th>
                                 <th>Почетен датум</th>
                                 <th>Краен рок</th>
@@ -102,6 +106,10 @@
                                 <tr onclick="location.href='@Url.Action("Details", new { id = project.Id })'">
                                     <td>@(Model.Projects.IndexOf(project) + 1)</td>
                                     <td class="fw-medium">@project.Title</td>
+                                    @if (User.IsInRole("Consultant"))
+                                    {
+                                        <td>@project.CreatedBy.User.FirstName</td>
+                                    }
                                     <td>@project.Expertise</td>
                                     <td>@(project.StartDate.ToShortDateString())</td>
                                     <td>@(project.EndDate.ToShortDateString())</td>

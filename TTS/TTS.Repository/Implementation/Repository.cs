@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using TTS.Domain.Domain;
 using TTS.Domain.Shared;
 using TTS.Repository.Interface;
 
@@ -27,8 +28,18 @@ namespace TTS.Repository.Implementation
 
         public T Get(Guid? id)
         {
+            if(typeof(T) == typeof(Project))
+            {
+                return entities.Include("CreatedBy").Include("CreatedBy.User").SingleOrDefault(s => s.Id == id);
+            }
+            if (typeof(T) == typeof(ConsultantProject))
+            {
+                return entities.Include("Consultant").Include("Consultant.User").Include("Project").SingleOrDefault(s => s.Id == id);
+            }
+
             return entities.SingleOrDefault(s => s.Id == id);
         }
+
         public void Insert(T entity)
         {
             if (entity == null)

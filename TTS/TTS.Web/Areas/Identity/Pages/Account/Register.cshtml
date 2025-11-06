@@ -21,10 +21,17 @@
 
             <div class="form-floating mb-3">
                 <select asp-for="Input.Role" class="form-select" id="roleSelect" onchange="toggleAdditionalDropdown()">
-                    <option value="" disabled selected>Изберете тип на корисник</option>
+                    <option value="" disabled>Изберете тип на корисник</option>
                     @foreach (var role in roles)
                     {
-                        <option value="@role.Value">@role.Text</option>
+                        if (roles.First().Value == role.Value)
+                        {
+                            <option selected value="@role.Value">@role.Text</option>
+                        }
+                        else
+                        {
+                            <option value="@role.Value">@role.Text</option>
+                        }                       
                     }
                 </select>
                 <label asp-for="Input.Role">Тип корисник</label>
@@ -41,10 +48,10 @@
                         }
                     </select>
                     <label asp-for="Input.Expertise">Експертиза</label>
-                <span asp-validation-for="Input.Expertise" class="text-danger"></span>
+                    <span asp-validation-for="Input.Expertise" class="text-danger"></span>
                 </div>
 
-            <div class="form-floating mb-3" id="industrySelectContainer" style="display: none;">
+            <div class="form-floating mb-3" id="industrySelectContainer" style="display: block;">
                 <select asp-for="Input.Industry" class="form-select" id="industrySelect">
                     <option value="" disabled selected>Изберете индустрија</option>
                     @foreach (var industry in industries)
@@ -61,14 +68,14 @@
                 <label asp-for="Input.FirstName">Име</label>
                 <span asp-validation-for="Input.FirstName" class="text-danger"></span>
             </div>
-            <div class="form-floating mb-3" id="lastNameInput">
+            <div class="form-floating mb-3" id="lastNameInput" style="display: none">
                 <input asp-for="Input.LastName" class="form-control" autocomplete="last-name" aria-required="false" placeholder="Doe" />
                 <label asp-for="Input.LastName">Презиме</label>
                 <span asp-validation-for="Input.LastName" class="text-danger"></span>
             </div>
 
-            <div class="form-floating mb-3" id="addressInputContainer">
-                <input asp-for="Input.Address" class="form-control" autocomplete="address" aria-required="true" placeholder="Jhon" />
+            <div class="form-floating mb-3" id="addressInputContainer" style="display: block">
+                <input asp-for="Input.Address" class="form-control" autocomplete="address" aria-required="true" placeholder="Jhon" id="addressInput"/>
                 <label asp-for="Input.Address">Адреса</label>
                 <span asp-validation-for="Input.Address" class="text-danger"></span>
             </div>
@@ -101,39 +108,33 @@
     <partial name="_ValidationScriptsPartial" />
     <script>
         function toggleAdditionalDropdown() {
-            var roleSelect = document.getElementById("roleSelect");
-            var expertiseSelectContainer = document.getElementById("expertiseSelectContainer");
-            var expertiseSelect = document.getElementById("expertiseSelect");
-            var industrySelectContainer = document.getElementById("industrySelectContainer");
-            var industrySelect = document.getElementById("industrySelect");
-            var addressInput = document.getElementById("addressInputContainer");
-            var lastNameInput = document.getElementById("lastNameInput");
+            const roleSelect = document.getElementById("roleSelect");
+            const role = roleSelect.value;
 
-            if (roleSelect.value === "Consultant") {
-                expertiseSelectContainer.style.display = "block";
-                expertiseSelect.setAttribute("required", "required");
-            } else {
-                expertiseSelectContainer.style.display = "none";
-                expertiseSelect.removeAttribute("required");
-            }
+            const expertiseContainer = document.getElementById("expertiseSelectContainer");
+            const expertiseSelect = document.getElementById("expertiseSelect");
+            const industryContainer = document.getElementById("industrySelectContainer");
+            const industrySelect = document.getElementById("industrySelect");
+            const addressContainer = document.getElementById("addressInputContainer");
+            const addressInput = addressContainer.querySelector("input");
+            const lastNameInput = document.getElementById("lastNameInput");
 
-            if (roleSelect.value === "Client") {
-                industrySelectContainer.style.display = "block";
-                industrySelect.setAttribute("required", "required");
-
-                addressInput.style.display = "block";
-                addressInput.setAttribute("required", "required");
-
-                lastNameInput.style.display = "none";
-            } else {
-                industrySelectContainer.style.display = "none";
-                industrySelect.removeAttribute("required");
-
-                addressInput.style.display = "none";
-                addressInput.removeAttribute("required");
-
+            if (role == 1) {
                 lastNameInput.style.display = "block";
+                expertiseContainer.style.display = "block";
+               
+                industryContainer.style.display = "none";
+                addressContainer.style.display = "none";
+                addressInput.value = "N/A";
+            } else if (role == 0) {
+                lastNameInput.style.display = "none";
+                expertiseContainer.style.display = "none";
+
+                industryContainer.style.display = "block";
+                addressContainer.style.display = "block";    
             }
-        }     
+        }
     </script>
 }
+
+

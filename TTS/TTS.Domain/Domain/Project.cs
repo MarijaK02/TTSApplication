@@ -32,7 +32,7 @@ namespace TTS.Domain.Domain
         public DateTime? CompletedOn { get; set; }
 
         public Guid CreatedById { get; set; }
-        public Client? CreatedBy { get; set; } 
+        public virtual Client? CreatedBy { get; set; } 
         public virtual ICollection<ConsultantProject>? ConsultantProjects { get; set; }
     }
 }

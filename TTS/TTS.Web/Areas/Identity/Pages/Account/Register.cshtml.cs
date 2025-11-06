@@ -22,6 +22,7 @@ using TTS.Domain.Domain;
 using TTS.Domain.Enum;
 using TTS.Domain.Identity;
 using TTS.Repository;
+using TTS.Service.Interface;
 
 namespace TTS.Web.Areas.Identity.Pages.Account
 {
@@ -32,14 +33,14 @@ namespace TTS.Web.Areas.Identity.Pages.Account
         private readonly IUserStore<TTSApplicationUser> _userStore;
         private readonly IUserEmailStore<TTSApplicationUser> _emailStore;
         private readonly ILogger<RegisterModel> _logger;
-        private readonly IEmailSender _emailSender;
+        private readonly IEmailService _emailService;
         private readonly ApplicationDbContext _context;
         public RegisterModel(
             UserManager<TTSApplicationUser> userManager,
             IUserStore<TTSApplicationUser> userStore,
             SignInManager<TTSApplicationUser> signInManager,
             ILogger<RegisterModel> logger,
-            IEmailSender emailSender,
+            IEmailService emailService,
             ApplicationDbContext context)
         {
             _userManager = userManager;
@@ -47,7 +48,7 @@ namespace TTS.Web.Areas.Identity.Pages.Account
             _emailStore = GetEmailStore();
             _signInManager = signInManager;
             _logger = logger;
-            _emailSender = emailSender;
+            _emailService = emailService;
             _context = context;
         }
 
@@ -107,6 +108,8 @@ namespace TTS.Web.Areas.Identity.Pages.Account
             [Required(ErrorMessage = "Please select a role.")]
             [EnumDataType(typeof(TTSApplicationUserRole))]
             public TTSApplicationUserRole Role { get; set; }
+
+            [Required(ErrorMessage = "Please select your firstname.")]
             public string FirstName { get; set; }
             public string LastName { get; set; }
 
@@ -120,6 +123,8 @@ namespace TTS.Web.Areas.Identity.Pages.Account
             [EnumDataType(typeof(Industry))]
             [Required(ErrorMessage = "Please select your industry.")]
             public Industry Industry { get; set; }
+
+            [Required(ErrorMessage = "Please select your address.")]
 
             public string Address { get; set; }
         }
@@ -195,8 +200,8 @@ namespace TTS.Web.Areas.Identity.Pages.Account
                         values: new { area = "Identity", userId = userId, code = code, returnUrl = returnUrl },
                         protocol: Request.Scheme);
 
-                    await _emailSender.SendEmailAsync(Input.Email, "Confirm your email",
-                        $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
+                    await _emailService.SendEmailAsync(Input.Email, Input.FirstName, Input.LastName ?? " ", "Потвредете ја вашата е-пошта!",
+                        $"Ве замолуваме да ја потврдите вашата е-пошта со клик на следниот линк <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>link</a>. Во спротивно нема да можете да се најавите користејќи ги креденцијалите со кои се регистриравте.");
 
                     if (_userManager.Options.SignIn.RequireConfirmedAccount)
                     {
@@ -214,7 +219,6 @@ namespace TTS.Web.Areas.Identity.Pages.Account
                 }               
             }
 
-            // If we got this far, something failed, redisplay form
             return Page();
         }
 

@@ -58,11 +58,13 @@ namespace TTS.Service.Implementation
             var consultant = _userService.GetConsultant(userId);
 
             var projects = _projectRepository.GetAll()
-                   .Include(p => p.ConsultantProjects)
-                   .Where(p => p.ConsultantProjects!
-                      .Any(cp => cp.ConsultantId.Equals(consultant.Id) && cp.ApplicationStatus == ApplicationStatus.Accepted)
-                   )
-                   .ToList();
+                .Include(p => p.CreatedBy)
+                .Include("CreatedBy.User")
+                .Include(p => p.ConsultantProjects)
+                .Where(p => p.ConsultantProjects!
+                    .Any(cp => cp.ConsultantId.Equals(consultant.Id) && cp.ApplicationStatus == ApplicationStatus.Accepted)
+                )
+                .ToList();
 
             var consultantActivities = consultant.Projects?.Where(p => p.Activites != null && p.Activites.Any()).SelectMany(p => p.Activites).ToList();
 
@@ -177,6 +179,8 @@ namespace TTS.Service.Implementation
             var consultant = _userService.GetConsultant(userId);
 
             var projects = _projectRepository.GetAll()
+                .Include(p => p.CreatedBy)
+                .Include("CreatedBy.User")
                 .Include(p => p.ConsultantProjects)
                 .Where(p => p.Expertise == consultant.Expertise && !p.ConsultantProjects!.Any(cp => cp.ConsultantId == consultant.Id) && p.Status == ProjectStatus.New)
                 .ToList();              
@@ -190,6 +194,8 @@ namespace TTS.Service.Implementation
 
             var projects = _consultantProjectRepository.GetAll()
                 .Include(cp => cp.Project)
+                .Include("Project.CreatedBy")
+                .Include("Project.CreatedBy.User")
                 .Where(cp => cp.ConsultantId == consultant.Id && cp.ApplicationStatus == status)
                 .ToList();
 
@@ -344,16 +350,15 @@ namespace TTS.Service.Implementation
                         ApplicationStatus = ApplicationStatus.Applied,
                         Activites = new List<Activity>()
                     };
+                    _emailService.SendEmailAsync(project.CreatedBy.User.Email, project.CreatedBy.User.FirstName, project.CreatedBy.User.LastName,
+                       "Известување за апликации на проект " + project.Title,
+                       $"Нов консултант, " +
+                       $"{consultant.User.FirstName} {consultant.User.LastName}, аплицираше да се придружи на вашиот проект „{project.Title}“." +
+                       $"<br />Ве молиме разгледајте ја неговата апликација и одлучете дали да ја прифатите или одбиете.<br />");
 
                     _consultantProjectRepository.Insert(application);
-
                     project.ConsultantProjects?.Add(application);
-
-                    _projectRepository.Update(project);
-
-                    _emailService.SendEmailAsync(project.CreatedBy.User.Email, project.CreatedBy.User.FirstName, project.CreatedBy.User.LastName,
-                        "Известување за апликации на проект " + project.Title,
-                        $"Почитуван/а {project.CreatedBy.User.FirstName} {project.CreatedBy.User.LastName}, \r\n\r\nНов консултант, {consultant.User.FirstName} {consultant.User.LastName}, аплицираше да се придружи на вашиот проект „{project.Title}“.\r\n\r\nВе молиме разгледајте ја неговата апликација и одлучете дали да ја прифатите или одбиете.\r\n\r\nВи благодариме за вашето внимание.");
+                    _projectRepository.Update(project);                  
                 }                
             }  
                        
@@ -368,12 +373,12 @@ namespace TTS.Service.Implementation
         {
             var application = _consultantProjectRepository.Get(applicationId);
             application.ApplicationStatus = ApplicationStatus.Accepted;
-            
-            _consultantProjectRepository.Update(application);
 
             _emailService.SendEmailAsync(application.Consultant!.User!.Email, application.Consultant.User.FirstName, application.Consultant.User.LastName,
-                "Известување за вашата апликација на проектот" + application.Project.Title, 
-                $"Вашата апликација за проектот '{application.Project!.Title}' е прифатена. Вашите апликации можете да ги прегледате во делот Мои Проекти. Ви благодариме за разбирањето и соработката.");
+                "Известување за вашата апликација на проектот" + application.Project.Title,
+                $"Вашата апликација за проектот '{application.Project!.Title}' е <strong>прифатена</strong>. Вашите апликации можете да ги прегледате во делот Мои Апликации.");
+
+            _consultantProjectRepository.Update(application);           
         }
 
         public void RejectApplication(Guid applicationId)
@@ -382,11 +387,10 @@ namespace TTS.Service.Implementation
 
             application.ApplicationStatus = ApplicationStatus.Rejected;
 
-            _consultantProjectRepository.Update(application);
-
             _emailService.SendEmailAsync(application.Consultant!.User!.Email, application.Consultant.User.FirstName, application.Consultant.User.LastName,
                 "Известување за вашата апликација на проектот" + application.Project.Title,
-                $"Вашата апликација за проектот '{application.Project!.Title}' е одбиена. Вашите апликации можете да ги прегледате во делот Мои Проекти. Ви благодариме за разбирањето и соработката.");        
+                $"Вашата апликација за проектот '{application.Project!.Title}' е <strong>одбиена</strong>. Вашите апликации можете да ги прегледате во делот Мои Апликации. Ви благодариме за разбирањето и соработката.");
+            _consultantProjectRepository.Update(application);                   
         }
 
         public void RemoveApplication(Guid applicationId)

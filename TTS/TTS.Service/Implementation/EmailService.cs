@@ -38,7 +38,7 @@ namespace TTS.Service.Implementation
             {
                 using (var smtp = new MailKit.Net.Smtp.SmtpClient())
                 {
-                    var socketOptions = SecureSocketOptions.Auto;
+                    var socketOptions = _emailSettings.EnableSsl ? SecureSocketOptions.StartTls : SecureSocketOptions.Auto;
 
                     await smtp.ConnectAsync(_emailSettings.SmtpServer, 587, socketOptions);
 
@@ -115,14 +115,14 @@ namespace TTS.Service.Implementation
             </head>
             <body>
                 <div class='container'>
-                    <div class='header'>TTS Application</div>
+                    <div class='header'>Систем за трансфер на технологии</div>
                     <div class='content'>
-                        <p>Почитувани {name},</p>
-                        <p>{userMessage}</p>
-                        <p>Ви благодариме за користење на системот за трансфер на технологии</p>
+                        <p>Почитувани {name.Trim()},</p>
+                        <p>{userMessage.Trim()}</p>
+                        <p>Ви благодариме за користење на системот за трансфер на технологии!</p>
                     </div>
                     <div class='footer'>
-                        &copy; @{DateTime.Now.Year} All rights reserved.
+                        &copy; {DateTime.Now.Year} All rights reserved.
                     </div>
                 </div>
             </body>

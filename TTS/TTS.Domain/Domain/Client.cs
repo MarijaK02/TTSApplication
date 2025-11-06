@@ -14,7 +14,7 @@ namespace TTS.Domain.Domain
     public class Client : BaseEntity
     {
         public string UserId { get; set; }
-        public TTSApplicationUser User { get; set; }
+        public virtual TTSApplicationUser User { get; set; }
 
         public string? Address { get; set; }
         public Industry Industry { get; set; }

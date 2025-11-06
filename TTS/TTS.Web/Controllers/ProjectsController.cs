@@ -95,7 +95,7 @@ namespace TTS.Web.Controllers
                 return NotFound("Корисникот не е пронајден");
             }
 
-            var applicaitons = _projectsService.GetConsultantApplicationsFiltered(userId, status);
+            var applicaitons = _projectsService.GetConsultantApplicationsFiltered(userId, status ?? ApplicationStatus.Applied);
 
             return View(applicaitons);
         }

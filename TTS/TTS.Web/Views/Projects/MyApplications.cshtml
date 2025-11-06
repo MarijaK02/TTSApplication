@@ -56,7 +56,8 @@
 
                                 <li class="list-group-item">
                                     <div>
-                                        <h5>@application.Project.Title</h5>
+                                        <h4>@application.Project.Title</h4>
+                                        <h6 class="text-black-50">@application.Project.CreatedBy.User.FirstName</h6>                                        
                                         <p><strong>Датум на аплицирање:</strong> @application.DateApplied.ToShortDateString()</p>
                                         <p><strong>Почетен датум на проектот:</strong> @application.Project.StartDate.ToShortDateString()</p>
                                         <div class="d-flex"><strong class="me-2">Статус на проектот:</strong><p class="@statusClass"> @application.Project.Status</p></div>

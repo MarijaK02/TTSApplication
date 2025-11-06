@@ -13,7 +13,7 @@ namespace TTS.Domain.Domain
     public class Consultant : BaseEntity
     {
         public string UserId { get; set; }
-        public TTSApplicationUser User { get; set; }
+        public virtual TTSApplicationUser User { get; set; }
 
         public Expertise Expertise { get; set; }
 

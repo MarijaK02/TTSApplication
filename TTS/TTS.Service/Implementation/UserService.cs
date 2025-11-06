@@ -40,6 +40,7 @@ namespace TTS.Service.Implementation
         public List<Consultant> GetAllConsultants()
         {
             return _consultantRepository.GetAll()
+                .Include(c => c.User)
                 .Include(c => c.Projects)
                 .Include("Projects.Project")
                 .ToList();
