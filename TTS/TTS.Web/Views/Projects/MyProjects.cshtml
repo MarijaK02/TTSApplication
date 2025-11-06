@@ -103,7 +103,7 @@
                                     _ => "text-success"
                                 };                             
 
-                                <tr onclick="location.href='@Url.Action("Details", new { id = project.Id })'">
+                                <tr onclick="location.href='@Url.Action("Details/" + project.Id)">
                                     <td>@(Model.Projects.IndexOf(project) + 1)</td>
                                     <td class="fw-medium">@project.Title</td>
                                     @if (User.IsInRole("Consultant"))

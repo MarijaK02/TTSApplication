@@ -102,7 +102,7 @@ namespace TTS.Web.Controllers
 
 
         // GET: Projects/Details/5
-        [HttpGet("Projects/Details/{id}")]
+        [HttpGet("Details/{id}")]
         public IActionResult Details(Guid? id)
         {         
             if (id == null)
