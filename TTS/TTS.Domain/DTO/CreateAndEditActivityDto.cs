@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using TTS.Domain.Enum;
+using TTS.Domain.Shared;
 
 namespace TTS.Domain.DTO
 {
@@ -11,6 +12,7 @@ namespace TTS.Domain.DTO
     {
         public required Guid ProjectId { get; set; }
         public required string ProjectTitle { get; set; }
+        public Interval ProjectDeadline { get; set; }
         public Guid ActivityId { get; set; }
         public required string Title { get; set; }
         public required string? Description { get; set; }

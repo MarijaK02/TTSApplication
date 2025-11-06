@@ -87,7 +87,7 @@ namespace TTS.Web.Controllers
 
         // GET: ConsultantActivites/Edit/5
         [HttpGet("Edit/{id}")]
-        public IActionResult Edit(Guid projectId, Guid id, string projectTitle)
+        public IActionResult Edit(Guid projectId, Guid id, string projectTitle, Interval projectDedaline)
         {
             var activity = _activitesService.Get(id);
             if (activity == null)
@@ -99,6 +99,7 @@ namespace TTS.Web.Controllers
             {
                 ProjectId = projectId,
                 ProjectTitle = projectTitle,
+                ProjectDeadline = projectDedaline,
                 ActivityId = activity.Id,
                 Title = activity.Title,
                 Description = activity.Description ?? "",
@@ -127,7 +128,7 @@ namespace TTS.Web.Controllers
 
                 _activitesService.Edit(activityId, dto.Title, dto.Description, dto.ActivityStatus, dto.StartDate, dto.EndDate);
 
-                return RedirectToAction(nameof(Details), new { projectId = dto.ProjectId, id = activityId, projectTitle = dto.ProjectTitle });
+                return RedirectToAction(nameof(Details), new { projectId = dto.ProjectId, id = activityId, projectTitle = dto.ProjectTitle, projectDeadline = dto.ProjectDeadline });
             }
             return View(dto);
         }
@@ -149,7 +150,7 @@ namespace TTS.Web.Controllers
 
         [HttpPost("AddComment")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> AddComment(Guid projectId, string projectTitle, Guid id, string? commentBody, IFormFile[]? files)
+        public async Task<IActionResult> AddComment(Guid projectId, string projectTitle, Interval projectDeadline, Guid id, string? commentBody, IFormFile[]? files)
         {
             if(String.IsNullOrEmpty(commentBody) && (files==null || !files.Any()))
             {
@@ -165,7 +166,7 @@ namespace TTS.Web.Controllers
 
             _commentsService.Create(activity, user, commentBody, files);
 
-            return RedirectToAction(nameof(Details), new { projectId = projectId, projectTitle = projectTitle, id = activity.Id });
+            return RedirectToAction(nameof(Details), new { projectId = projectId, projectTitle = projectTitle, id = activity.Id, projectDeadline = projectDeadline });
         }
 
         [HttpGet("Download/{fileId}")]
@@ -186,7 +187,7 @@ namespace TTS.Web.Controllers
 
         [HttpPost("RemoveFile/{fileId}")]
         [ValidateAntiForgeryToken]
-        public IActionResult RemoveFile(Guid fileId, Guid projectId, Guid id, string projectTitle)
+        public IActionResult RemoveFile(Guid fileId, Guid projectId, Guid id, string projectTitle, Interval projectDeadline)
         {
             var attachment = _attachmentService.GetDetails(fileId);
             if (attachment != null && System.IO.File.Exists(attachment.FilePath))
@@ -195,12 +196,12 @@ namespace TTS.Web.Controllers
                 _attachmentService.Delete(attachment);
             }
 
-            return RedirectToAction(nameof(Details), new { projectId = projectId, id = id, projectTitle = projectTitle });
+            return RedirectToAction(nameof(Details), new { projectId = projectId, id = id, projectTitle = projectTitle, projectDeadline = projectDeadline });
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult DeleteComment(Guid projectId, Guid activityId, Guid commentId, string projectTitle)
+        public IActionResult DeleteComment(Guid projectId, Guid activityId, Guid commentId, string projectTitle, Interval projectDeadline)
         {  
             var comment = _commentsService.GetDetails(commentId);
             if (comment != null)
@@ -208,7 +209,7 @@ namespace TTS.Web.Controllers
                 _commentsService.Delete(comment);
             }
             
-            return RedirectToAction(nameof(Details), new { projectId = projectId, id = activityId, projectTitle = projectTitle });
+            return RedirectToAction(nameof(Details), new { projectId = projectId, id = activityId, projectTitle = projectTitle, projectDeadline = projectDeadline });
         }
     }
 }
