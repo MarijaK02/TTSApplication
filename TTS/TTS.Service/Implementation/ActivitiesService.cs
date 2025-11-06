@@ -41,15 +41,22 @@ namespace TTS.Service.Implementation
 
         public IndexActivitesDto GetAllProjectActivites(Guid projectId, string projectTitle, Guid? selectedConsultantId, ActivityStatus? selectedStatus, string? searchTerm)
         {
-            var consultantProject = _consultantProjectRepository.GetAll()
-                                    .Include(cp => cp.Activites)
-                                    .Include(cp => cp.Consultant)
-                                    .Include(cp => cp.Project)
-                                    .Include("Consultant.User")
-                                    .SingleOrDefault(cp => cp.ProjectId == projectId);
+            var project = _projectRepository.Get(projectId);
 
+            var consultantProjects = _consultantProjectRepository.GetAll()
+               .Include(cp => cp.Activites)
+               .Include(cp => cp.Consultant)
+               .Include("Consultant.User")
+               .Where(cp => cp.ProjectId == projectId)
+               .ToList()
+               .Where(cp => cp.Activites != null)
+               .ToList();
 
-            var activities = FilterActivitiesByConsultant(consultantProject!.Activites!.ToList(), selectedConsultantId, selectedStatus, searchTerm);
+            var activities = consultantProjects
+                .SelectMany(cp => cp.Activites)
+                .ToList();
+
+            activities = FilterActivitiesByConsultant(activities, selectedConsultantId, selectedStatus, searchTerm);
 
             var dto = new IndexActivitesDto
             {
@@ -57,8 +64,8 @@ namespace TTS.Service.Implementation
                 ProjectTitle = projectTitle,
                 ProjectDeadline = new Domain.Shared.Interval()
                 {
-                    From = consultantProject.Project!.StartDate,
-                    To = consultantProject.Project.EndDate
+                    From = project.StartDate,
+                    To = project.EndDate
                 },
                 Activites = activities,
                 Consultants = _userService.GetConsultantsForProject(projectId),
