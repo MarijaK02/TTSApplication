@@ -102,6 +102,7 @@ namespace TTS.Web.Controllers
 
 
         // GET: Projects/Details/5
+        [HttpGet("Projects/Details/{id}")]
         public IActionResult Details(Guid? id)
         {         
             if (id == null)
@@ -156,6 +157,7 @@ namespace TTS.Web.Controllers
 
         // GET: Projects/Edit/5
         [Authorize(Roles = "Client")]
+        [HttpGet("Projects/Edit/{id}")]
         public IActionResult Edit(Guid id)
         {
             var project = _projectsService.Get(id);

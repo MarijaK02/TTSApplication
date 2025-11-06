@@ -61,6 +61,7 @@ namespace AdminApplication.Controllers
             return View(dto);
         }
 
+        [HttpGet("Projects/Details/{projectId}")]
         public IActionResult Details(Guid projectId)
         {
             HttpClient client = _httpClientFactory.CreateClient("MainAppClient");
