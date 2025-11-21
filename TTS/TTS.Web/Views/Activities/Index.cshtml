@@ -132,14 +132,21 @@
                 @foreach (var item in Model!.Activites!)
                 {
                     {
-                        
-                        if (item.EndDate.Date > Model.ProjectDeadline.To.Date)
+                        if (item.Status == ActivityStatus.Invalid)
+                        {
+                            rowClass = "table-secondary";
+                        }
+                        else if (item.EndDate > Model.ProjectDeadline.To || item.EndDate < item.CompletedOn)
                         {
                             rowClass = "table-danger";
-                        }
-                        else if (item.EndDate.Date == DateTime.Today)
+                        }                      
+                        else if (item.EndDate == DateTime.Today)
                         {
                             rowClass = "table-warning";
+                        }
+                        else
+                        {
+                            rowClass = "";
                         }
                     }
                     <tr class="@rowClass" onclick="location.href='@Url.Action("Details", new { id = item.Id, projectId = Model.ProjectId, projectTitle = Model.ProjectTitle, from = Model.ProjectDeadline.From, To = Model.ProjectDeadline.To })'">
